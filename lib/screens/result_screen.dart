@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../data/score_service.dart';
 
 class ResultScreen extends StatelessWidget {
   final int correct;
   final int total;
   final int longestStreak;
-  final int newTotalPoints;
+  final RunOutcome outcome;
 
   const ResultScreen({
     super.key,
     required this.correct,
     required this.total,
     required this.longestStreak,
-    required this.newTotalPoints,
+    required this.outcome,
   });
 
-  int get _earned =>
-      correct * 10 + (longestStreak >= 3 ? longestStreak * 2 : 0);
-
   String get _title {
-    final rate = correct / total;
+    final rate = total == 0 ? 0.0 : correct / total;
     if (rate == 1.0) return '完璧です!';
     if (rate >= 0.8) return 'すばらしい!';
     if (rate >= 0.5) return 'その調子!';
@@ -29,13 +27,12 @@ class ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('結果')),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
           child: Column(
             children: [
@@ -61,19 +58,36 @@ class ResultScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _ScoreCircle(correct: correct, total: total),
               const SizedBox(height: 28),
+              if (outcome.leveledUp)
+                _LevelUpCard(outcome: outcome)
+                    .animate()
+                    .fadeIn(delay: 200.ms, duration: 400.ms)
+                    .scale(
+                      begin: const Offset(0.95, 0.95),
+                      end: const Offset(1, 1),
+                      duration: 400.ms,
+                      curve: Curves.easeOut,
+                    ),
+              if (outcome.leveledUp) const SizedBox(height: 16),
+              if (outcome.totalDropped > 0)
+                _DropsCard(outcome: outcome)
+                    .animate()
+                    .fadeIn(delay: 300.ms, duration: 400.ms),
+              if (outcome.totalDropped > 0) const SizedBox(height: 16),
               _StatRow(label: '正解数', value: '$correct / $total'),
               _StatRow(label: '最長連続正解', value: '$longestStreak'),
               _StatRow(
                 label: '今回の獲得ポイント',
-                value: '+$_earned pt',
+                value: '+${outcome.earned} pt',
                 highlight: true,
               ),
               _StatRow(
                 label: '累計業績ポイント',
-                value: '$newTotalPoints pt',
+                value: '${outcome.newTotalPoints} pt',
                 highlight: true,
               ),
-              const Spacer(),
+              _StatRow(label: '現在の段位', value: outcome.newRank.name),
+              const SizedBox(height: 28),
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 style: FilledButton.styleFrom(
@@ -89,6 +103,159 @@ class ResultScreen extends StatelessWidget {
   }
 }
 
+class _DropsCard extends StatelessWidget {
+  final RunOutcome outcome;
+  const _DropsCard({required this.outcome});
+
+  String _labelFor(HintKind k) => switch (k) {
+        HintKind.fiftyFifty => '50:50',
+        HintKind.reading => 'ふりがな',
+        HintKind.kanji => '漢字一字',
+      };
+
+  IconData _iconFor(HintKind k) => switch (k) {
+        HintKind.fiftyFifty => Icons.filter_alt_rounded,
+        HintKind.reading => Icons.record_voice_over_rounded,
+        HintKind.kanji => Icons.visibility_rounded,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final entries = outcome.hintDrops.entries
+        .where((e) => e.value > 0)
+        .toList();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: scheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.card_giftcard_rounded,
+                  color: scheme.onTertiaryContainer, size: 20),
+              const SizedBox(width: 6),
+              Text(
+                'ヒント獲得 ×${outcome.totalDropped}',
+                style: GoogleFonts.notoSerifJp(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: scheme.onTertiaryContainer,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              for (final e in entries)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: scheme.onTertiaryContainer.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(_iconFor(e.key),
+                          size: 14, color: scheme.onTertiaryContainer),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${_labelFor(e.key)} ×${e.value}',
+                        style: GoogleFonts.notoSansJp(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: scheme.onTertiaryContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LevelUpCard extends StatelessWidget {
+  final RunOutcome outcome;
+  const _LevelUpCard({required this.outcome});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
+          colors: [scheme.primary, scheme.tertiary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome_rounded,
+                  color: scheme.onPrimary, size: 20),
+              const SizedBox(width: 6),
+              Text(
+                '昇段しました!',
+                style: GoogleFonts.notoSansJp(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: scheme.onPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                outcome.previousRank.name,
+                style: GoogleFonts.notoSerifJp(
+                  fontSize: 20,
+                  color: scheme.onPrimary.withValues(alpha: 0.7),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Icon(Icons.arrow_forward_rounded,
+                    color: scheme.onPrimary, size: 20),
+              ),
+              Text(
+                outcome.newRank.name,
+                style: GoogleFonts.notoSerifJp(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: scheme.onPrimary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ScoreCircle extends StatelessWidget {
   final int correct;
   final int total;
@@ -99,8 +266,8 @@ class _ScoreCircle extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final rate = total == 0 ? 0.0 : correct / total;
     return SizedBox(
-      width: 180,
-      height: 180,
+      width: 160,
+      height: 160,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -118,7 +285,7 @@ class _ScoreCircle extends StatelessWidget {
               Text(
                 '${(rate * 100).round()}',
                 style: GoogleFonts.notoSerifJp(
-                  fontSize: 52,
+                  fontSize: 44,
                   fontWeight: FontWeight.w800,
                   height: 1,
                   color: scheme.onSurface,
@@ -128,7 +295,7 @@ class _ScoreCircle extends StatelessWidget {
               Text(
                 '%',
                 style: GoogleFonts.notoSansJp(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: scheme.onSurfaceVariant,
                 ),
               ),

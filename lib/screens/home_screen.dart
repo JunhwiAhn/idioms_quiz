@@ -5,6 +5,7 @@ import '../data/idiom_repository.dart';
 import '../data/quiz_session.dart';
 import '../data/score_service.dart';
 import '../models/idiom.dart';
+import 'collection_screen.dart';
 import 'quiz_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,9 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _scoreService = ScoreService();
 
   List<Idiom>? _idioms;
-  int _points = 0;
-  int _totalAnswered = 0;
-  int _bestStreak = 0;
+  ScoreSnapshot? _snap;
 
   @override
   void initState() {
@@ -30,31 +29,44 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _bootstrap() async {
-    final results = await Future.wait([
-      _repo.loadAll(),
-      _scoreService.achievementPoints(),
-      _scoreService.totalAnswered(),
-      _scoreService.bestStreak(),
-    ]);
+    await _scoreService.grantStarterPackOnce();
+    final idioms = await _repo.loadAll();
+    final snap = await _scoreService.snapshot();
     if (!mounted) return;
     setState(() {
-      _idioms = results[0] as List<Idiom>;
-      _points = results[1] as int;
-      _totalAnswered = results[2] as int;
-      _bestStreak = results[3] as int;
+      _idioms = idioms;
+      _snap = snap;
     });
   }
 
   Future<void> _startQuiz(int questionCount) async {
     final idioms = _idioms;
-    if (idioms == null) return;
+    final snap = _snap;
+    if (idioms == null || snap == null) return;
     final session = QuizSession.build(idioms, count: questionCount);
-    final _ = await Navigator.of(context).push<bool>(
+    await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => QuizScreen(session: session),
+        builder: (_) => QuizScreen(
+          session: session,
+          initialHints: snap.hints,
+        ),
       ),
     );
     await _bootstrap();
+  }
+
+  Future<void> _openCollection() async {
+    final idioms = _idioms;
+    final snap = _snap;
+    if (idioms == null || snap == null) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CollectionScreen(
+          idioms: idioms,
+          mastered: snap.mastered,
+        ),
+      ),
+    );
   }
 
   @override
@@ -62,71 +74,73 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final idioms = _idioms;
+    final snap = _snap;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('四字熟語クイズ')),
+      appBar: AppBar(
+        title: const Text('四字熟語クイズ'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.collections_bookmark_rounded),
+            tooltip: '図鑑',
+            onPressed: idioms == null ? null : _openCollection,
+          ),
+        ],
+      ),
       body: SafeArea(
-        child: idioms == null
+        child: (idioms == null || snap == null)
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _AchievementCard(
-                      points: _points,
-                      totalAnswered: _totalAnswered,
-                      bestStreak: _bestStreak,
-                    ).animate().fadeIn(duration: 400.ms).slideY(
+                    _RankCard(snap: snap)
+                        .animate()
+                        .fadeIn(duration: 400.ms)
+                        .slideY(
                           begin: -0.1,
                           end: 0,
                           duration: 400.ms,
                           curve: Curves.easeOut,
                         ),
-                    const SizedBox(height: 28),
-                    Text(
-                      'クイズを始める',
-                      style: GoogleFonts.notoSerifJp(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _ModeTile(
+                    const SizedBox(height: 16),
+                    _StatsRow(snap: snap, total: idioms.length),
+                    const SizedBox(height: 24),
+                    _SectionTitle(title: 'クイズを始める'),
+                    const SizedBox(height: 10),
+                    _CountTile(
                       title: '10問チャレンジ',
-                      subtitle: 'さくっと腕試し。1回で最大120点。',
+                      subtitle: 'さくっと腕試し。',
                       icon: Icons.bolt_rounded,
                       onTap: () => _startQuiz(10),
                     ),
                     const SizedBox(height: 10),
-                    _ModeTile(
+                    _CountTile(
                       title: '20問じっくり',
-                      subtitle: 'じっくり挑戦して業績ポイントを稼ごう。',
+                      subtitle: 'じっくり段位を狙う。',
                       icon: Icons.menu_book_rounded,
                       onTap: () => _startQuiz(20),
                     ),
                     const SizedBox(height: 10),
-                    _ModeTile(
-                      title: '全100問マラソン',
-                      subtitle: '収録している四字熟語をすべて出題。',
+                    _CountTile(
+                      title: '全${idioms.length}問マラソン',
+                      subtitle: '収録をすべて出題。',
                       icon: Icons.emoji_events_rounded,
                       onTap: () => _startQuiz(idioms.length),
                     ),
-                    const SizedBox(height: 32),
-                    Text(
-                      'ライブラリ',
-                      style: GoogleFonts.notoSerifJp(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '収録 ${idioms.length} 個の四字熟語',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                    const SizedBox(height: 24),
+                    _SectionTitle(title: 'ヒントアイテム'),
+                    const SizedBox(height: 10),
+                    _HintInventory(snap: snap),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        '正解するとまれにヒントがドロップします。',
+                        style: GoogleFonts.notoSansJp(
+                          fontSize: 12,
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ],
@@ -137,20 +151,33 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _AchievementCard extends StatelessWidget {
-  final int points;
-  final int totalAnswered;
-  final int bestStreak;
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle({required this.title});
 
-  const _AchievementCard({
-    required this.points,
-    required this.totalAnswered,
-    required this.bestStreak,
-  });
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: GoogleFonts.notoSerifJp(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+    );
+  }
+}
+
+class _RankCard extends StatelessWidget {
+  final ScoreSnapshot snap;
+  const _RankCard({required this.snap});
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final next = snap.next;
+    final toGo = next == null ? 0 : next.threshold - snap.totalCorrect;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
       decoration: BoxDecoration(
@@ -173,60 +200,59 @@ class _AchievementCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.workspace_premium_rounded,
+              Icon(Icons.military_tech_rounded,
                   color: scheme.onPrimary, size: 22),
               const SizedBox(width: 8),
               Text(
-                '業績ポイント',
+                '段位',
                 style: GoogleFonts.notoSansJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: scheme.onPrimary.withValues(alpha: 0.9),
                 ),
               ),
+              const Spacer(),
+              Text(
+                '${snap.points} pt',
+                style: GoogleFonts.notoSerifJp(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: scheme.onPrimary.withValues(alpha: 0.9),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '$points',
-                style: GoogleFonts.notoSerifJp(
-                  fontSize: 48,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onPrimary,
-                  height: 1,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  'pt',
-                  style: GoogleFonts.notoSansJp(
-                    fontSize: 16,
-                    color: scheme.onPrimary.withValues(alpha: 0.85),
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            snap.rank.name,
+            style: GoogleFonts.notoSerifJp(
+              fontSize: 42,
+              fontWeight: FontWeight.w800,
+              color: scheme.onPrimary,
+              height: 1,
+            ),
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              _StatPill(
-                label: '累計回答',
-                value: '$totalAnswered',
-                color: scheme.onPrimary,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: snap.progress,
+              minHeight: 8,
+              backgroundColor: scheme.onPrimary.withValues(alpha: 0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                scheme.onPrimary.withValues(alpha: 0.9),
               ),
-              const SizedBox(width: 10),
-              _StatPill(
-                label: '最高連続正解',
-                value: '$bestStreak',
-                color: scheme.onPrimary,
-              ),
-            ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            next == null
+                ? '最高位に到達!'
+                : '次は ${next.name} まであと $toGo 問正解',
+            style: GoogleFonts.notoSansJp(
+              fontSize: 12,
+              color: scheme.onPrimary.withValues(alpha: 0.9),
+            ),
           ),
         ],
       ),
@@ -234,39 +260,71 @@ class _AchievementCard extends StatelessWidget {
   }
 }
 
-class _StatPill extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-  const _StatPill(
-      {required this.label, required this.value, required this.color});
+class _StatsRow extends StatelessWidget {
+  final ScoreSnapshot snap;
+  final int total;
+  const _StatsRow({required this.snap, required this.total});
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _StatBox(
+            label: '正解数',
+            value: '${snap.totalCorrect}',
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _StatBox(
+            label: '最高連続',
+            value: '${snap.bestStreak}',
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _StatBox(
+            label: '図鑑',
+            value: '${snap.mastered.length}/$total',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatBox extends StatelessWidget {
+  final String label;
+  final String value;
+  const _StatBox({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(999),
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: scheme.outlineVariant),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
         children: [
           Text(
             label,
             style: GoogleFonts.notoSansJp(
               fontSize: 11,
-              color: color.withValues(alpha: 0.85),
-              fontWeight: FontWeight.w500,
+              color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(height: 4),
           Text(
             value,
             style: GoogleFonts.notoSerifJp(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: color,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: scheme.onSurface,
             ),
           ),
         ],
@@ -275,13 +333,14 @@ class _StatPill extends StatelessWidget {
   }
 }
 
-class _ModeTile extends StatelessWidget {
+
+class _CountTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
 
-  const _ModeTile({
+  const _CountTile({
     required this.title,
     required this.subtitle,
     required this.icon,
@@ -338,6 +397,79 @@ class _ModeTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _HintInventory extends StatelessWidget {
+  final ScoreSnapshot snap;
+  const _HintInventory({required this.snap});
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = <(HintKind, IconData, String)>[
+      (HintKind.fiftyFifty, Icons.filter_alt_rounded, '50:50'),
+      (HintKind.reading, Icons.record_voice_over_rounded, 'ふりがな'),
+      (HintKind.kanji, Icons.visibility_rounded, '漢字一字'),
+    ];
+    return Row(
+      children: [
+        for (int i = 0; i < entries.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(
+            child: _HintBox(
+              icon: entries[i].$2,
+              label: entries[i].$3,
+              count: snap.hints[entries[i].$1] ?? 0,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _HintBox extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final int count;
+  const _HintBox({
+    required this.icon,
+    required this.label,
+    required this.count,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: scheme.onSecondaryContainer),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.notoSansJp(
+              fontSize: 11,
+              color: scheme.onSecondaryContainer,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '×$count',
+            style: GoogleFonts.notoSerifJp(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: scheme.onSecondaryContainer,
+            ),
+          ),
+        ],
       ),
     );
   }
