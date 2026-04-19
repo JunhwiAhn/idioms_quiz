@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'data/audio_service.dart';
+import 'data/idiom_images.dart';
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AudioService.instance.load();
+  await Future.wait([
+    AudioService.instance.load(),
+    IdiomImageRegistry.instance.load(),
+  ]);
   runApp(const IdiomsQuizApp());
 }
 

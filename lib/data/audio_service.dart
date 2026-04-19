@@ -2,8 +2,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum Sfx { correct, wrong, clear, clearVoice, perfect }
-enum Bgm { home, quiz }
+enum Sfx { correct, wrong, clear, clearVoice, perfect, modeStart }
+enum Bgm { quiz }
 
 String _sfxAsset(Sfx s) => switch (s) {
       Sfx.correct => 'audio/sfx_correct.mp3',
@@ -11,10 +11,10 @@ String _sfxAsset(Sfx s) => switch (s) {
       Sfx.clear => 'audio/sfx_clear.mp3',
       Sfx.clearVoice => 'audio/sfx_clear_voice.mp3',
       Sfx.perfect => 'audio/sfx_perfect.mp3',
+      Sfx.modeStart => 'audio/mode_start.mp3',
     };
 
 String _bgmAsset(Bgm b) => switch (b) {
-      Bgm.home => 'audio/bgm_home.mp3',
       Bgm.quiz => 'audio/bgm_quiz.mp3',
     };
 

@@ -51,3 +51,17 @@ double rankProgress(int totalCorrect) {
   if (span <= 0) return 1.0;
   return ((totalCorrect - cur.threshold) / span).clamp(0.0, 1.0);
 }
+
+/// Every [kCorrectPerLevel] correct answers earn 1 level. Chosen low so
+/// early-game users see frequent level-ups.
+const int kCorrectPerLevel = 5;
+
+int levelFor(int totalCorrect) => (totalCorrect ~/ kCorrectPerLevel) + 1;
+
+/// Remaining correct answers needed to reach the next level.
+int remainingToNextLevel(int totalCorrect) =>
+    kCorrectPerLevel - (totalCorrect % kCorrectPerLevel);
+
+/// Fraction 0..1 toward next level.
+double levelProgress(int totalCorrect) =>
+    (totalCorrect % kCorrectPerLevel) / kCorrectPerLevel;

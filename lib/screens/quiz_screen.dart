@@ -4,21 +4,33 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../data/audio_service.dart';
+import '../data/idiom_images.dart';
 import '../data/quiz_session.dart';
 import '../data/score_service.dart';
+import '../data/stage_plan.dart' show starsForRound;
 import '../theme/app_theme.dart';
 import 'result_screen.dart';
 
 const int kQuestionSeconds = 20;
+const int kTimeHintBonus = 10;
 
 class QuizScreen extends StatefulWidget {
   final QuizSession session;
   final Map<HintKind, int> initialHints;
+  final bool isMarathon;
+  final int? roundStageIndex;
+  final int? roundRoundIndex;
   const QuizScreen({
     super.key,
     required this.session,
     required this.initialHints,
+    this.isMarathon = false,
+    this.roundStageIndex,
+    this.roundRoundIndex,
   });
+
+  bool get isStageRound =>
+      roundStageIndex != null && roundRoundIndex != null;
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -35,8 +47,6 @@ class _QuizScreenState extends State<QuizScreen> {
 
   // Per-question hint state
   bool _readingRevealed = false;
-  bool _kanjiRevealed = false;
-  int? _kanjiRevealIndex;
   Set<int> _eliminated = {};
 
   // Per-question countdown
@@ -69,6 +79,15 @@ class _QuizScreenState extends State<QuizScreen> {
         _timeOut();
       }
     });
+  }
+
+  bool _shouldShowChoice(int i) {
+    if (!_revealed) return true;
+    // Answer was correct → show all for completeness.
+    if (_picked == _q.correctIndex) return true;
+    // Answer was wrong (or timed out) → show only the picked wrong tile
+    // and the correct answer; hide everything else.
+    return i == _picked || i == _q.correctIndex;
   }
 
   void _timeOut() {
@@ -110,12 +129,23 @@ class _QuizScreenState extends State<QuizScreen> {
   Future<void> _next() async {
     widget.session.advance();
     if (widget.session.isFinished) {
+      int? stars;
+      if (widget.isStageRound) {
+        stars = starsForRound(
+          correct: widget.session.correctCount,
+          total: widget.session.questions.length,
+        );
+      }
       final outcome = await _scoreService.commitRun(
         correct: widget.session.correctCount,
         total: widget.session.questions.length,
         longestStreak: widget.session.longestStreak,
         correctIdioms: widget.session.correctIdioms,
         droppedHints: widget.session.droppedHints,
+        isMarathon: widget.isMarathon,
+        roundStageIndex: widget.roundStageIndex,
+        roundRoundIndex: widget.roundRoundIndex,
+        roundStars: stars,
       );
       if (!mounted) return;
       await Navigator.of(context).pushReplacement(
@@ -125,6 +155,7 @@ class _QuizScreenState extends State<QuizScreen> {
             total: widget.session.questions.length,
             longestStreak: widget.session.longestStreak,
             outcome: outcome,
+            isMarathon: widget.isMarathon,
           ),
         ),
       );
@@ -134,8 +165,6 @@ class _QuizScreenState extends State<QuizScreen> {
         _revealed = false;
         _lastDrop = null;
         _readingRevealed = false;
-        _kanjiRevealed = false;
-        _kanjiRevealIndex = null;
         _eliminated = {};
       });
       _startTimer();
@@ -150,11 +179,12 @@ class _QuizScreenState extends State<QuizScreen> {
         return _eliminated.length < 2;
       case HintKind.reading:
         if (_readingRevealed) return false;
-        return _q.mode == QuizMode.noReading ||
-            _q.mode == QuizMode.reverseLookup;
-      case HintKind.kanji:
-        if (_kanjiRevealed) return false;
-        return _q.mode == QuizMode.fillBlank && _q.maskedIndices.isNotEmpty;
+        // Only meaningful when the reading is hidden in the prompt.
+        // reverseLookup shows the meaning + choice readings already, so
+        // the hint adds nothing there.
+        return _q.mode == QuizMode.noReading;
+      case HintKind.time:
+        return _secondsLeft < kQuestionSeconds;
     }
   }
 
@@ -176,11 +206,9 @@ class _QuizScreenState extends State<QuizScreen> {
         case HintKind.reading:
           _readingRevealed = true;
           break;
-        case HintKind.kanji:
-          _kanjiRevealed = true;
-          // Reveal first masked index by default.
-          _kanjiRevealIndex =
-              _q.maskedIndices.isEmpty ? null : _q.maskedIndices.first;
+        case HintKind.time:
+          _secondsLeft = (_secondsLeft + kTimeHintBonus)
+              .clamp(0, kQuestionSeconds);
           break;
       }
     });
@@ -198,7 +226,7 @@ class _QuizScreenState extends State<QuizScreen> {
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () {
-            AudioService.instance.playBgm(Bgm.home);
+            AudioService.instance.stopBgm();
             Navigator.of(context).maybePop();
           },
         ),
@@ -264,17 +292,30 @@ class _QuizScreenState extends State<QuizScreen> {
                   _PromptDisplay(
                     question: _q,
                     readingRevealed: _readingRevealed,
-                    kanjiRevealIndex: _kanjiRevealIndex,
                     fullReveal: _revealed,
                   ),
-                  if (_revealed &&
-                      (_q.mode == QuizMode.fillBlank ||
-                          _q.mode == QuizMode.reverseLookup ||
-                          _q.mode == QuizMode.noReading)) ...[
+                  if (IdiomImageRegistry.instance
+                      .has(_q.idiom.idiom)) ...[
                     const SizedBox(height: 14),
-                    _MeaningRevealCard(idiom: _q.idiom)
-                        .animate()
-                        .fadeIn(duration: 300.ms),
+                    _IdiomImageCard(idiomKanji: _q.idiom.idiom)
+                        .animate(key: ValueKey(_q.idiom.idiom))
+                        .fadeIn(duration: 350.ms)
+                        .scale(
+                          begin: const Offset(0.96, 0.96),
+                          end: const Offset(1, 1),
+                          duration: 350.ms,
+                          curve: Curves.easeOut,
+                        ),
+                  ],
+                  if (_revealed) ...[
+                    if (_q.mode == QuizMode.fillBlank ||
+                        _q.mode == QuizMode.reverseLookup ||
+                        _q.mode == QuizMode.noReading) ...[
+                      const SizedBox(height: 14),
+                      _MeaningRevealCard(idiom: _q.idiom)
+                          .animate()
+                          .fadeIn(duration: 300.ms),
+                    ],
                   ],
                   const SizedBox(height: 24),
                   _HintBar(
@@ -297,39 +338,41 @@ class _QuizScreenState extends State<QuizScreen> {
                       crossAxisCount: 2,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 1.35,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      childAspectRatio: 2.2,
                       children: [
                         for (int i = 0; i < _q.choices.length; i++)
-                          _KanjiChoiceTile(
+                          if (_shouldShowChoice(i))
+                            _KanjiChoiceTile(
+                              index: i,
+                              char: _q.choices[i],
+                              picked: _picked,
+                              correct: _q.correctIndex,
+                              revealed: _revealed,
+                              eliminated: _eliminated.contains(i),
+                              onTap: () => _pick(i),
+                            ),
+                      ],
+                    )
+                  else
+                    for (int i = 0; i < _q.choices.length; i++)
+                      if (_shouldShowChoice(i))
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _ChoiceTile(
                             index: i,
-                            char: _q.choices[i],
+                            text: _q.choices[i],
+                            subText: _q.mode == QuizMode.reverseLookup
+                                ? _q.readingOf[_q.choices[i]]
+                                : null,
                             picked: _picked,
                             correct: _q.correctIndex,
                             revealed: _revealed,
                             eliminated: _eliminated.contains(i),
                             onTap: () => _pick(i),
                           ),
-                      ],
-                    )
-                  else
-                    for (int i = 0; i < _q.choices.length; i++)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _ChoiceTile(
-                          index: i,
-                          text: _q.choices[i],
-                          subText: _q.mode == QuizMode.reverseLookup
-                              ? _q.readingOf[_q.choices[i]]
-                              : null,
-                          picked: _picked,
-                          correct: _q.correctIndex,
-                          revealed: _revealed,
-                          eliminated: _eliminated.contains(i),
-                          onTap: () => _pick(i),
                         ),
-                      ),
                 ],
               ),
             ),
@@ -382,13 +425,11 @@ class _QuizScreenState extends State<QuizScreen> {
 class _PromptDisplay extends StatelessWidget {
   final QuizQuestion question;
   final bool readingRevealed;
-  final int? kanjiRevealIndex;
   final bool fullReveal;
 
   const _PromptDisplay({
     required this.question,
     required this.readingRevealed,
-    required this.kanjiRevealIndex,
     required this.fullReveal,
   });
 
@@ -434,7 +475,6 @@ class _PromptDisplay extends StatelessWidget {
                 ch: chars[i],
                 masked: question.mode == QuizMode.fillBlank &&
                     question.maskedIndices.contains(i) &&
-                    kanjiRevealIndex != i &&
                     !fullReveal,
                 highlight: fullReveal &&
                     question.mode == QuizMode.fillBlank &&
@@ -504,14 +544,14 @@ class _IdiomChar extends StatelessWidget {
         height: 58,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: scheme.primaryContainer,
+          color: AppTheme.correctBg,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           ch,
           style: AppTheme.idiomDisplay(context).copyWith(
             letterSpacing: 0,
-            color: scheme.onPrimaryContainer,
+            color: AppTheme.correctFg,
           ),
         ),
       );
@@ -530,13 +570,13 @@ class _DropBanner extends StatelessWidget {
   String get _label => switch (kind) {
         HintKind.fiftyFifty => '50:50',
         HintKind.reading => 'ふりがな',
-        HintKind.kanji => '漢字一字',
+        HintKind.time => '時間+',
       };
 
   IconData get _icon => switch (kind) {
         HintKind.fiftyFifty => Icons.filter_alt_rounded,
         HintKind.reading => Icons.record_voice_over_rounded,
-        HintKind.kanji => Icons.visibility_rounded,
+        HintKind.time => Icons.more_time_rounded,
       };
 
   @override
@@ -615,11 +655,11 @@ class _HintBar extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _HintButton(
-            icon: Icons.visibility_rounded,
-            label: '漢字',
-            count: hints[HintKind.kanji] ?? 0,
-            enabled: usable[HintKind.kanji] ?? false,
-            onTap: () => onUse(HintKind.kanji),
+            icon: Icons.more_time_rounded,
+            label: '時間+',
+            count: hints[HintKind.time] ?? 0,
+            enabled: usable[HintKind.time] ?? false,
+            onTap: () => onUse(HintKind.time),
           ),
         ),
       ],
@@ -725,6 +765,8 @@ class _ChoiceTile extends StatelessWidget {
 
     Color bg = scheme.surface;
     Color border = scheme.outlineVariant;
+    Color textColor = scheme.onSurface;
+    Color subTextColor = scheme.onSurfaceVariant;
     IconData? trailing;
     Color? trailingColor;
     double opacity = 1;
@@ -735,13 +777,17 @@ class _ChoiceTile extends StatelessWidget {
 
     if (revealed) {
       if (index == correct) {
-        bg = scheme.primaryContainer;
-        border = scheme.primary;
+        bg = AppTheme.correctBg;
+        border = AppTheme.correctBorder;
+        textColor = AppTheme.correctFg;
+        subTextColor = AppTheme.correctFg.withValues(alpha: 0.75);
         trailing = Icons.check_circle_rounded;
-        trailingColor = scheme.primary;
+        trailingColor = AppTheme.correctFg;
       } else if (index == picked) {
         bg = scheme.errorContainer;
         border = scheme.error;
+        textColor = scheme.onErrorContainer;
+        subTextColor = scheme.onErrorContainer.withValues(alpha: 0.75);
         trailing = Icons.cancel_rounded;
         trailingColor = scheme.error;
       }
@@ -773,7 +819,7 @@ class _ChoiceTile extends StatelessWidget {
                   height: 28,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest,
+                    color: textColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -781,7 +827,7 @@ class _ChoiceTile extends StatelessWidget {
                     style: notoSerifJp(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: scheme.onSurface,
+                      color: textColor,
                     ),
                   ),
                 ),
@@ -799,7 +845,7 @@ class _ChoiceTile extends StatelessWidget {
                               : FontWeight.w500,
                           height: 1.5,
                           letterSpacing: subText != null ? 4 : 0,
-                          color: scheme.onSurface,
+                          color: textColor,
                         ),
                       ),
                       if (subText != null) ...[
@@ -808,7 +854,7 @@ class _ChoiceTile extends StatelessWidget {
                           subText!,
                           style: notoSansJp(
                             fontSize: 12,
-                            color: scheme.onSurfaceVariant,
+                            color: subTextColor,
                             letterSpacing: 1.5,
                           ),
                         ),
@@ -858,9 +904,9 @@ class _KanjiChoiceTile extends StatelessWidget {
 
     if (revealed) {
       if (index == correct) {
-        bg = scheme.primaryContainer;
-        border = scheme.primary;
-        textColor = scheme.onPrimaryContainer;
+        bg = AppTheme.correctBg;
+        border = AppTheme.correctBorder;
+        textColor = AppTheme.correctFg;
       } else if (index == picked) {
         bg = scheme.errorContainer;
         border = scheme.error;
@@ -887,7 +933,7 @@ class _KanjiChoiceTile extends StatelessWidget {
             child: Text(
               char,
               style: notoSerifJp(
-                fontSize: 48,
+                fontSize: 34,
                 fontWeight: FontWeight.w800,
                 color: textColor,
               ),
@@ -940,6 +986,36 @@ class _TimerBar extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _IdiomImageCard extends StatelessWidget {
+  final String idiomKanji;
+  const _IdiomImageCard({required this.idiomKanji});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final path = IdiomImageRegistry.instance.pathFor(idiomKanji);
+    if (path == null) return const SizedBox.shrink();
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: 150,
+          height: 150,
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Image.asset(
+            path,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+          ),
+        ),
+      ),
     );
   }
 }

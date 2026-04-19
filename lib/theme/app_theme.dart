@@ -50,6 +50,11 @@ TextStyle notoSerifJp({
 class AppTheme {
   static const Color _seed = Color(0xFFB03A2E);
 
+  /// Success/correct color, distinct from the red-ish primary seed.
+  static const Color correctBg = Color(0xFFDCEBCB);
+  static const Color correctFg = Color(0xFF2F5720);
+  static const Color correctBorder = Color(0xFF6B9440);
+
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(
       seedColor: _seed,

@@ -1,14 +1,19 @@
+import 'dart:math';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_theme.dart';
 import '../data/audio_service.dart';
+import '../data/kanken_tier.dart';
 import '../data/score_service.dart';
+import '../data/stage_plan.dart' show kMinCorrectToClear, roundFailed;
 
 class ResultScreen extends StatefulWidget {
   final int correct;
   final int total;
   final int longestStreak;
   final RunOutcome outcome;
+  final bool isMarathon;
 
   const ResultScreen({
     super.key,
@@ -16,6 +21,7 @@ class ResultScreen extends StatefulWidget {
     required this.total,
     required this.longestStreak,
     required this.outcome,
+    this.isMarathon = false,
   });
 
   @override
@@ -23,13 +29,24 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
+  int? _masteredCount;
+
   @override
   void initState() {
     super.initState();
+    _loadMastered();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final audio = AudioService.instance;
-      final perfect = widget.total > 0 && widget.correct == widget.total;
-      if (perfect) {
+      // Stage rounds treat 8+ / 10 as "great" → perfect SFX. Marathon and
+      // other runs need 100% correct.
+      final perfect = widget.outcome.isRoundRun
+          ? widget.correct >= 8
+          : widget.total > 0 && widget.correct == widget.total;
+      final failed = widget.outcome.isRoundRun &&
+          roundFailed(correct: widget.correct);
+      if (failed) {
+        audio.playSfx(Sfx.wrong);
+      } else if (perfect) {
         audio.playSfx(Sfx.perfect);
       } else {
         audio.playSfx(Sfx.clear);
@@ -38,7 +55,27 @@ class _ResultScreenState extends State<ResultScreen> {
           audio.playSfx(Sfx.clearVoice);
         });
       }
+      if (widget.outcome.leveledUp && mounted) {
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (!mounted) return;
+          _showLevelUpDialog();
+        });
+      }
     });
+  }
+
+  Future<void> _showLevelUpDialog() async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => _LevelUpDialog(outcome: widget.outcome),
+    );
+  }
+
+  Future<void> _loadMastered() async {
+    final snap = await ScoreService().snapshot();
+    if (!mounted) return;
+    setState(() => _masteredCount = snap.mastered.length);
   }
 
   String get _title {
@@ -84,24 +121,76 @@ class _ResultScreenState extends State<ResultScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              _ScoreCircle(correct: correct, total: total),
+              if (outcome.isRoundRun)
+                _RoundStarsCard(
+                  outcome: outcome,
+                  correct: correct,
+                  total: total,
+                )
+                    .animate()
+                    .fadeIn(duration: 300.ms)
+                    .scale(
+                      begin: const Offset(0.9, 0.9),
+                      end: const Offset(1, 1),
+                      duration: 500.ms,
+                      curve: Curves.easeOutBack,
+                    )
+              else
+                _ScoreCircle(correct: correct, total: total),
               const SizedBox(height: 28),
               if (outcome.leveledUp)
                 _LevelUpCard(outcome: outcome)
                     .animate()
-                    .fadeIn(delay: 200.ms, duration: 400.ms)
+                    .fadeIn(delay: 150.ms, duration: 400.ms)
+                    .scale(
+                      begin: const Offset(0.95, 0.95),
+                      end: const Offset(1, 1),
+                      duration: 400.ms,
+                      curve: Curves.easeOutBack,
+                    ),
+              if (outcome.leveledUp) const SizedBox(height: 12),
+              if (outcome.rankUp)
+                _RankUpCard(outcome: outcome)
+                    .animate()
+                    .fadeIn(delay: 250.ms, duration: 400.ms)
                     .scale(
                       begin: const Offset(0.95, 0.95),
                       end: const Offset(1, 1),
                       duration: 400.ms,
                       curve: Curves.easeOut,
                     ),
-              if (outcome.leveledUp) const SizedBox(height: 16),
+              if (outcome.rankUp) const SizedBox(height: 16),
+              if (widget.isMarathon) ...[
+                _MarathonScoreCard(
+                  correct: correct,
+                  total: total,
+                  outcome: outcome,
+                )
+                    .animate()
+                    .fadeIn(delay: 300.ms, duration: 400.ms)
+                    .scale(
+                      begin: const Offset(0.95, 0.95),
+                      end: const Offset(1, 1),
+                      duration: 400.ms,
+                      curve: Curves.easeOut,
+                    ),
+                const SizedBox(height: 12),
+              ],
+              if (widget.isMarathon && _masteredCount != null) ...[
+                _MarathonTierCard(masteredCount: _masteredCount!)
+                    .animate()
+                    .fadeIn(delay: 400.ms, duration: 400.ms),
+                const SizedBox(height: 16),
+              ],
               if (outcome.totalDropped > 0)
                 _DropsCard(outcome: outcome)
                     .animate()
-                    .fadeIn(delay: 300.ms, duration: 400.ms),
+                    .fadeIn(delay: 450.ms, duration: 400.ms),
               if (outcome.totalDropped > 0) const SizedBox(height: 16),
+              _StatRow(
+                label: 'レベル',
+                value: 'Lv. ${outcome.newLevel}',
+              ),
               _StatRow(label: '正解数', value: '$correct / $total'),
               _StatRow(label: '最長連続正解', value: '$longestStreak'),
               _StatRow(
@@ -118,7 +207,7 @@ class _ResultScreenState extends State<ResultScreen> {
               const SizedBox(height: 28),
               FilledButton(
                 onPressed: () {
-                  AudioService.instance.playBgm(Bgm.home);
+                  AudioService.instance.stopBgm();
                   Navigator.of(context).pop(true);
                 },
                 style: FilledButton.styleFrom(
@@ -141,13 +230,13 @@ class _DropsCard extends StatelessWidget {
   String _labelFor(HintKind k) => switch (k) {
         HintKind.fiftyFifty => '50:50',
         HintKind.reading => 'ふりがな',
-        HintKind.kanji => '漢字一字',
+        HintKind.time => '時間+',
       };
 
   IconData _iconFor(HintKind k) => switch (k) {
         HintKind.fiftyFifty => Icons.filter_alt_rounded,
         HintKind.reading => Icons.record_voice_over_rounded,
-        HintKind.kanji => Icons.visibility_rounded,
+        HintKind.time => Icons.more_time_rounded,
       };
 
   @override
@@ -228,6 +317,61 @@ class _LevelUpCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: scheme.tertiaryContainer,
+        border: Border.all(color: scheme.tertiary, width: 1.5),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.trending_up_rounded,
+              color: scheme.onTertiaryContainer, size: 22),
+          const SizedBox(width: 10),
+          Text(
+            'レベルアップ!',
+            style: notoSerifJp(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: scheme.onTertiaryContainer,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            'Lv.${outcome.previousLevel}',
+            style: notoSerifJp(
+              fontSize: 18,
+              color: scheme.onTertiaryContainer.withValues(alpha: 0.6),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Icon(Icons.arrow_forward_rounded,
+                color: scheme.onTertiaryContainer, size: 18),
+          ),
+          Text(
+            'Lv.${outcome.newLevel}',
+            style: notoSerifJp(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: scheme.onTertiaryContainer,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RankUpCard extends StatelessWidget {
+  final RunOutcome outcome;
+  const _RankUpCard({required this.outcome});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
@@ -280,6 +424,323 @@ class _LevelUpCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoundStarsCard extends StatelessWidget {
+  final RunOutcome outcome;
+  final int correct;
+  final int total;
+  const _RoundStarsCard({
+    required this.outcome,
+    required this.correct,
+    required this.total,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final stars = outcome.roundStars ?? 0;
+    final prev = outcome.previousRoundStars ?? 0;
+    final improved = outcome.roundStarsImproved;
+    final failed = roundFailed(correct: correct);
+    final gradient = failed
+        ? [scheme.error, scheme.errorContainer]
+        : [scheme.primary, scheme.tertiary];
+    final onGrad = failed ? scheme.onError : scheme.onPrimary;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: gradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        children: [
+          if (failed) ...[
+            Icon(Icons.error_outline_rounded,
+                color: onGrad, size: 46),
+            const SizedBox(height: 8),
+            Text(
+              'クリア失敗',
+              style: notoSerifJp(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: onGrad,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'クリアには $kMinCorrectToClear 問以上の正解が必要です (今回 $correct / $total)',
+              textAlign: TextAlign.center,
+              style: notoSansJp(
+                fontSize: 12,
+                color: onGrad.withValues(alpha: 0.85),
+              ),
+            ),
+          ] else ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (int i = 0; i < 5; i++)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: Icon(
+                      i < stars
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      size: 46,
+                      color: i < stars
+                          ? Colors.amber
+                          : onGrad.withValues(alpha: 0.4),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              improved
+                  ? (prev == 0 ? 'クリア!' : '自己ベスト更新!')
+                  : '今回: ☆ $stars',
+              style: notoSerifJp(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: onGrad,
+              ),
+            ),
+            if (prev > 0) ...[
+              const SizedBox(height: 4),
+              Text(
+                '自己ベスト ☆ ${stars > prev ? stars : prev}',
+                style: notoSansJp(
+                  fontSize: 12,
+                  color: onGrad.withValues(alpha: 0.85),
+                ),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _MarathonScoreCard extends StatelessWidget {
+  final int correct;
+  final int total;
+  final RunOutcome outcome;
+  const _MarathonScoreCard({
+    required this.correct,
+    required this.total,
+    required this.outcome,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final updated = outcome.marathonBestUpdated;
+    final prevHasRecord = outcome.previousBestMarathon > 0 ||
+        (outcome.marathonBestUpdated && outcome.previousBestMarathon == 0);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: updated
+            ? LinearGradient(
+                colors: [scheme.primary, scheme.tertiary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: updated ? null : scheme.surface,
+        border: updated ? null : Border.all(color: scheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                updated
+                    ? Icons.emoji_events_rounded
+                    : Icons.emoji_events_outlined,
+                color: updated ? scheme.onPrimary : scheme.primary,
+                size: 22,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                updated ? 'マラソン最高記録 更新!' : 'マラソン記録',
+                style: notoSerifJp(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: updated ? scheme.onPrimary : scheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$correct',
+                style: notoSerifJp(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  height: 1,
+                  color: updated ? scheme.onPrimary : scheme.onSurface,
+                ),
+              ),
+              Text(
+                ' / $total',
+                style: notoSansJp(
+                  fontSize: 16,
+                  color: updated
+                      ? scheme.onPrimary.withValues(alpha: 0.8)
+                      : scheme.onSurfaceVariant,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: updated
+                      ? scheme.onPrimary.withValues(alpha: 0.18)
+                      : scheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  marathonPercentile(correct, total),
+                  style: notoSansJp(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: updated
+                        ? scheme.onPrimary
+                        : scheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (prevHasRecord && !updated) ...[
+            const SizedBox(height: 6),
+            Text(
+              '自己ベスト: ${outcome.newBestMarathon} / ${outcome.newBestMarathonTotal} (${marathonPercentile(outcome.newBestMarathon, outcome.newBestMarathonTotal)})',
+              style: notoSansJp(
+                fontSize: 11,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+          if (updated && outcome.previousBestMarathon > 0) ...[
+            const SizedBox(height: 6),
+            Text(
+              '前回ベスト: ${outcome.previousBestMarathon} / ${outcome.newBestMarathonTotal}',
+              style: notoSansJp(
+                fontSize: 11,
+                color: scheme.onPrimary.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _MarathonTierCard extends StatelessWidget {
+  final int masteredCount;
+  const _MarathonTierCard({required this.masteredCount});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final tier = kankenTierFor(masteredCount);
+    final next = nextKankenTierFor(masteredCount);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '推定級',
+                  style: notoSansJp(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                tier.percentile,
+                style: notoSansJp(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: scheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                tier.label,
+                style: notoSerifJp(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: scheme.onSurface,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  tier.subtitle,
+                  style: notoSansJp(
+                    fontSize: 12,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            next == null
+                ? 'マスター$masteredCount個 ・ 最高位到達'
+                : 'マスター$masteredCount個 ・ 次は「${next.label}」まであと ${next.min - masteredCount} 個',
+            style: notoSansJp(
+              fontSize: 11,
+              color: scheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -369,6 +830,176 @@ class _StatRow extends StatelessWidget {
               fontSize: highlight ? 20 : 16,
               fontWeight: FontWeight.w700,
               color: highlight ? scheme.primary : scheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LevelUpDialog extends StatefulWidget {
+  final RunOutcome outcome;
+  const _LevelUpDialog({required this.outcome});
+
+  @override
+  State<_LevelUpDialog> createState() => _LevelUpDialogState();
+}
+
+class _LevelUpDialogState extends State<_LevelUpDialog> {
+  late final ConfettiController _confetti;
+
+  @override
+  void initState() {
+    super.initState();
+    _confetti = ConfettiController(duration: const Duration(seconds: 2));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _confetti.play();
+    });
+  }
+
+  @override
+  void dispose() {
+    _confetti.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final o = widget.outcome;
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                colors: [scheme.primary, scheme.tertiary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.workspace_premium_rounded,
+                        size: 72, color: scheme.onPrimary)
+                    .animate()
+                    .scale(
+                      begin: const Offset(0.3, 0.3),
+                      end: const Offset(1, 1),
+                      duration: 450.ms,
+                      curve: Curves.easeOutBack,
+                    )
+                    .shimmer(
+                      delay: 350.ms,
+                      duration: 900.ms,
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                const SizedBox(height: 12),
+                Text(
+                  'レベルアップ!',
+                  style: notoSerifJp(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onPrimary,
+                  ),
+                )
+                    .animate()
+                    .fadeIn(delay: 200.ms, duration: 300.ms)
+                    .slideY(begin: 0.2, end: 0, duration: 400.ms),
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      'Lv.${o.previousLevel}',
+                      style: notoSerifJp(
+                        fontSize: 22,
+                        color: scheme.onPrimary.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Icon(Icons.arrow_forward_rounded,
+                          color: scheme.onPrimary, size: 24),
+                    ),
+                    Text(
+                      'Lv.${o.newLevel}',
+                      style: notoSerifJp(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w800,
+                        height: 1,
+                        color: scheme.onPrimary,
+                      ),
+                    )
+                        .animate()
+                        .scale(
+                          begin: const Offset(0.6, 0.6),
+                          end: const Offset(1, 1),
+                          delay: 300.ms,
+                          duration: 500.ms,
+                          curve: Curves.easeOutBack,
+                        ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'おめでとうございます!',
+                  style: notoSerifJp(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onPrimary.withValues(alpha: 0.9),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: scheme.onPrimary,
+                      foregroundColor: scheme.primary,
+                    ),
+                    child: const Text('続ける'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: -8,
+            child: ConfettiWidget(
+              confettiController: _confetti,
+              blastDirection: pi / 2,
+              maxBlastForce: 22,
+              minBlastForce: 12,
+              emissionFrequency: 0.08,
+              numberOfParticles: 30,
+              gravity: 0.25,
+              shouldLoop: false,
+              colors: const [
+                Color(0xFFFFD54F),
+                Color(0xFFE6A817),
+                Color(0xFFB03A2E),
+                Color(0xFF8CB369),
+                Color(0xFF4A6FA5),
+              ],
             ),
           ),
         ],
