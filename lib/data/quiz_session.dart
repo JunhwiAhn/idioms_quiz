@@ -14,7 +14,7 @@ extension QuizModeX on QuizMode {
 
   String get description => switch (this) {
         QuizMode.normal => '漢字とふりがなを見て意味を選ぶ。',
-        QuizMode.fillBlank => '漢字の一部が伏せられる。ふりがなは表示。',
+        QuizMode.fillBlank => '伏せられた漢字を選ぶ。',
         QuizMode.noReading => 'ふりがな無し。漢字だけで意味を選ぶ。',
         QuizMode.reverseLookup => '意味を見て該当する四字熟語を当てる。',
       };
@@ -118,19 +118,31 @@ class QuizSession {
         for (final d in distractors) {
           readings[d.idiom] = d.reading;
         }
+      } else if (mode == QuizMode.fillBlank) {
+        final chars = idiom.idiom.split('');
+        final maskIdx = rng.nextInt(chars.length);
+        masked.add(maskIdx);
+        final correctChar = chars[maskIdx];
+
+        // Pool of distractor kanji sampled from other idioms, minus anything
+        // that already appears in this idiom (so the blank has one obvious
+        // answer, not two plausible ones).
+        final inThis = chars.toSet();
+        final distractorPool = <String>{};
+        for (final other in pool) {
+          if (other.idiom == idiom.idiom) continue;
+          distractorPool.addAll(other.idiom.split(''));
+        }
+        distractorPool.removeAll(inThis);
+        final distractorList = distractorPool.toList()..shuffle(rng);
+        final distractors = distractorList.take(3).toList();
+
+        choices = [correctChar, ...distractors]..shuffle(rng);
+        correctIndex = choices.indexOf(correctChar);
       } else {
         final opts = [idiom.meaning, ...idiom.wrongChoices]..shuffle(rng);
         choices = opts;
         correctIndex = choices.indexOf(idiom.meaning);
-
-        if (mode == QuizMode.fillBlank) {
-          final len = idiom.idiom.length;
-          // Hide 1 char usually, 2 chars ~30% of the time for added difficulty.
-          final hideCount = rng.nextDouble() < 0.3 ? 2 : 1;
-          final indices = List<int>.generate(len, (i) => i)..shuffle(rng);
-          masked.addAll(indices.take(hideCount));
-          masked.sort();
-        }
       }
 
       return QuizQuestion(

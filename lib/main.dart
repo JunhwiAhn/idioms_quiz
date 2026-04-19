@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'data/audio_service.dart';
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AudioService.instance.load();
   runApp(const IdiomsQuizApp());
 }
 

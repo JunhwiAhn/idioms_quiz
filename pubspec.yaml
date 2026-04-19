@@ -11,9 +11,10 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  google_fonts: ^6.2.1
   flutter_animate: ^4.5.0
   shared_preferences: ^2.3.2
+  audioplayers: ^6.1.0
+  confetti: ^0.8.0
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +26,22 @@ flutter:
 
   assets:
     - assets/data/idioms.json
+    - assets/audio/
+
+  fonts:
+    - family: Noto Sans JP
+      fonts:
+        - asset: assets/fonts/NotoSansJP-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NotoSansJP-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSansJP-ExtraBold.ttf
+          weight: 800
+    - family: Noto Serif JP
+      fonts:
+        - asset: assets/fonts/NotoSerifJP-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NotoSerifJP-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/NotoSerifJP-ExtraBold.ttf
+          weight: 800

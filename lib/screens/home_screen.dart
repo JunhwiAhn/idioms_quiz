@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_theme.dart';
+import '../data/audio_service.dart';
 import '../data/idiom_repository.dart';
 import '../data/quiz_session.dart';
 import '../data/score_service.dart';
@@ -21,11 +22,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Idiom>? _idioms;
   ScoreSnapshot? _snap;
+  bool _muted = AudioService.instance.muted;
 
   @override
   void initState() {
     super.initState();
     _bootstrap();
+    AudioService.instance.playBgm(Bgm.home);
   }
 
   Future<void> _bootstrap() async {
@@ -39,11 +42,22 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _toggleMute() async {
+    final next = !_muted;
+    await AudioService.instance.setMuted(next);
+    // Kick BGM if it wasn't running (e.g. blocked by web autoplay policy).
+    if (!next) await AudioService.instance.playBgm(Bgm.home);
+    setState(() => _muted = next);
+  }
+
   Future<void> _startQuiz(int questionCount) async {
     final idioms = _idioms;
     final snap = _snap;
     if (idioms == null || snap == null) return;
     final session = QuizSession.build(idioms, count: questionCount);
+    // First user gesture after app start — safe to begin audio on web too.
+    await AudioService.instance.playBgm(Bgm.quiz);
+    if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => QuizScreen(
@@ -52,6 +66,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+    // Returning here can fire while ResultScreen is still visible (because
+    // Quiz→Result uses pushReplacement). BGM restoration is handled by the
+    // back buttons on Result/Quiz so we don't flip it prematurely here.
+    if (!mounted) return;
     await _bootstrap();
   }
 
@@ -80,6 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('四字熟語クイズ'),
         actions: [
+          IconButton(
+            icon: Icon(_muted
+                ? Icons.volume_off_rounded
+                : Icons.volume_up_rounded),
+            tooltip: _muted ? 'ミュート解除' : 'ミュート',
+            onPressed: _toggleMute,
+          ),
           IconButton(
             icon: const Icon(Icons.collections_bookmark_rounded),
             tooltip: '図鑑',
@@ -137,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.only(top: 12),
                       child: Text(
                         '正解するとまれにヒントがドロップします。',
-                        style: GoogleFonts.notoSansJp(
+                        style: notoSansJp(
                           fontSize: 12,
                           color: scheme.onSurfaceVariant,
                         ),
@@ -159,7 +184,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: GoogleFonts.notoSerifJp(
+      style: notoSerifJp(
         fontSize: 18,
         fontWeight: FontWeight.w700,
         color: Theme.of(context).colorScheme.onSurface,
@@ -205,7 +230,7 @@ class _RankCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 '段位',
-                style: GoogleFonts.notoSansJp(
+                style: notoSansJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: scheme.onPrimary.withValues(alpha: 0.9),
@@ -214,7 +239,7 @@ class _RankCard extends StatelessWidget {
               const Spacer(),
               Text(
                 '${snap.points} pt',
-                style: GoogleFonts.notoSerifJp(
+                style: notoSerifJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: scheme.onPrimary.withValues(alpha: 0.9),
@@ -225,7 +250,7 @@ class _RankCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             snap.rank.name,
-            style: GoogleFonts.notoSerifJp(
+            style: notoSerifJp(
               fontSize: 42,
               fontWeight: FontWeight.w800,
               color: scheme.onPrimary,
@@ -249,7 +274,7 @@ class _RankCard extends StatelessWidget {
             next == null
                 ? '最高位に到達!'
                 : '次は ${next.name} まであと $toGo 問正解',
-            style: GoogleFonts.notoSansJp(
+            style: notoSansJp(
               fontSize: 12,
               color: scheme.onPrimary.withValues(alpha: 0.9),
             ),
@@ -313,7 +338,7 @@ class _StatBox extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.notoSansJp(
+            style: notoSansJp(
               fontSize: 11,
               color: scheme.onSurfaceVariant,
             ),
@@ -321,7 +346,7 @@ class _StatBox extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.notoSerifJp(
+            style: notoSerifJp(
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: scheme.onSurface,
@@ -376,7 +401,7 @@ class _CountTile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.notoSerifJp(
+                      style: notoSerifJp(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: scheme.onSurface,
@@ -385,7 +410,7 @@ class _CountTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: GoogleFonts.notoSansJp(
+                      style: notoSansJp(
                         fontSize: 12,
                         color: scheme.onSurfaceVariant,
                       ),
@@ -455,7 +480,7 @@ class _HintBox extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: GoogleFonts.notoSansJp(
+            style: notoSansJp(
               fontSize: 11,
               color: scheme.onSecondaryContainer,
             ),
@@ -463,7 +488,7 @@ class _HintBox extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             '×$count',
-            style: GoogleFonts.notoSerifJp(
+            style: notoSerifJp(
               fontSize: 16,
               fontWeight: FontWeight.w800,
               color: scheme.onSecondaryContainer,

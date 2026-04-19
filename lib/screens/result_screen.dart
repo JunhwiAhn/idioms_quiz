@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_theme.dart';
+import '../data/audio_service.dart';
 import '../data/score_service.dart';
 
-class ResultScreen extends StatelessWidget {
+class ResultScreen extends StatefulWidget {
   final int correct;
   final int total;
   final int longestStreak;
@@ -17,8 +18,31 @@ class ResultScreen extends StatelessWidget {
     required this.outcome,
   });
 
+  @override
+  State<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends State<ResultScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final audio = AudioService.instance;
+      final perfect = widget.total > 0 && widget.correct == widget.total;
+      if (perfect) {
+        audio.playSfx(Sfx.perfect);
+      } else {
+        audio.playSfx(Sfx.clear);
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (!mounted) return;
+          audio.playSfx(Sfx.clearVoice);
+        });
+      }
+    });
+  }
+
   String get _title {
-    final rate = total == 0 ? 0.0 : correct / total;
+    final rate = widget.total == 0 ? 0.0 : widget.correct / widget.total;
     if (rate == 1.0) return '完璧です!';
     if (rate >= 0.8) return 'すばらしい!';
     if (rate >= 0.5) return 'その調子!';
@@ -28,6 +52,10 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final correct = widget.correct;
+    final total = widget.total;
+    final longestStreak = widget.longestStreak;
+    final outcome = widget.outcome;
 
     return Scaffold(
       appBar: AppBar(title: const Text('結果')),
@@ -49,7 +77,7 @@ class ResultScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 _title,
-                style: GoogleFonts.notoSerifJp(
+                style: notoSerifJp(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: scheme.onSurface,
@@ -89,7 +117,10 @@ class ResultScreen extends StatelessWidget {
               _StatRow(label: '現在の段位', value: outcome.newRank.name),
               const SizedBox(height: 28),
               FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () {
+                  AudioService.instance.playBgm(Bgm.home);
+                  Navigator.of(context).pop(true);
+                },
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
                 ),
@@ -142,7 +173,7 @@ class _DropsCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 'ヒント獲得 ×${outcome.totalDropped}',
-                style: GoogleFonts.notoSerifJp(
+                style: notoSerifJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                   color: scheme.onTertiaryContainer,
@@ -171,7 +202,7 @@ class _DropsCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         '${_labelFor(e.key)} ×${e.value}',
-                        style: GoogleFonts.notoSansJp(
+                        style: notoSansJp(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: scheme.onTertiaryContainer,
@@ -216,7 +247,7 @@ class _LevelUpCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 '昇段しました!',
-                style: GoogleFonts.notoSansJp(
+                style: notoSansJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: scheme.onPrimary,
@@ -230,7 +261,7 @@ class _LevelUpCard extends StatelessWidget {
             children: [
               Text(
                 outcome.previousRank.name,
-                style: GoogleFonts.notoSerifJp(
+                style: notoSerifJp(
                   fontSize: 20,
                   color: scheme.onPrimary.withValues(alpha: 0.7),
                 ),
@@ -242,7 +273,7 @@ class _LevelUpCard extends StatelessWidget {
               ),
               Text(
                 outcome.newRank.name,
-                style: GoogleFonts.notoSerifJp(
+                style: notoSerifJp(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                   color: scheme.onPrimary,
@@ -284,7 +315,7 @@ class _ScoreCircle extends StatelessWidget {
             children: [
               Text(
                 '${(rate * 100).round()}',
-                style: GoogleFonts.notoSerifJp(
+                style: notoSerifJp(
                   fontSize: 44,
                   fontWeight: FontWeight.w800,
                   height: 1,
@@ -294,7 +325,7 @@ class _ScoreCircle extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 '%',
-                style: GoogleFonts.notoSansJp(
+                style: notoSansJp(
                   fontSize: 13,
                   color: scheme.onSurfaceVariant,
                 ),
@@ -326,7 +357,7 @@ class _StatRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.notoSansJp(
+            style: notoSansJp(
               fontSize: 14,
               color: scheme.onSurfaceVariant,
             ),
@@ -334,7 +365,7 @@ class _StatRow extends StatelessWidget {
           const Spacer(),
           Text(
             value,
-            style: GoogleFonts.notoSerifJp(
+            style: notoSerifJp(
               fontSize: highlight ? 20 : 16,
               fontWeight: FontWeight.w700,
               color: highlight ? scheme.primary : scheme.onSurface,

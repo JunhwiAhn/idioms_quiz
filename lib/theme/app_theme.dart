@@ -1,5 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+const String _sansJp = 'Noto Sans JP';
+const String _serifJp = 'Noto Serif JP';
+
+TextStyle notoSansJp({
+  double? fontSize,
+  FontWeight? fontWeight,
+  Color? color,
+  double? letterSpacing,
+  double? wordSpacing,
+  double? height,
+  TextDecoration? decoration,
+  FontStyle? fontStyle,
+}) =>
+    TextStyle(
+      fontFamily: _sansJp,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      height: height,
+      decoration: decoration,
+      fontStyle: fontStyle,
+    );
+
+TextStyle notoSerifJp({
+  double? fontSize,
+  FontWeight? fontWeight,
+  Color? color,
+  double? letterSpacing,
+  double? wordSpacing,
+  double? height,
+  TextDecoration? decoration,
+  FontStyle? fontStyle,
+}) =>
+    TextStyle(
+      fontFamily: _serifJp,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      height: height,
+      decoration: decoration,
+      fontStyle: fontStyle,
+    );
 
 class AppTheme {
   static const Color _seed = Color(0xFFB03A2E);
@@ -11,14 +57,15 @@ class AppTheme {
     );
     final base = ThemeData(colorScheme: scheme, useMaterial3: true);
     return base.copyWith(
-      textTheme: GoogleFonts.notoSansJpTextTheme(base.textTheme),
+      textTheme: base.textTheme.apply(fontFamily: _sansJp),
+      primaryTextTheme: base.primaryTextTheme.apply(fontFamily: _sansJp),
       scaffoldBackgroundColor: const Color(0xFFFAF6F2),
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
         foregroundColor: scheme.onSurface,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.notoSerifJp(
+        titleTextStyle: notoSerifJp(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: scheme.onSurface,
@@ -35,7 +82,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: GoogleFonts.notoSansJp(
+          textStyle: notoSansJp(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -51,13 +98,14 @@ class AppTheme {
     );
     final base = ThemeData(colorScheme: scheme, useMaterial3: true);
     return base.copyWith(
-      textTheme: GoogleFonts.notoSansJpTextTheme(base.textTheme),
+      textTheme: base.textTheme.apply(fontFamily: _sansJp),
+      primaryTextTheme: base.primaryTextTheme.apply(fontFamily: _sansJp),
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
         foregroundColor: scheme.onSurface,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.notoSerifJp(
+        titleTextStyle: notoSerifJp(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: scheme.onSurface,
@@ -71,7 +119,7 @@ class AppTheme {
     );
   }
 
-  static TextStyle idiomDisplay(BuildContext context) => GoogleFonts.notoSerifJp(
+  static TextStyle idiomDisplay(BuildContext context) => notoSerifJp(
         fontSize: 44,
         fontWeight: FontWeight.w800,
         letterSpacing: 6,

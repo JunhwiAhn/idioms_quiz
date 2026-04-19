@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_theme.dart';
 import '../models/idiom.dart';
 
 class CollectionScreen extends StatelessWidget {
@@ -92,7 +92,7 @@ class _CollectionCard extends StatelessWidget {
             children: [
               Text(
                 mastered ? idiom.idiom : '???',
-                style: GoogleFonts.notoSerifJp(
+                style: notoSerifJp(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 4,
@@ -104,7 +104,7 @@ class _CollectionCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 mastered ? idiom.reading : '未獲得',
-                style: GoogleFonts.notoSansJp(
+                style: notoSansJp(
                   fontSize: 12,
                   color: mastered
                       ? scheme.onSurfaceVariant
@@ -136,7 +136,7 @@ class _IdiomSheet extends StatelessWidget {
           Center(
             child: Text(
               idiom.idiom,
-              style: GoogleFonts.notoSerifJp(
+              style: notoSerifJp(
                 fontSize: 36,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 6,
@@ -148,7 +148,7 @@ class _IdiomSheet extends StatelessWidget {
           Center(
             child: Text(
               idiom.reading,
-              style: GoogleFonts.notoSansJp(
+              style: notoSansJp(
                 fontSize: 14,
                 color: scheme.onSurfaceVariant,
                 letterSpacing: 2,
@@ -164,7 +164,7 @@ class _IdiomSheet extends StatelessWidget {
             ),
             child: Text(
               idiom.meaning,
-              style: GoogleFonts.notoSerifJp(
+              style: notoSerifJp(
                 fontSize: 15,
                 height: 1.6,
                 color: scheme.onPrimaryContainer,
