@@ -3,6 +3,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_theme.dart';
+import '../data/ad_service.dart';
 import '../data/audio_service.dart';
 import '../data/kanken_tier.dart';
 import '../data/score_service.dart';
@@ -204,7 +205,9 @@ class _ResultScreenState extends State<ResultScreen> {
                 highlight: true,
               ),
               _StatRow(label: '現在の段位', value: outcome.newRank.name),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
+              _RewardedAdButton(),
+              const SizedBox(height: 12),
               FilledButton(
                 onPressed: () {
                   AudioService.instance.stopBgm();
@@ -577,7 +580,7 @@ class _MarathonScoreCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                updated ? 'マラソン最高記録 更新!' : 'マラソン記録',
+                updated ? '道場破り最高記録 更新!' : '道場破り記録',
                 style: notoSerifJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -1003,6 +1006,103 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RewardedAdButton extends StatefulWidget {
+  @override
+  State<_RewardedAdButton> createState() => _RewardedAdButtonState();
+}
+
+class _RewardedAdButtonState extends State<_RewardedAdButton> {
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    AdService.instance.preloadRewarded();
+  }
+
+  Future<void> _onTap() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final granted = await AdService.instance.showRewarded();
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (!granted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '広告を読み込めませんでした。少ししてからもう一度。',
+            style: notoSansJp(fontSize: 12),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    final kind = await ScoreService().grantRandomHint();
+    if (!mounted) return;
+    final label = switch (kind) {
+      HintKind.fiftyFifty => '50:50',
+      HintKind.reading => 'ふりがな',
+      HintKind.time => '時間+',
+    };
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.card_giftcard_rounded,
+                color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              'ヒント「$label」を獲得!',
+              style: notoSansJp(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!AdService.instance.isSupported) {
+      return const SizedBox.shrink();
+    }
+    final scheme = Theme.of(context).colorScheme;
+    return OutlinedButton.icon(
+      onPressed: _busy ? null : _onTap,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(52),
+        side: BorderSide(color: scheme.primary, width: 1.4),
+        foregroundColor: scheme.primary,
+      ),
+      icon: _busy
+          ? SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(scheme.primary),
+              ),
+            )
+          : const Icon(Icons.play_circle_fill_rounded),
+      label: Text(
+        _busy ? '広告を読み込み中…' : '動画を見てヒント +1',
+        style: notoSerifJp(
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }

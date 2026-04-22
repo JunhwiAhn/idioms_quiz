@@ -57,7 +57,7 @@ class _QuizScreenState extends State<QuizScreen> {
   void initState() {
     super.initState();
     _hints = {...widget.initialHints};
-    _confetti = ConfettiController(duration: const Duration(milliseconds: 600));
+    _confetti = ConfettiController(duration: const Duration(milliseconds: 900));
     _startTimer();
   }
 
@@ -397,22 +397,63 @@ class _QuizScreenState extends State<QuizScreen> {
           ),
         ],
       ),
+          // Top center burst
           Align(
             alignment: Alignment.topCenter,
             child: ConfettiWidget(
               confettiController: _confetti,
               blastDirection: pi / 2,
-              maxBlastForce: 20,
-              minBlastForce: 8,
-              emissionFrequency: 0.06,
-              numberOfParticles: 18,
-              gravity: 0.3,
+              maxBlastForce: 28,
+              minBlastForce: 12,
+              emissionFrequency: 0.08,
+              numberOfParticles: 28,
+              gravity: 0.25,
               shouldLoop: false,
               colors: [
                 scheme.primary,
                 scheme.tertiary,
                 scheme.secondary,
                 scheme.primaryContainer,
+                const Color(0xFFFFD166),
+                const Color(0xFFEF476F),
+              ],
+            ),
+          ),
+          // Left side cross-fire
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ConfettiWidget(
+              confettiController: _confetti,
+              blastDirection: -pi / 5,
+              maxBlastForce: 24,
+              minBlastForce: 10,
+              emissionFrequency: 0.08,
+              numberOfParticles: 16,
+              gravity: 0.25,
+              shouldLoop: false,
+              colors: [
+                scheme.primary,
+                scheme.tertiary,
+                const Color(0xFFFFD166),
+              ],
+            ),
+          ),
+          // Right side cross-fire
+          Align(
+            alignment: Alignment.centerRight,
+            child: ConfettiWidget(
+              confettiController: _confetti,
+              blastDirection: pi + pi / 5,
+              maxBlastForce: 24,
+              minBlastForce: 10,
+              emissionFrequency: 0.08,
+              numberOfParticles: 16,
+              gravity: 0.25,
+              shouldLoop: false,
+              colors: [
+                scheme.secondary,
+                scheme.primaryContainer,
+                const Color(0xFFEF476F),
               ],
             ),
           ),
@@ -775,6 +816,9 @@ class _ChoiceTile extends StatelessWidget {
       opacity = 0.35;
     }
 
+    final isCorrectReveal = revealed && index == correct;
+    List<BoxShadow>? shadows;
+
     if (revealed) {
       if (index == correct) {
         bg = AppTheme.correctBg;
@@ -783,6 +827,13 @@ class _ChoiceTile extends StatelessWidget {
         subTextColor = AppTheme.correctFg.withValues(alpha: 0.75);
         trailing = Icons.check_circle_rounded;
         trailingColor = AppTheme.correctFg;
+        shadows = [
+          BoxShadow(
+            color: AppTheme.correctBorder.withValues(alpha: 0.45),
+            blurRadius: 22,
+            spreadRadius: 1,
+          ),
+        ];
       } else if (index == picked) {
         bg = scheme.errorContainer;
         border = scheme.error;
@@ -797,81 +848,112 @@ class _ChoiceTile extends StatelessWidget {
 
     final letter = String.fromCharCode('A'.codeUnitAt(0) + index);
 
-    return Opacity(
+    final tile = Opacity(
       opacity: opacity,
-      child: Material(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          onTap: revealed || eliminated ? null : onTap,
+      child: Container(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: border, width: 1.5),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: textColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    letter,
-                    style: notoSerifJp(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
+          boxShadow: shadows,
+        ),
+        child: Material(
+          color: bg,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            onTap: revealed || eliminated ? null : onTap,
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: border,
+                  width: isCorrectReveal ? 2.2 : 1.5,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: textColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      letter,
+                      style: notoSerifJp(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        text,
-                        style: notoSerifJp(
-                          fontSize: subText != null ? 20 : 15,
-                          fontWeight: subText != null
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                          height: 1.5,
-                          letterSpacing: subText != null ? 4 : 0,
-                          color: textColor,
-                        ),
-                      ),
-                      if (subText != null) ...[
-                        const SizedBox(height: 2),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          subText!,
-                          style: notoSansJp(
-                            fontSize: 12,
-                            color: subTextColor,
-                            letterSpacing: 1.5,
+                          text,
+                          style: notoSerifJp(
+                            fontSize: subText != null ? 20 : 15,
+                            fontWeight: subText != null
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            height: 1.5,
+                            letterSpacing: subText != null ? 4 : 0,
+                            color: textColor,
                           ),
                         ),
+                        if (subText != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            subText!,
+                            style: notoSansJp(
+                              fontSize: 12,
+                              color: subTextColor,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                if (trailing != null) ...[
-                  const SizedBox(width: 8),
-                  Icon(trailing, color: trailingColor),
+                  if (trailing != null) ...[
+                    const SizedBox(width: 8),
+                    Icon(trailing, color: trailingColor),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
       ),
     );
+
+    if (!isCorrectReveal) return tile;
+    return tile
+        .animate()
+        .scale(
+          begin: const Offset(1, 1),
+          end: const Offset(1.05, 1.05),
+          duration: 180.ms,
+          curve: Curves.easeOutBack,
+        )
+        .then()
+        .scale(
+          begin: const Offset(1.05, 1.05),
+          end: const Offset(1, 1),
+          duration: 220.ms,
+          curve: Curves.easeOut,
+        )
+        .shimmer(
+          delay: 120.ms,
+          duration: 900.ms,
+          color: Colors.white.withValues(alpha: 0.55),
+        );
   }
 }
 
@@ -901,12 +983,21 @@ class _KanjiChoiceTile extends StatelessWidget {
     Color border = scheme.outlineVariant;
     Color textColor = scheme.onSurface;
     double opacity = eliminated ? 0.35 : 1;
+    final isCorrectReveal = revealed && index == correct;
+    List<BoxShadow>? shadows;
 
     if (revealed) {
       if (index == correct) {
         bg = AppTheme.correctBg;
         border = AppTheme.correctBorder;
         textColor = AppTheme.correctFg;
+        shadows = [
+          BoxShadow(
+            color: AppTheme.correctBorder.withValues(alpha: 0.5),
+            blurRadius: 22,
+            spreadRadius: 1,
+          ),
+        ];
       } else if (index == picked) {
         bg = scheme.errorContainer;
         border = scheme.error;
@@ -916,32 +1007,63 @@ class _KanjiChoiceTile extends StatelessWidget {
       border = scheme.primary;
     }
 
-    return Opacity(
+    final tile = Opacity(
       opacity: opacity,
-      child: Material(
-        color: bg,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: revealed || eliminated ? null : onTap,
+      child: Container(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: border, width: 1.8),
-            ),
-            child: Text(
-              char,
-              style: notoSerifJp(
-                fontSize: 34,
-                fontWeight: FontWeight.w800,
-                color: textColor,
+          boxShadow: shadows,
+        ),
+        child: Material(
+          color: bg,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: revealed || eliminated ? null : onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: border,
+                  width: isCorrectReveal ? 2.4 : 1.8,
+                ),
+              ),
+              child: Text(
+                char,
+                style: notoSerifJp(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+
+    if (!isCorrectReveal) return tile;
+    return tile
+        .animate()
+        .scale(
+          begin: const Offset(1, 1),
+          end: const Offset(1.08, 1.08),
+          duration: 180.ms,
+          curve: Curves.easeOutBack,
+        )
+        .then()
+        .scale(
+          begin: const Offset(1.08, 1.08),
+          end: const Offset(1, 1),
+          duration: 220.ms,
+          curve: Curves.easeOut,
+        )
+        .shimmer(
+          delay: 120.ms,
+          duration: 900.ms,
+          color: Colors.white.withValues(alpha: 0.6),
+        );
   }
 }
 

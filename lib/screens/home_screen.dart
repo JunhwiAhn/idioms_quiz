@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
+import '../data/ad_service.dart';
 import '../data/audio_service.dart';
 import '../data/crossword.dart';
 import '../data/daily.dart';
@@ -37,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _bootstrap();
+    // Fire-and-forget preload; safe-no-op on web.
+    AdService.instance.preloadInterstitial();
   }
 
   Future<void> _bootstrap() async {
@@ -65,6 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (idioms == null || snap == null) return;
     final session = QuizSession.build(idioms, count: questionCount);
     AudioService.instance.playSfx(Sfx.modeStart, multiplier: 2.0);
+    // Interstitial every few mode-starts (shares counter with round-end).
+    await AdService.instance.maybeShowAfterRound(frequency: 3);
     // First user gesture after app start — safe to begin audio on web too.
     await AudioService.instance.playBgm(Bgm.quiz);
     if (!mounted) return;
@@ -88,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final bank = _crossword;
     if (bank == null) return;
     AudioService.instance.playSfx(Sfx.modeStart, multiplier: 2.0);
+    await AdService.instance.maybeShowAfterRound(frequency: 3);
     await AudioService.instance.playBgm(Bgm.quiz);
     if (!mounted) return;
     await Navigator.of(context).push(
@@ -104,6 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final plan = _plan;
     if (plan == null) return;
     AudioService.instance.playSfx(Sfx.modeStart, multiplier: 2.0);
+    await AdService.instance.maybeShowAfterRound(frequency: 3);
+    if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => StageScreen(plan: plan),
@@ -111,6 +120,160 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (!mounted) return;
     await _bootstrap();
+  }
+
+  Future<void> _openFeedbackForm(BuildContext ctx) async {
+    final url = Uri.parse(
+      'https://docs.google.com/forms/d/e/1FAIpQLSdaNmb7JE8CWiS_4QUV0IawKI4-496jyDNBDXQa-ZDuoBX3Cw/viewform',
+    );
+    final ok = await launchUrl(url, mode: LaunchMode.externalApplication);
+    if (!ok && ctx.mounted) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(content: Text('フォームを開けませんでした')),
+      );
+    }
+  }
+
+  void _openAppInfoSheet() {
+    final scheme = Theme.of(context).colorScheme;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) {
+        final s = Theme.of(ctx).colorScheme;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '四字熟語道場',
+                    style: notoSerifJp(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: s.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'バージョン: 1.0.0',
+                    style: notoSansJp(
+                      fontSize: 11,
+                      color: s.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Divider(color: s.outlineVariant),
+                  const SizedBox(height: 12),
+                  Text(
+                    'データの保存について',
+                    style: notoSerifJp(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: s.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'クイズの進捗・獲得した四字熟語・設定などは、すべてご利用の端末内にのみ保存されます。外部サーバーへの送信はありません。アプリをアンインストールすると全てのデータが削除されます。',
+                    style: notoSansJp(
+                      fontSize: 12,
+                      height: 1.5,
+                      color: s.onSurface.withValues(alpha: 0.9),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Divider(color: s.outlineVariant),
+                  const SizedBox(height: 6),
+                  InkWell(
+                    onTap: () => _openFeedbackForm(ctx),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 8),
+                      child: Row(
+                        children: [
+                          Icon(Icons.feedback_outlined,
+                              size: 18, color: s.primary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'ご意見・お問い合わせ',
+                              style: notoSerifJp(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: s.primary,
+                              ),
+                            ),
+                          ),
+                          Icon(Icons.open_in_new_rounded,
+                              size: 14,
+                              color: s.onSurfaceVariant),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Divider(color: s.outlineVariant),
+                  const SizedBox(height: 12),
+                  Text(
+                    'ライセンス',
+                    style: notoSerifJp(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: s.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        showLicensePage(
+                          context: context,
+                          applicationName: '四字熟語道場',
+                          applicationVersion: '1.0.0',
+                        );
+                      },
+                      icon: Icon(Icons.description_outlined,
+                          size: 16, color: s.primary),
+                      label: Text(
+                        'オープンソースライセンスを表示',
+                        style: notoSansJp(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: s.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: Text(
+                        '閉じる',
+                        style: notoSerifJp(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: scheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _openCollection() async {
@@ -135,7 +298,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leadingWidth: 56,
+        centerTitle: false,
+        titleSpacing: 8,
+        leadingWidth: 48,
         leading: Padding(
           padding: const EdgeInsets.only(left: 12),
           child: Center(
@@ -151,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        title: const Text('四字熟語クイズ'),
+        title: const Text('四字熟語道場'),
         actions: [
           IconButton(
             icon: Icon(_muted
@@ -159,6 +324,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 : Icons.volume_up_rounded),
             tooltip: _muted ? 'ミュート解除' : 'ミュート',
             onPressed: _toggleMute,
+          ),
+          IconButton(
+            icon: const Icon(Icons.info_outline_rounded),
+            tooltip: 'アプリ情報',
+            onPressed: _openAppInfoSheet,
           ),
           IconButton(
             icon: const Icon(Icons.collections_bookmark_rounded),
@@ -188,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                     const SizedBox(height: 18),
                     _PlayModeTile(
-                      title: 'ステージモード',
+                      title: 'ステージ',
                       subtitle: '5 ステージ × 8 ラウンド。星を集めよう。',
                       icon: Icons.stars_rounded,
                       gradient: [
@@ -199,9 +369,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 12),
                     _PlayModeTile(
-                      title: 'マラソンモード',
-                      subtitle:
-                          '50問解いて貴方の実力が上位○%(目安)に該当するかを確認しよう。',
+                      title: '道場破り',
+                      subtitle: '50問に挑戦して、自分の実力を測ってみよう!',
                       icon: Icons.emoji_events_rounded,
                       gradient: [
                         const Color(0xFFC46A2E),
@@ -222,6 +391,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 24),
                     _StatsRow(snap: snap, total: idioms.length),
+                    const SizedBox(height: 20),
+                    Center(child: AdService.instance.buildBanner()),
                   ],
                 ),
               ),
@@ -495,7 +666,7 @@ class _InlineMarathonLine extends StatelessWidget {
             size: 13, color: scheme.onSurfaceVariant),
         const SizedBox(width: 5),
         Text(
-          'マラソン自己ベスト',
+          '道場破り自己ベスト',
           style: notoSansJp(
             fontSize: 10,
             color: scheme.onSurfaceVariant,
@@ -542,7 +713,7 @@ class _StatsRow extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: _StatBox(
-            label: '直近マラソン',
+            label: '直近道場破り',
             value: hasMarathon
                 ? '${snap.lastMarathonScore}/${snap.lastMarathonTotal}'
                 : '—',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../data/ad_service.dart';
 import '../data/audio_service.dart';
 import '../data/quiz_session.dart';
 import '../data/score_service.dart';
@@ -54,6 +55,8 @@ class _RoundScreenState extends State<RoundScreen> {
       ),
     );
     await _load();
+    // Show an interstitial every few rounds. Safe no-op on web.
+    await AdService.instance.maybeShowAfterRound(frequency: 3);
   }
 
   @override

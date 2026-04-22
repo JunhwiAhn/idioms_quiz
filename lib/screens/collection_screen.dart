@@ -4,7 +4,9 @@ import '../data/score_service.dart' show kMasteryThreshold;
 import '../theme/app_theme.dart';
 import '../models/idiom.dart';
 
-class CollectionScreen extends StatelessWidget {
+enum _Filter { all, mastered, locked }
+
+class CollectionScreen extends StatefulWidget {
   final List<Idiom> idioms;
   final Set<String> mastered;
   final Map<String, int> correctCounts;
@@ -17,21 +19,96 @@ class CollectionScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final sorted = [...idioms]
+  State<CollectionScreen> createState() => _CollectionScreenState();
+}
+
+class _CollectionScreenState extends State<CollectionScreen> {
+  late final List<Idiom> _sorted;
+  final _searchCtrl = TextEditingController();
+  final _scrollCtrl = ScrollController();
+  String _query = '';
+  _Filter _filter = _Filter.all;
+  bool _showToTop = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sorted = [...widget.idioms]
       ..sort((a, b) {
-        final am = mastered.contains(a.idiom);
-        final bm = mastered.contains(b.idiom);
+        final am = widget.mastered.contains(a.idiom);
+        final bm = widget.mastered.contains(b.idiom);
         if (am != bm) return am ? -1 : 1;
         final d = a.difficulty.compareTo(b.difficulty);
         if (d != 0) return d;
         return a.reading.compareTo(b.reading);
       });
+    _scrollCtrl.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final show = _scrollCtrl.hasClients && _scrollCtrl.offset > 400;
+    if (show != _showToTop) {
+      setState(() => _showToTop = show);
+    }
+  }
+
+  Future<void> _scrollToTop() async {
+    if (!_scrollCtrl.hasClients) return;
+    await _scrollCtrl.animateTo(
+      0,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.removeListener(_onScroll);
+    _scrollCtrl.dispose();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<Idiom> get _visible {
+    final q = _query.trim();
+    return _sorted.where((idiom) {
+      if (_filter == _Filter.mastered &&
+          !widget.mastered.contains(idiom.idiom)) {
+        return false;
+      }
+      if (_filter == _Filter.locked &&
+          widget.mastered.contains(idiom.idiom)) {
+        return false;
+      }
+      if (q.isEmpty) return true;
+      return idiom.idiom.contains(q) ||
+          idiom.reading.contains(q) ||
+          idiom.meaning.contains(q);
+    }).toList(growable: false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final visible = _visible;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('図鑑 ${mastered.length}/${idioms.length}'),
+        title: Text('図鑑 ${widget.mastered.length}/${widget.idioms.length}'),
+      ),
+      floatingActionButton: AnimatedSlide(
+        duration: const Duration(milliseconds: 200),
+        offset: _showToTop ? Offset.zero : const Offset(0, 2),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          opacity: _showToTop ? 1 : 0,
+          child: FloatingActionButton.small(
+            heroTag: 'collection-to-top',
+            tooltip: '一番上へ',
+            onPressed: _showToTop ? _scrollToTop : null,
+            child: const Icon(Icons.keyboard_arrow_up_rounded),
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -63,36 +140,180 @@ class CollectionScreen extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisExtent: 140,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+            child: TextField(
+              controller: _searchCtrl,
+              textInputAction: TextInputAction.search,
+              style: notoSansJp(fontSize: 14, color: scheme.onSurface),
+              decoration: InputDecoration(
+                hintText: '四字熟語・読み・意味で検索',
+                hintStyle: notoSansJp(
+                  fontSize: 13,
+                  color: scheme.onSurfaceVariant,
+                ),
+                prefixIcon: Icon(Icons.search_rounded,
+                    color: scheme.onSurfaceVariant),
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.close_rounded),
+                        tooltip: 'クリア',
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() => _query = '');
+                        },
+                      ),
+                isDense: true,
+                filled: true,
+                fillColor: scheme.surfaceContainerHighest,
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
               ),
-              itemCount: sorted.length,
-              itemBuilder: (context, i) {
-                final idiom = sorted[i];
-                final isMastered = mastered.contains(idiom.idiom);
-                final count = correctCounts[idiom.idiom] ?? 0;
-                return _CollectionCard(
-                  idiom: idiom,
-                  mastered: isMastered,
-                  correctCount: count,
-                  onTap: () => showModalBottomSheet<void>(
-                    context: context,
-                    showDragHandle: true,
-                    backgroundColor: scheme.surface,
-                    builder: (_) => _IdiomSheet(
-                      idiom: idiom,
-                      mastered: isMastered,
-                      correctCount: count,
+              onChanged: (v) => setState(() => _query = v),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+            child: Row(
+              children: [
+                _FilterChip(
+                  label: '全て',
+                  selected: _filter == _Filter.all,
+                  onTap: () => setState(() => _filter = _Filter.all),
+                ),
+                const SizedBox(width: 6),
+                _FilterChip(
+                  label: '獲得済み',
+                  selected: _filter == _Filter.mastered,
+                  onTap: () => setState(() => _filter = _Filter.mastered),
+                ),
+                const SizedBox(width: 6),
+                _FilterChip(
+                  label: '未獲得',
+                  selected: _filter == _Filter.locked,
+                  onTap: () => setState(() => _filter = _Filter.locked),
+                ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Text(
+                    '${visible.length}件',
+                    style: notoSansJp(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: scheme.onSurfaceVariant,
                     ),
                   ),
-                );
-              },
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: visible.isEmpty
+                ? _EmptyState(query: _query)
+                : GridView.builder(
+                    controller: _scrollCtrl,
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 80),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisExtent: 140,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    cacheExtent: 600,
+                    itemCount: visible.length,
+                    itemBuilder: (context, i) {
+                      final idiom = visible[i];
+                      final isMastered =
+                          widget.mastered.contains(idiom.idiom);
+                      final count =
+                          widget.correctCounts[idiom.idiom] ?? 0;
+                      return _CollectionCard(
+                        key: ValueKey(idiom.idiom),
+                        idiom: idiom,
+                        mastered: isMastered,
+                        correctCount: count,
+                        onTap: () => showModalBottomSheet<void>(
+                          context: context,
+                          showDragHandle: true,
+                          backgroundColor: scheme.surface,
+                          builder: (_) => _IdiomSheet(
+                            idiom: idiom,
+                            mastered: isMastered,
+                            correctCount: count,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: selected ? scheme.primary : scheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onTap,
+        child: Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Text(
+            label,
+            style: notoSansJp(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final String query;
+  const _EmptyState({required this.query});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.search_off_rounded,
+              size: 48, color: scheme.onSurfaceVariant),
+          const SizedBox(height: 10),
+          Text(
+            query.trim().isEmpty ? '該当する熟語がありません' : '「$query」に一致する熟語はありません',
+            style: notoSansJp(
+              fontSize: 13,
+              color: scheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -108,6 +329,7 @@ class _CollectionCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const _CollectionCard({
+    super.key,
     required this.idiom,
     required this.mastered,
     required this.correctCount,
@@ -117,146 +339,148 @@ class _CollectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: mastered
-                ? LinearGradient(
-                    colors: [scheme.primary, scheme.tertiary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
-            color: mastered ? null : scheme.surface,
-            border: mastered
-                ? null
-                : Border.all(
-                    color: scheme.outlineVariant,
-                    width: 1,
-                  ),
-            boxShadow: mastered
-                ? [
-                    BoxShadow(
-                      color: scheme.primary.withValues(alpha: 0.25),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+    return RepaintBoundary(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: mastered
+                  ? LinearGradient(
+                      colors: [scheme.primary, scheme.tertiary],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null,
+              color: mastered ? null : scheme.surface,
+              border: mastered
+                  ? null
+                  : Border.all(
+                      color: scheme.outlineVariant,
+                      width: 1,
                     ),
-                  ]
-                : null,
-          ),
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      idiom.idiom,
-                      style: notoSerifJp(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 4,
-                        color: mastered
-                            ? scheme.onPrimary
-                            : scheme.onSurface
-                                .withValues(alpha: 0.55),
+              boxShadow: mastered
+                  ? [
+                      BoxShadow(
+                        color: scheme.primary.withValues(alpha: 0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      idiom.reading,
-                      style: notoSansJp(
-                        fontSize: 12,
-                        color: mastered
-                            ? scheme.onPrimary.withValues(alpha: 0.85)
-                            : scheme.onSurfaceVariant
-                                .withValues(alpha: 0.7),
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (mastered)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: scheme.onPrimary.withValues(alpha: 0.22),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check_rounded,
-                            size: 12, color: scheme.onPrimary),
-                        const SizedBox(width: 2),
-                        Text(
-                          '獲得済み',
-                          style: notoSansJp(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: scheme.onPrimary,
-                          ),
+                    ]
+                  : null,
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        idiom.idiom,
+                        style: notoSerifJp(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 4,
+                          color: mastered
+                              ? scheme.onPrimary
+                              : scheme.onSurface
+                                  .withValues(alpha: 0.55),
                         ),
-                      ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        idiom.reading,
+                        style: notoSansJp(
+                          fontSize: 12,
+                          color: mastered
+                              ? scheme.onPrimary.withValues(alpha: 0.85)
+                              : scheme.onSurfaceVariant
+                                  .withValues(alpha: 0.7),
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (mastered)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: scheme.onPrimary.withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_rounded,
+                              size: 12, color: scheme.onPrimary),
+                          const SizedBox(width: 2),
+                          Text(
+                            '獲得済み',
+                            style: notoSansJp(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: scheme.onPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '$correctCount / $kMasteryThreshold',
+                        style: notoSansJp(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                   ),
-                )
-              else
                 Positioned(
-                  top: 8,
-                  right: 8,
+                  bottom: 6,
+                  left: 8,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest,
+                      color: (mastered ? scheme.onPrimary : scheme.primary)
+                          .withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      '$correctCount / $kMasteryThreshold',
+                      'Lv${idiom.difficulty}',
                       style: notoSansJp(
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
-                        color: scheme.onSurfaceVariant,
+                        color: mastered ? scheme.onPrimary : scheme.primary,
                       ),
                     ),
                   ),
                 ),
-              Positioned(
-                bottom: 6,
-                left: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: (mastered ? scheme.onPrimary : scheme.primary)
-                        .withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    'Lv${idiom.difficulty}',
-                    style: notoSansJp(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      color: mastered ? scheme.onPrimary : scheme.primary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -371,6 +595,8 @@ class _IdiomSheet extends StatelessWidget {
                   child: Image.asset(
                     IdiomImageRegistry.instance.pathFor(idiom.idiom)!,
                     fit: BoxFit.cover,
+                    cacheWidth: 360,
+                    cacheHeight: 360,
                     errorBuilder: (_, _, _) => const SizedBox.shrink(),
                   ),
                 ),

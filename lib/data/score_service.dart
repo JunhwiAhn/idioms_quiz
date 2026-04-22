@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'rank.dart';
 
@@ -319,6 +320,16 @@ class ScoreService {
       roundStageIndex: roundStageIndex,
       roundRoundIndex: roundRoundIndex,
     );
+  }
+
+  /// Grants a single hint of a random kind. Returns the kind that was given.
+  Future<HintKind> grantRandomHint() async {
+    final kinds = HintKind.values;
+    final kind = kinds[Random().nextInt(kinds.length)];
+    final prefs = await SharedPreferences.getInstance();
+    final cur = prefs.getInt(_hintKey(kind)) ?? 0;
+    await prefs.setInt(_hintKey(kind), cur + 1);
+    return kind;
   }
 
   Future<bool> consumeHint(HintKind kind) async {

@@ -39,6 +39,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
   void _accept(int r, int c, int slot) {
     if (_revealed) return;
     setState(() {
+      // If this slot is already placed in another cell, clear that cell
+      // first so the kanji effectively moves.
+      _filled.removeWhere((_, v) => v == slot);
       _filled[_k(r, c)] = slot;
     });
   }
@@ -47,6 +50,13 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
     if (_revealed) return;
     setState(() {
       _filled.remove(_k(r, c));
+    });
+  }
+
+  void _removeSlot(int slot) {
+    if (_revealed) return;
+    setState(() {
+      _filled.removeWhere((_, v) => v == slot);
     });
   }
 
@@ -108,6 +118,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
                 revealed: _revealed,
                 onAccept: _accept,
                 onTapClear: _clearCell,
+                onDragRemove: _clearCell,
               ),
             ),
             const SizedBox(height: 18),
@@ -120,19 +131,43 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (int i = 0; i < _p.pool.length; i++)
-                  _PoolDraggable(
-                    kanji: _p.pool[i],
-                    slot: i,
-                    used: _usedSlots.contains(i),
-                    disabled: _revealed,
+            DragTarget<int>(
+              onWillAcceptWithDetails: (d) =>
+                  !_revealed && _usedSlots.contains(d.data),
+              onAcceptWithDetails: (d) => _removeSlot(d.data),
+              builder: (context, candidate, rejected) {
+                final highlight = candidate.isNotEmpty;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: highlight
+                        ? scheme.primaryContainer.withValues(alpha: 0.3)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: highlight
+                          ? scheme.primary
+                          : Colors.transparent,
+                      width: 1.5,
+                    ),
                   ),
-              ],
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (int i = 0; i < _p.pool.length; i++)
+                        _PoolDraggable(
+                          kanji: _p.pool[i],
+                          slot: i,
+                          used: _usedSlots.contains(i),
+                          disabled: _revealed,
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 24),
             if (_revealed)
@@ -209,6 +244,7 @@ class _Grid extends StatelessWidget {
   final bool revealed;
   final void Function(int r, int c, int slot) onAccept;
   final void Function(int r, int c) onTapClear;
+  final void Function(int r, int c) onDragRemove;
 
   const _Grid({
     required this.puzzle,
@@ -216,6 +252,7 @@ class _Grid extends StatelessWidget {
     required this.revealed,
     required this.onAccept,
     required this.onTapClear,
+    required this.onDragRemove,
   });
 
   @override
@@ -245,6 +282,7 @@ class _Grid extends StatelessWidget {
                       revealed: revealed,
                       onAccept: (slot) => onAccept(r, c, slot),
                       onTapClear: () => onTapClear(r, c),
+                      onDragRemove: () => onDragRemove(r, c),
                     ),
                   ],
                 ],
@@ -266,6 +304,7 @@ class _Cell extends StatefulWidget {
   final bool revealed;
   final void Function(int slot) onAccept;
   final VoidCallback onTapClear;
+  final VoidCallback onDragRemove;
 
   const _Cell({
     required this.size,
@@ -276,6 +315,7 @@ class _Cell extends StatefulWidget {
     required this.revealed,
     required this.onAccept,
     required this.onTapClear,
+    required this.onDragRemove,
   });
 
   @override
@@ -330,28 +370,58 @@ class _CellState extends State<_Cell> {
         widget.onAccept(d.data);
       },
       builder: (context, candidate, rejected) {
+        final cellBox = Container(
+          width: widget.size,
+          height: widget.size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: border, width: borderWidth),
+          ),
+          child: Text(
+            kanji ?? '',
+            style: notoSerifJp(
+              fontSize: 30,
+              fontWeight: FontWeight.w800,
+              color: textColor,
+            ),
+          ),
+        );
+
+        Widget inner = cellBox;
+        if (slot != null && !widget.revealed) {
+          inner = Draggable<int>(
+            data: slot,
+            dragAnchorStrategy: pointerDragAnchorStrategy,
+            feedback: Material(
+              color: Colors.transparent,
+              child: Transform.translate(
+                offset: const Offset(-24, -27),
+                child: _PoolChip(
+                  kanji: kanji ?? '',
+                  used: false,
+                  disabled: false,
+                  dragging: true,
+                ),
+              ),
+            ),
+            childWhenDragging: Opacity(
+              opacity: 0.35,
+              child: cellBox,
+            ),
+            onDraggableCanceled: (_, _) {
+              widget.onDragRemove();
+            },
+            child: cellBox,
+          );
+        }
+
         return GestureDetector(
           onTap: kanji != null && !widget.revealed
               ? widget.onTapClear
               : null,
-          child: Container(
-            width: widget.size,
-            height: widget.size,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: bg,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: border, width: borderWidth),
-            ),
-            child: Text(
-              kanji ?? '',
-              style: notoSerifJp(
-                fontSize: 30,
-                fontWeight: FontWeight.w800,
-                color: textColor,
-              ),
-            ),
-          ),
+          child: inner,
         );
       },
     );
