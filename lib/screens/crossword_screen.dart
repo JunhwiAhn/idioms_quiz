@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../data/audio_service.dart';
+import '../data/app_text.dart';
 import '../data/crossword.dart';
+import '../models/idiom.dart';
 import '../theme/app_theme.dart';
 
 const int kCrosswordPuzzlesPerSession = 5;
 
 class CrosswordScreen extends StatefulWidget {
   final CrosswordBank bank;
-  const CrosswordScreen({super.key, required this.bank});
+  final StudyLanguage language;
+  const CrosswordScreen({
+    super.key,
+    required this.bank,
+    required this.language,
+  });
 
   @override
   State<CrosswordScreen> createState() => _CrosswordScreenState();
@@ -62,6 +69,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   bool get _allFilled {
     for (final cell in _p.activeCells) {
+      if (_p.isSharedCell(cell.$1, cell.$2)) continue;
       if (_filled[_k(cell.$1, cell.$2)] == null) return false;
     }
     return true;
@@ -69,6 +77,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   bool get _isCorrect {
     for (final cell in _p.activeCells) {
+      if (_p.isSharedCell(cell.$1, cell.$2)) continue;
       final slot = _filled[_k(cell.$1, cell.$2)];
       if (slot == null) return false;
       if (_p.pool[slot] != _p.expectedAt(cell.$1, cell.$2)) return false;
@@ -98,18 +107,25 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final text = AppText(widget.language);
     return Scaffold(
       appBar: AppBar(
-        title: Text('クロスワード ${_index + 1} / $_total'),
+        title: Text(text.crosswordCounter(_index + 1, _total)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _ClueLine(label: 'よこ', meaning: _p.horizontal.meaning),
+            _ClueLine(
+              label: text.horizontal,
+              meaning: _p.horizontal.meaningFor(widget.language),
+            ),
             const SizedBox(height: 6),
-            _ClueLine(label: 'たて', meaning: _p.vertical.meaning),
+            _ClueLine(
+              label: text.vertical,
+              meaning: _p.vertical.meaningFor(widget.language),
+            ),
             const SizedBox(height: 18),
             Center(
               child: _Grid(
@@ -123,7 +139,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
             ),
             const SizedBox(height: 18),
             Text(
-              '下の漢字を空きマスへドラッグ&ドロップ (マスをタップで戻す)',
+              text.dragLetters,
               textAlign: TextAlign.center,
               style: notoSansJp(
                 fontSize: 12,
@@ -171,7 +187,11 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
             ),
             const SizedBox(height: 24),
             if (_revealed)
-              _ResultBanner(correct: _isCorrect, puzzle: _p)
+              _ResultBanner(
+                correct: _isCorrect,
+                puzzle: _p,
+                text: text,
+              )
                   .animate()
                   .fadeIn(duration: 250.ms),
             if (_revealed) const SizedBox(height: 12),
@@ -184,8 +204,8 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
               ),
               child: Text(
                 _revealed
-                    ? (_index >= _total - 1 ? '終了' : '次へ')
-                    : (_allFilled ? '答え合わせ' : 'すべて埋めよう'),
+                    ? (_index >= _total - 1 ? text.finish : text.next)
+                    : (_allFilled ? text.checkAnswer : text.fillAll),
               ),
             ),
           ],
@@ -335,7 +355,12 @@ class _CellState extends State<_Cell> {
     }
 
     final slot = widget.filledSlot;
-    final kanji = slot == null ? null : widget.puzzle.pool[slot];
+    final fixed = widget.puzzle.isSharedCell(widget.r, widget.c);
+    final kanji = fixed
+        ? widget.puzzle.sharedChar
+        : slot == null
+            ? null
+            : widget.puzzle.pool[slot];
 
     Color bg = scheme.surface;
     Color border = scheme.outlineVariant;
@@ -350,6 +375,11 @@ class _CellState extends State<_Cell> {
       border = correct ? AppTheme.correctBorder : scheme.error;
       textColor =
           correct ? AppTheme.correctFg : scheme.onErrorContainer;
+    } else if (fixed) {
+      bg = scheme.primaryContainer;
+      border = scheme.primary;
+      textColor = scheme.onPrimaryContainer;
+      borderWidth = 1.8;
     } else if (_hovering) {
       bg = scheme.primaryContainer.withValues(alpha: 0.4);
       border = scheme.primary;
@@ -360,7 +390,7 @@ class _CellState extends State<_Cell> {
 
     return DragTarget<int>(
       onWillAcceptWithDetails: (_) {
-        if (widget.revealed) return false;
+        if (widget.revealed || fixed) return false;
         setState(() => _hovering = true);
         return true;
       },
@@ -390,7 +420,7 @@ class _CellState extends State<_Cell> {
         );
 
         Widget inner = cellBox;
-        if (slot != null && !widget.revealed) {
+        if (slot != null && !widget.revealed && !fixed) {
           inner = Draggable<int>(
             data: slot,
             dragAnchorStrategy: pointerDragAnchorStrategy,
@@ -418,7 +448,7 @@ class _CellState extends State<_Cell> {
         }
 
         return GestureDetector(
-          onTap: kanji != null && !widget.revealed
+          onTap: kanji != null && !widget.revealed && !fixed
               ? widget.onTapClear
               : null,
           child: inner,
@@ -535,7 +565,12 @@ class _PoolChip extends StatelessWidget {
 class _ResultBanner extends StatelessWidget {
   final bool correct;
   final CrosswordPuzzle puzzle;
-  const _ResultBanner({required this.correct, required this.puzzle});
+  final AppText text;
+  const _ResultBanner({
+    required this.correct,
+    required this.puzzle,
+    required this.text,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -562,7 +597,7 @@ class _ResultBanner extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                correct ? '正解!' : '不正解',
+                correct ? text.correct : text.incorrect,
                 style: notoSerifJp(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -575,7 +610,7 @@ class _ResultBanner extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'よこ: ${puzzle.horizontal.idiom} (${puzzle.horizontal.reading})',
+            '${text.horizontal}: ${puzzle.horizontal.idiom} (${puzzle.horizontal.reading})',
             style: notoSansJp(
               fontSize: 13,
               color: correct
@@ -584,7 +619,7 @@ class _ResultBanner extends StatelessWidget {
             ),
           ),
           Text(
-            'たて: ${puzzle.vertical.idiom} (${puzzle.vertical.reading})',
+            '${text.vertical}: ${puzzle.vertical.idiom} (${puzzle.vertical.reading})',
             style: notoSansJp(
               fontSize: 13,
               color: correct

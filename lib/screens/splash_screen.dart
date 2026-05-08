@@ -77,22 +77,20 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  '四字熟語道場',
+                  'Español Dojo',
                   style: notoSerifJp(
                     fontSize: 32,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 6,
                     color: scheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '一日一語、段位を極めよ',
+                  'Una palabra al día',
                   style: notoSansJp(
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
                     color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
-                    letterSpacing: 2,
                   ),
                 ),
               ],

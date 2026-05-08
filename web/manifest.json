@@ -1,11 +1,11 @@
 {
-    "name": "四字熟語道場",
-    "short_name": "四字熟語道場",
+    "name": "Español Dojo",
+    "short_name": "Español Dojo",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FAF6F2",
-    "theme_color": "#B03A2E",
-    "description": "400問の四字熟語を段位で鍛えるクイズアプリ。",
+    "background_color": "#FFF8EF",
+    "theme_color": "#C44D2D",
+    "description": "DELE語彙をゲーム感覚で鍛えるスペイン語学習アプリ。",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -1,33 +1,33 @@
 import '../models/idiom.dart';
 
 const _morning = <String>[
-  'おはようございます。',
-  'おはよう。',
-  'おはようございます!',
+  'Buenos días.',
+  'Ready for today.',
+  'Start with one word.',
 ];
 
 const _noon = <String>[
-  'こんにちは。',
-  'こんにちは!',
-  'どうも、こんにちは。',
+  'Buen día.',
+  'Keep practicing.',
+  'One word at a time.',
 ];
 
 const _afternoon = <String>[
-  'こんにちは。',
-  'どうも。',
-  'こんにちは!',
+  'Buena tarde.',
+  'Small practice, real progress.',
+  'Review and move on.',
 ];
 
 const _evening = <String>[
-  'こんばんは。',
-  'こんばんは!',
-  'どうも、こんばんは。',
+  'Buenas tardes.',
+  'Finish with one more word.',
+  'A short review helps.',
 ];
 
 const _late = <String>[
-  'こんばんは。',
-  'こんばんは!',
-  'どうも。',
+  'Buenas noches.',
+  'Quiet review time.',
+  'One last word.',
 ];
 
 int _daySeed(DateTime now) =>

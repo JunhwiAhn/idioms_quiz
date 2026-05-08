@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../data/app_text.dart';
 import '../theme/app_theme.dart';
 import '../data/ad_service.dart';
 import '../data/audio_service.dart';
@@ -34,6 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
   StagePlan? _plan;
   CrosswordBank? _crossword;
   bool _muted = AudioService.instance.muted;
+  StudyLanguage _language = StudyLanguage.ko;
+  bool _languageDialogShown = false;
 
   @override
   void initState() {
@@ -47,13 +50,76 @@ class _HomeScreenState extends State<HomeScreen> {
     await _scoreService.grantStarterPackOnce();
     final idioms = await _repo.loadAll();
     final snap = await _scoreService.snapshot();
+    final language = await _scoreService.studyLanguage();
+    final hasLanguage = await _scoreService.hasStudyLanguage();
     if (!mounted) return;
     setState(() {
       _idioms = idioms;
       _snap = snap;
+      _language = language;
       _plan = StagePlan.build(idioms);
       _crossword ??= CrosswordBank.build(idioms);
     });
+    if (!hasLanguage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_languageDialogShown) _showLanguageDialog();
+      });
+    }
+  }
+
+  Future<void> _setLanguage(StudyLanguage language) async {
+    await _scoreService.setStudyLanguage(language);
+    if (!mounted) return;
+    setState(() => _language = language);
+  }
+
+  Future<void> _showLanguageDialog() async {
+    _languageDialogShown = true;
+    var selected = _language;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            final text = AppText(selected);
+            return AlertDialog(
+              title: Text(text.chooseLanguageTitle),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(text.chooseLanguageBody),
+                  const SizedBox(height: 12),
+                  for (final language in StudyLanguage.values)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        selected == language
+                            ? Icons.radio_button_checked_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                      ),
+                      title: Text(language.label),
+                      onTap: () {
+                        setDialogState(() => selected = language);
+                      },
+                    ),
+                ],
+              ),
+              actions: [
+                FilledButton(
+                  onPressed: () async {
+                    await _setLanguage(selected);
+                    if (ctx.mounted) Navigator.of(ctx).pop();
+                  },
+                  child: Text(text.start),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _toggleMute() async {
@@ -67,7 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final idioms = _idioms;
     final snap = _snap;
     if (idioms == null || snap == null) return;
-    final session = QuizSession.build(idioms, count: questionCount);
+    final session =
+        QuizSession.build(idioms, count: questionCount, language: _language);
     AudioService.instance.playSfx(Sfx.modeStart, multiplier: 2.0);
     // Interstitial every few mode-starts (shares counter with round-end).
     await AdService.instance.maybeShowAfterRound(frequency: 3);
@@ -99,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => CrosswordScreen(bank: bank),
+        builder: (_) => CrosswordScreen(bank: bank, language: _language),
       ),
     );
     await AudioService.instance.stopBgm();
@@ -115,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => StageScreen(plan: plan),
+        builder: (_) => StageScreen(plan: plan, language: _language),
       ),
     );
     if (!mounted) return;
@@ -129,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final ok = await launchUrl(url, mode: LaunchMode.externalApplication);
     if (!ok && ctx.mounted) {
       ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(content: Text('フォームを開けませんでした')),
+        const SnackBar(content: Text('Could not open the feedback form.')),
       );
     }
   }
@@ -151,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '四字熟語道場',
+                    'Español Dojo',
                     style: notoSerifJp(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -160,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'バージョン: 1.0.0',
+                    'Version: 1.0.0',
                     style: notoSansJp(
                       fontSize: 11,
                       color: s.onSurfaceVariant,
@@ -170,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Divider(color: s.outlineVariant),
                   const SizedBox(height: 12),
                   Text(
-                    'データの保存について',
+                    'Data storage',
                     style: notoSerifJp(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -179,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'クイズの進捗・獲得した四字熟語・設定などは、すべてご利用の端末内にのみ保存されます。外部サーバーへの送信はありません。アプリをアンインストールすると全てのデータが削除されます。',
+                    'Quiz progress, mastered words, items, and language settings are stored only on this device. No study data is sent to an external server. Uninstalling the app deletes the local data.',
                     style: notoSansJp(
                       fontSize: 12,
                       height: 1.5,
@@ -202,7 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'ご意見・お問い合わせ',
+                              'Feedback',
                               style: notoSerifJp(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w800,
@@ -221,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Divider(color: s.outlineVariant),
                   const SizedBox(height: 12),
                   Text(
-                    'ライセンス',
+                    'Licenses',
                     style: notoSerifJp(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -236,14 +303,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.of(ctx).pop();
                         showLicensePage(
                           context: context,
-                          applicationName: '四字熟語道場',
+                          applicationName: 'Español Dojo',
                           applicationVersion: '1.0.0',
                         );
                       },
                       icon: Icon(Icons.description_outlined,
                           size: 16, color: s.primary),
                       label: Text(
-                        'オープンソースライセンスを表示',
+                        'Open source licenses',
                         style: notoSansJp(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -258,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: FilledButton(
                       onPressed: () => Navigator.of(ctx).pop(),
                       child: Text(
-                        '閉じる',
+                        'Close',
                         style: notoSerifJp(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -284,6 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(
         builder: (_) => CollectionScreen(
           idioms: idioms,
+          language: _language,
           mastered: snap.mastered,
           correctCounts: snap.correctCounts,
         ),
@@ -295,6 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final idioms = _idioms;
     final snap = _snap;
+    final text = AppText(_language);
 
     return Scaffold(
       appBar: AppBar(
@@ -316,23 +385,36 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        title: const Text('四字熟語道場'),
+        title: const Text('Español Dojo'),
         actions: [
+          PopupMenuButton<StudyLanguage>(
+            tooltip: 'Language',
+            icon: const Icon(Icons.language_rounded),
+            initialValue: _language,
+            onSelected: _setLanguage,
+            itemBuilder: (context) => [
+              for (final language in StudyLanguage.values)
+                PopupMenuItem(
+                  value: language,
+                  child: Text(language.label),
+                ),
+            ],
+          ),
           IconButton(
             icon: Icon(_muted
                 ? Icons.volume_off_rounded
                 : Icons.volume_up_rounded),
-            tooltip: _muted ? 'ミュート解除' : 'ミュート',
+            tooltip: _muted ? 'Unmute' : 'Mute',
             onPressed: _toggleMute,
           ),
           IconButton(
             icon: const Icon(Icons.info_outline_rounded),
-            tooltip: 'アプリ情報',
+            tooltip: 'App info',
             onPressed: _openAppInfoSheet,
           ),
           IconButton(
             icon: const Icon(Icons.collections_bookmark_rounded),
-            tooltip: '図鑑',
+            tooltip: 'Wordbook',
             onPressed: idioms == null ? null : _openCollection,
           ),
         ],
@@ -345,7 +427,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _DailyStrip(idioms: idioms),
+                    _DailyStrip(
+                      idioms: idioms,
+                      language: _language,
+                      text: text,
+                    ),
                     const SizedBox(height: 12),
                     _RankCard(snap: snap)
                         .animate()
@@ -358,8 +444,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                     const SizedBox(height: 18),
                     _PlayModeTile(
-                      title: 'ステージ',
-                      subtitle: '5 ステージ × 8 ラウンド。星を集めよう。',
+                      title: text.stage,
+                      subtitle: text.stageSubtitle,
                       icon: Icons.stars_rounded,
                       gradient: [
                         Theme.of(context).colorScheme.primary,
@@ -369,8 +455,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 12),
                     _PlayModeTile(
-                      title: '道場破り',
-                      subtitle: '50問に挑戦して、自分の実力を測ってみよう!',
+                      title: text.marathon,
+                      subtitle: text.marathonSubtitle,
                       icon: Icons.emoji_events_rounded,
                       gradient: [
                         const Color(0xFFC46A2E),
@@ -380,8 +466,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 12),
                     _PlayModeTile(
-                      title: 'クロスワード',
-                      subtitle: '2つの熟語が漢字を共有。空きマスを埋めよう。',
+                      title: text.crossword,
+                      subtitle: text.crosswordSubtitle,
                       icon: Icons.grid_on_rounded,
                       gradient: [
                         const Color(0xFF4A6FA5),
@@ -390,7 +476,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: _openCrossword,
                     ),
                     const SizedBox(height: 24),
-                    _StatsRow(snap: snap, total: idioms.length),
+                    _StatsRow(
+                      snap: snap,
+                      total: idioms.length,
+                      text: text,
+                    ),
                     const SizedBox(height: 20),
                     Center(child: AdService.instance.buildBanner()),
                   ],
@@ -403,7 +493,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _DailyStrip extends StatelessWidget {
   final List<Idiom> idioms;
-  const _DailyStrip({required this.idioms});
+  final StudyLanguage language;
+  final AppText text;
+  const _DailyStrip({
+    required this.idioms,
+    required this.language,
+    required this.text,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -424,7 +520,7 @@ class _DailyStrip extends StatelessWidget {
           Row(
             children: [
               Text(
-                '本日の四字熟語',
+                text.todaysWord,
                 style: notoSansJp(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -441,9 +537,8 @@ class _DailyStrip extends StatelessWidget {
               Text(
                 idiom.idiom,
                 style: notoSerifJp(
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 3,
                   color: scheme.onSurface,
                 ),
               ),
@@ -460,7 +555,7 @@ class _DailyStrip extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            idiom.meaning,
+            idiom.meaningFor(language),
             style: notoSerifJp(
               fontSize: 12,
               height: 1.5,
@@ -546,7 +641,7 @@ class _RankCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                '次Lv +${snap.remainingToNextLevel}問',
+                'Next level +${snap.remainingToNextLevel}',
                 style: notoSansJp(
                   fontSize: 9,
                   color: scheme.onSurfaceVariant,
@@ -555,8 +650,8 @@ class _RankCard extends StatelessWidget {
               const Spacer(),
               Text(
                 next == null
-                    ? '最高段位'
-                    : '次段位 ${next.name} +$toGo問',
+                    ? 'Max rank'
+                    : 'Next rank ${next.name} +$toGo',
                 style: notoSansJp(
                   fontSize: 9,
                   color: scheme.onSurfaceVariant,
@@ -587,7 +682,7 @@ class _LevelBadge extends StatelessWidget {
       textBaseline: TextBaseline.alphabetic,
       children: [
         Text(
-          'Lv.',
+          'Level',
           style: notoSansJp(
             fontSize: 11,
             fontWeight: FontWeight.w700,
@@ -643,9 +738,9 @@ class _InlineHintsCompact extends StatelessWidget {
       children: [
         chip(Icons.filter_alt_rounded, '50:50',
             snap.hints[HintKind.fiftyFifty] ?? 0),
-        chip(Icons.record_voice_over_rounded, '読み',
+        chip(Icons.record_voice_over_rounded, 'Pron.',
             snap.hints[HintKind.reading] ?? 0),
-        chip(Icons.more_time_rounded, '時間+',
+        chip(Icons.more_time_rounded, 'Time+',
             snap.hints[HintKind.time] ?? 0),
       ],
     );
@@ -666,7 +761,7 @@ class _InlineMarathonLine extends StatelessWidget {
             size: 13, color: scheme.onSurfaceVariant),
         const SizedBox(width: 5),
         Text(
-          '道場破り自己ベスト',
+          'Marathon best',
           style: notoSansJp(
             fontSize: 10,
             color: scheme.onSurfaceVariant,
@@ -697,7 +792,12 @@ class _InlineMarathonLine extends StatelessWidget {
 class _StatsRow extends StatelessWidget {
   final ScoreSnapshot snap;
   final int total;
-  const _StatsRow({required this.snap, required this.total});
+  final AppText text;
+  const _StatsRow({
+    required this.snap,
+    required this.total,
+    required this.text,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -706,14 +806,14 @@ class _StatsRow extends StatelessWidget {
       children: [
         Expanded(
           child: _StatBox(
-            label: '正解数',
+            label: text.correctCount,
             value: '${snap.totalCorrect}',
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: _StatBox(
-            label: '直近道場破り',
+            label: text.recentMarathon,
             value: hasMarathon
                 ? '${snap.lastMarathonScore}/${snap.lastMarathonTotal}'
                 : '—',
@@ -722,7 +822,7 @@ class _StatsRow extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: _StatBox(
-            label: '図鑑',
+            label: text.wordbook,
             value: '${snap.mastered.length}/$total',
           ),
         ),
@@ -867,7 +967,7 @@ class _PlayModeTile extends StatelessWidget {
                           size: 16, color: onColor),
                       const SizedBox(width: 2),
                       Text(
-                        'スタート',
+                        'Start',
                         style: notoSerifJp(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
@@ -885,4 +985,3 @@ class _PlayModeTile extends StatelessWidget {
     );
   }
 }
-

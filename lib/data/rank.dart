@@ -12,19 +12,19 @@ class Rank {
 
 /// Ranks are unlocked once total_correct crosses the threshold.
 const ranks = <Rank>[
-  Rank(level: 1, name: '白帯', threshold: 0),
-  Rank(level: 2, name: '青帯', threshold: 10),
-  Rank(level: 3, name: '緑帯', threshold: 30),
-  Rank(level: 4, name: '茶帯', threshold: 60),
-  Rank(level: 5, name: '黒帯', threshold: 100),
-  Rank(level: 6, name: '初段', threshold: 160),
-  Rank(level: 7, name: '二段', threshold: 240),
-  Rank(level: 8, name: '三段', threshold: 340),
-  Rank(level: 9, name: '四段', threshold: 460),
-  Rank(level: 10, name: '五段', threshold: 600),
-  Rank(level: 11, name: '六段', threshold: 760),
-  Rank(level: 12, name: '七段', threshold: 940),
-  Rank(level: 13, name: '名人', threshold: 1200),
+  Rank(level: 1, name: 'Novato', threshold: 0),
+  Rank(level: 2, name: 'Aprendiz', threshold: 10),
+  Rank(level: 3, name: 'Explorador', threshold: 30),
+  Rank(level: 4, name: 'Estudiante', threshold: 60),
+  Rank(level: 5, name: 'Hablante', threshold: 100),
+  Rank(level: 6, name: 'Viajero', threshold: 160),
+  Rank(level: 7, name: 'Conversador', threshold: 240),
+  Rank(level: 8, name: 'Intérprete', threshold: 340),
+  Rank(level: 9, name: 'Lingüista', threshold: 460),
+  Rank(level: 10, name: 'Embajador', threshold: 600),
+  Rank(level: 11, name: 'Maestro', threshold: 760),
+  Rank(level: 12, name: 'Sabio', threshold: 940),
+  Rank(level: 13, name: 'Gran Maestro', threshold: 1200),
 ];
 
 Rank rankFor(int totalCorrect) {

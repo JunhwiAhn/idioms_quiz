@@ -1,14 +1,14 @@
 import 'dart:math';
 import '../models/idiom.dart';
 
-/// A crossword puzzle consisting of two 4-kanji idioms that share exactly
-/// one kanji. Laid out on a 4×4 grid.
+/// A compact crossword puzzle consisting of two 4-letter Spanish words that
+/// share exactly one letter. Laid out on a 4×4 grid.
 class CrosswordPuzzle {
   final Idiom horizontal;
   final Idiom vertical;
-  final int hSharedIndex; // index in horizontal.idiom of shared char (col in grid)
-  final int vSharedIndex; // index in vertical.idiom of shared char (row in grid)
-  final List<String> pool; // kanji choices (shuffled)
+  final int hSharedIndex; // index in horizontal word of shared letter
+  final int vSharedIndex; // index in vertical word of shared letter
+  final List<String> pool; // letter choices for fillable cells (shuffled)
 
   const CrosswordPuzzle({
     required this.horizontal,
@@ -22,13 +22,14 @@ class CrosswordPuzzle {
 
   int get gridRow => vSharedIndex;
   int get gridCol => hSharedIndex;
+  bool isSharedCell(int r, int c) => r == gridRow && c == gridCol;
 
   bool isHorizontalCell(int r, int c) => r == gridRow;
   bool isVerticalCell(int r, int c) => c == gridCol;
   bool isCellActive(int r, int c) =>
       isHorizontalCell(r, c) || isVerticalCell(r, c);
 
-  /// Expected kanji at (r,c). Must be an active cell.
+  /// Expected letter at (r,c). Must be an active cell.
   String expectedAt(int r, int c) {
     if (r == gridRow) return horizontal.idiom[c];
     if (c == gridCol) return vertical.idiom[r];
@@ -46,11 +47,14 @@ class CrosswordPuzzle {
     }
     return cells;
   }
+
+  List<(int, int)> get fillableCells =>
+      activeCells.where((cell) => !isSharedCell(cell.$1, cell.$2)).toList();
 }
 
 class CrosswordBank {
   /// Precomputed list of valid pairs (a, b, hIdx, vIdx) where a and b share
-  /// exactly one kanji character.
+  /// exactly one letter.
   final List<_PairRef> _pairs;
   final List<Idiom> _pool;
   CrosswordBank._(this._pairs, this._pool);
@@ -58,13 +62,15 @@ class CrosswordBank {
   int get pairCount => _pairs.length;
 
   static CrosswordBank build(List<Idiom> pool) {
+    final crosswordPool =
+        pool.where((entry) => entry.idiom.split('').length == 4).toList();
     final pairs = <_PairRef>[];
-    for (int i = 0; i < pool.length; i++) {
-      final a = pool[i];
+    for (int i = 0; i < crosswordPool.length; i++) {
+      final a = crosswordPool[i];
       final aChars = a.idiom.split('');
       final aSet = aChars.toSet();
-      for (int j = i + 1; j < pool.length; j++) {
-        final b = pool[j];
+      for (int j = i + 1; j < crosswordPool.length; j++) {
+        final b = crosswordPool[j];
         final bChars = b.idiom.split('');
         final bSet = bChars.toSet();
         final shared = aSet.intersection(bSet);
@@ -75,7 +81,7 @@ class CrosswordBank {
         pairs.add(_PairRef(i, j, aIdx, bIdx));
       }
     }
-    return CrosswordBank._(pairs, pool);
+    return CrosswordBank._(pairs, crosswordPool);
   }
 
   /// Build N random puzzles.
@@ -89,18 +95,25 @@ class CrosswordBank {
   CrosswordPuzzle _buildPuzzle(_PairRef p, Random rng) {
     final h = _pool[p.a];
     final v = _pool[p.b];
-    // Collect the 7 unique chars from both idioms.
-    final uniqueChars = <String>{...h.idiom.split(''), ...v.idiom.split('')};
-    // Two distractor kanji sampled from other idioms, not overlapping the 7.
+    final letters = <String>[];
+    final hChars = h.idiom.split('');
+    final vChars = v.idiom.split('');
+    for (int i = 0; i < hChars.length; i++) {
+      if (i != p.aIdx) letters.add(hChars[i]);
+    }
+    for (int i = 0; i < vChars.length; i++) {
+      if (i != p.bIdx) letters.add(vChars[i]);
+    }
+    // Two distractor letters sampled from other words.
     final distractorPool = <String>{};
     for (final other in _pool) {
       if (other.idiom == h.idiom || other.idiom == v.idiom) continue;
       distractorPool.addAll(other.idiom.split(''));
     }
-    distractorPool.removeAll(uniqueChars);
+    distractorPool.removeAll(letters.toSet());
     final distractorList = distractorPool.toList()..shuffle(rng);
     final distractors = distractorList.take(2).toList();
-    final pool = [...uniqueChars, ...distractors]..shuffle(rng);
+    final pool = [...letters, ...distractors]..shuffle(rng);
     return CrosswordPuzzle(
       horizontal: h,
       vertical: v,

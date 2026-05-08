@@ -8,19 +8,19 @@ const int kTotalPlannedQuestions =
     kStagesCount * kRoundsPerStage * kQuestionsPerRound; // 400
 
 const List<String> kStageTitles = [
-  'ステージ 1 / 入門',
-  'ステージ 2 / 初級',
-  'ステージ 3 / 中級',
-  'ステージ 4 / 上級',
-  'ステージ 5 / 達人',
+  'Etapa 1 / A1',
+  'Etapa 2 / A2',
+  'Etapa 3 / B1',
+  'Etapa 4 / B2',
+  'Etapa 5 / DELE',
 ];
 
 const List<String> kStageSubtitles = [
-  '基礎の四字熟語',
-  '中学〜高校で学ぶ定番',
-  '一般教養レベル',
-  '漢検準1級相当',
-  '漢検1級以上',
+  'Greetings and daily essentials',
+  'Life, travel, and schedule words',
+  'Words for opinions and experience',
+  'Abstract ideas and news vocabulary',
+  'Final review for DELE vocabulary',
 ];
 
 /// Minimum correct answers needed to clear a round. 3 or fewer = fail.
@@ -56,7 +56,7 @@ class StagePlan {
       stageRounds[r.stageIndex][r.roundIndex];
 
   static StagePlan build(List<Idiom> pool) {
-    // Sort by difficulty ascending with a stable fallback on idiom string
+    // Sort by difficulty ascending with a stable fallback on Spanish word
     // so the plan is deterministic across runs.
     final sorted = [...pool]
       ..sort((a, b) {

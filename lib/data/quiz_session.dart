@@ -2,34 +2,33 @@ import 'dart:math';
 import '../models/idiom.dart';
 import 'score_service.dart' show HintKind;
 
-enum QuizMode { normal, fillBlank, noReading, reverseLookup }
+enum QuizMode { translationLookup, wordLookup, sentenceBlank }
 
 extension QuizModeX on QuizMode {
   String get label => switch (this) {
-        QuizMode.normal => 'ふつう',
-        QuizMode.fillBlank => '穴埋め',
-        QuizMode.noReading => '読みなし',
-        QuizMode.reverseLookup => '意味先出し',
+        QuizMode.translationLookup => 'Meaning',
+        QuizMode.wordLookup => 'Word',
+        QuizMode.sentenceBlank => 'Blank',
       };
 
   String get description => switch (this) {
-        QuizMode.normal => '漢字とふりがなを見て意味を選ぶ。',
-        QuizMode.fillBlank => '伏せられた漢字を選ぶ。',
-        QuizMode.noReading => 'ふりがな無し。漢字だけで意味を選ぶ。',
-        QuizMode.reverseLookup => '意味を見て該当する四字熟語を当てる。',
+        QuizMode.translationLookup => 'Choose the translation for the Spanish word.',
+        QuizMode.wordLookup => 'Choose the Spanish word from the translation.',
+        QuizMode.sentenceBlank => 'Fill the blank in the example sentence.',
       };
 }
 
 class QuizQuestion {
   final Idiom idiom;
   final QuizMode mode;
-  final List<int> maskedIndices; // for fillBlank
+  final List<int> maskedIndices; // reserved for future typed blanks
   final List<String> choices;
   final int correctIndex;
 
-  /// For reverseLookup choices carry the *reading* alongside the kanji,
+  /// For word lookup choices carry the pronunciation alongside the Spanish,
   /// looked up from this map to render properly.
   final Map<String, String> readingOf;
+  final StudyLanguage language;
 
   const QuizQuestion({
     required this.idiom,
@@ -38,7 +37,10 @@ class QuizQuestion {
     required this.choices,
     required this.correctIndex,
     required this.readingOf,
+    required this.language,
   });
+
+  String get promptMeaning => idiom.meaningFor(language);
 }
 
 /// Chance of dropping a hint on a correct answer.
@@ -93,6 +95,7 @@ class QuizSession {
     List<Idiom> pool, {
     int count = 10,
     int? seed,
+    StudyLanguage language = StudyLanguage.ko,
   }) {
     final rng = Random(seed);
     final shuffled = [...pool]..shuffle(rng);
@@ -107,7 +110,7 @@ class QuizSession {
       final masked = <int>[];
       final readings = <String, String>{};
 
-      if (mode == QuizMode.reverseLookup) {
+      if (mode == QuizMode.wordLookup) {
         final others = [...pool.where((x) => x.idiom != idiom.idiom)]
           ..shuffle(rng);
         final distractors = others.take(3).toList();
@@ -118,31 +121,19 @@ class QuizSession {
         for (final d in distractors) {
           readings[d.idiom] = d.reading;
         }
-      } else if (mode == QuizMode.fillBlank) {
-        final chars = idiom.idiom.split('');
-        final maskIdx = rng.nextInt(chars.length);
-        masked.add(maskIdx);
-        final correctChar = chars[maskIdx];
-
-        // Pool of distractor kanji sampled from other idioms, minus anything
-        // that already appears in this idiom (so the blank has one obvious
-        // answer, not two plausible ones).
-        final inThis = chars.toSet();
-        final distractorPool = <String>{};
-        for (final other in pool) {
-          if (other.idiom == idiom.idiom) continue;
-          distractorPool.addAll(other.idiom.split(''));
-        }
-        distractorPool.removeAll(inThis);
-        final distractorList = distractorPool.toList()..shuffle(rng);
-        final distractors = distractorList.take(3).toList();
-
-        choices = [correctChar, ...distractors]..shuffle(rng);
-        correctIndex = choices.indexOf(correctChar);
+      } else if (mode == QuizMode.sentenceBlank) {
+        final others = [...pool.where((x) => x.answer != idiom.answer)]
+          ..shuffle(rng);
+        final distractors = others.map((e) => e.answer).take(3).toList();
+        choices = [idiom.answer, ...distractors]..shuffle(rng);
+        correctIndex = choices.indexOf(idiom.answer);
       } else {
-        final opts = [idiom.meaning, ...idiom.wrongChoices]..shuffle(rng);
-        choices = opts;
-        correctIndex = choices.indexOf(idiom.meaning);
+        final others = [...pool.where((x) => x.idiom != idiom.idiom)]
+          ..shuffle(rng);
+        final distractors =
+            others.map((e) => e.meaningFor(language)).take(3).toList();
+        choices = [idiom.meaningFor(language), ...distractors]..shuffle(rng);
+        correctIndex = choices.indexOf(idiom.meaningFor(language));
       }
 
       return QuizQuestion(
@@ -152,6 +143,7 @@ class QuizSession {
         choices: choices,
         correctIndex: correctIndex,
         readingOf: readings,
+        language: language,
       );
     }).toList(growable: false);
 

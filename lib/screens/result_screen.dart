@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_theme.dart';
 import '../data/ad_service.dart';
+import '../data/app_text.dart';
 import '../data/audio_service.dart';
 import '../data/kanken_tier.dart';
 import '../data/score_service.dart';
 import '../data/stage_plan.dart' show kMinCorrectToClear, roundFailed;
+import '../models/idiom.dart';
 
 class ResultScreen extends StatefulWidget {
   final int correct;
@@ -15,6 +17,7 @@ class ResultScreen extends StatefulWidget {
   final int longestStreak;
   final RunOutcome outcome;
   final bool isMarathon;
+  final StudyLanguage language;
 
   const ResultScreen({
     super.key,
@@ -22,6 +25,7 @@ class ResultScreen extends StatefulWidget {
     required this.total,
     required this.longestStreak,
     required this.outcome,
+    required this.language,
     this.isMarathon = false,
   });
 
@@ -81,10 +85,10 @@ class _ResultScreenState extends State<ResultScreen> {
 
   String get _title {
     final rate = widget.total == 0 ? 0.0 : widget.correct / widget.total;
-    if (rate == 1.0) return '完璧です!';
-    if (rate >= 0.8) return 'すばらしい!';
-    if (rate >= 0.5) return 'その調子!';
-    return 'つぎ、がんばろう。';
+    if (rate == 1.0) return 'Perfect!';
+    if (rate >= 0.8) return 'Great work!';
+    if (rate >= 0.5) return 'Keep going!';
+    return 'Try the next run.';
   }
 
   @override
@@ -94,9 +98,10 @@ class _ResultScreenState extends State<ResultScreen> {
     final total = widget.total;
     final longestStreak = widget.longestStreak;
     final outcome = widget.outcome;
+    final text = AppText(widget.language);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('結果')),
+      appBar: AppBar(title: const Text('Result')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -189,22 +194,22 @@ class _ResultScreenState extends State<ResultScreen> {
                     .fadeIn(delay: 450.ms, duration: 400.ms),
               if (outcome.totalDropped > 0) const SizedBox(height: 16),
               _StatRow(
-                label: 'レベル',
-                value: 'Lv. ${outcome.newLevel}',
+                label: 'Level',
+                value: '${outcome.newLevel}',
               ),
-              _StatRow(label: '正解数', value: '$correct / $total'),
-              _StatRow(label: '最長連続正解', value: '$longestStreak'),
+              _StatRow(label: text.correctCount, value: '$correct / $total'),
+              _StatRow(label: 'Best streak', value: '$longestStreak'),
               _StatRow(
-                label: '今回の獲得ポイント',
+                label: 'Run points',
                 value: '+${outcome.earned} pt',
                 highlight: true,
               ),
               _StatRow(
-                label: '累計業績ポイント',
+                label: 'Total points',
                 value: '${outcome.newTotalPoints} pt',
                 highlight: true,
               ),
-              _StatRow(label: '現在の段位', value: outcome.newRank.name),
+              _StatRow(label: 'Current rank', value: outcome.newRank.name),
               const SizedBox(height: 24),
               _RewardedAdButton(),
               const SizedBox(height: 12),
@@ -216,7 +221,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
                 ),
-                child: const Text('ホームへ戻る'),
+                child: const Text('Back home'),
               ),
             ],
           ),
@@ -232,8 +237,8 @@ class _DropsCard extends StatelessWidget {
 
   String _labelFor(HintKind k) => switch (k) {
         HintKind.fiftyFifty => '50:50',
-        HintKind.reading => 'ふりがな',
-        HintKind.time => '時間+',
+        HintKind.reading => 'Pron.',
+        HintKind.time => 'Time+',
       };
 
   IconData _iconFor(HintKind k) => switch (k) {
@@ -264,7 +269,7 @@ class _DropsCard extends StatelessWidget {
                   color: scheme.onTertiaryContainer, size: 20),
               const SizedBox(width: 6),
               Text(
-                'ヒント獲得 ×${outcome.totalDropped}',
+                'Items gained ×${outcome.totalDropped}',
                 style: notoSerifJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -332,7 +337,7 @@ class _LevelUpCard extends StatelessWidget {
               color: scheme.onTertiaryContainer, size: 22),
           const SizedBox(width: 10),
           Text(
-            'レベルアップ!',
+            'Level up!',
             style: notoSerifJp(
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -341,7 +346,7 @@ class _LevelUpCard extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            'Lv.${outcome.previousLevel}',
+            '${outcome.previousLevel}',
             style: notoSerifJp(
               fontSize: 18,
               color: scheme.onTertiaryContainer.withValues(alpha: 0.6),
@@ -353,7 +358,7 @@ class _LevelUpCard extends StatelessWidget {
                 color: scheme.onTertiaryContainer, size: 18),
           ),
           Text(
-            'Lv.${outcome.newLevel}',
+            '${outcome.newLevel}',
             style: notoSerifJp(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -393,7 +398,7 @@ class _RankUpCard extends StatelessWidget {
                   color: scheme.onPrimary, size: 20),
               const SizedBox(width: 6),
               Text(
-                '昇段しました!',
+                'Rank up!',
                 style: notoSansJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -472,7 +477,7 @@ class _RoundStarsCard extends StatelessWidget {
                 color: onGrad, size: 46),
             const SizedBox(height: 8),
             Text(
-              'クリア失敗',
+              'Round failed',
               style: notoSerifJp(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
@@ -481,7 +486,7 @@ class _RoundStarsCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'クリアには $kMinCorrectToClear 問以上の正解が必要です (今回 $correct / $total)',
+              'You need at least $kMinCorrectToClear correct answers to clear this round ($correct / $total).',
               textAlign: TextAlign.center,
               style: notoSansJp(
                 fontSize: 12,
@@ -510,8 +515,8 @@ class _RoundStarsCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               improved
-                  ? (prev == 0 ? 'クリア!' : '自己ベスト更新!')
-                  : '今回: ☆ $stars',
+                  ? (prev == 0 ? 'Cleared!' : 'Best updated!')
+                  : 'This run: ☆ $stars',
               style: notoSerifJp(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
@@ -521,7 +526,7 @@ class _RoundStarsCard extends StatelessWidget {
             if (prev > 0) ...[
               const SizedBox(height: 4),
               Text(
-                '自己ベスト ☆ ${stars > prev ? stars : prev}',
+                'Best ☆ ${stars > prev ? stars : prev}',
                 style: notoSansJp(
                   fontSize: 12,
                   color: onGrad.withValues(alpha: 0.85),
@@ -580,7 +585,7 @@ class _MarathonScoreCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                updated ? '道場破り最高記録 更新!' : '道場破り記録',
+                updated ? 'Marathon best updated!' : 'Marathon record',
                 style: notoSerifJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -638,7 +643,7 @@ class _MarathonScoreCard extends StatelessWidget {
           if (prevHasRecord && !updated) ...[
             const SizedBox(height: 6),
             Text(
-              '自己ベスト: ${outcome.newBestMarathon} / ${outcome.newBestMarathonTotal} (${marathonPercentile(outcome.newBestMarathon, outcome.newBestMarathonTotal)})',
+              'Best: ${outcome.newBestMarathon} / ${outcome.newBestMarathonTotal} (${marathonPercentile(outcome.newBestMarathon, outcome.newBestMarathonTotal)})',
               style: notoSansJp(
                 fontSize: 11,
                 color: scheme.onSurfaceVariant,
@@ -648,7 +653,7 @@ class _MarathonScoreCard extends StatelessWidget {
           if (updated && outcome.previousBestMarathon > 0) ...[
             const SizedBox(height: 6),
             Text(
-              '前回ベスト: ${outcome.previousBestMarathon} / ${outcome.newBestMarathonTotal}',
+              'Previous best: ${outcome.previousBestMarathon} / ${outcome.newBestMarathonTotal}',
               style: notoSansJp(
                 fontSize: 11,
                 color: scheme.onPrimary.withValues(alpha: 0.8),
@@ -691,7 +696,7 @@ class _MarathonTierCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  '推定級',
+                  'Vocabulary tier',
                   style: notoSansJp(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -738,8 +743,8 @@ class _MarathonTierCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             next == null
-                ? 'マスター$masteredCount個 ・ 最高位到達'
-                : 'マスター$masteredCount個 ・ 次は「${next.label}」まであと ${next.min - masteredCount} 個',
+                ? '$masteredCount mastered ・ top tier reached'
+                : '$masteredCount mastered ・ ${next.min - masteredCount} to ${next.label}',
             style: notoSansJp(
               fontSize: 11,
               color: scheme.onSurfaceVariant,
@@ -914,7 +919,7 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
                     ),
                 const SizedBox(height: 12),
                 Text(
-                  'レベルアップ!',
+                  'Level up!',
                   style: notoSerifJp(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
@@ -931,7 +936,7 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      'Lv.${o.previousLevel}',
+                      '${o.previousLevel}',
                       style: notoSerifJp(
                         fontSize: 22,
                         color: scheme.onPrimary.withValues(alpha: 0.6),
@@ -943,7 +948,7 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
                           color: scheme.onPrimary, size: 24),
                     ),
                     Text(
-                      'Lv.${o.newLevel}',
+                      '${o.newLevel}',
                       style: notoSerifJp(
                         fontSize: 40,
                         fontWeight: FontWeight.w800,
@@ -963,7 +968,7 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'おめでとうございます!',
+                  'New level reached!',
                   style: notoSerifJp(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -979,7 +984,7 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
                       backgroundColor: scheme.onPrimary,
                       foregroundColor: scheme.primary,
                     ),
-                    child: const Text('続ける'),
+                    child: const Text('Continue'),
                   ),
                 ),
               ],
@@ -1035,7 +1040,7 @@ class _RewardedAdButtonState extends State<_RewardedAdButton> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '広告を読み込めませんでした。少ししてからもう一度。',
+            'Could not load the ad. Please try again later.',
             style: notoSansJp(fontSize: 12),
           ),
           behavior: SnackBarBehavior.floating,
@@ -1047,8 +1052,8 @@ class _RewardedAdButtonState extends State<_RewardedAdButton> {
     if (!mounted) return;
     final label = switch (kind) {
       HintKind.fiftyFifty => '50:50',
-      HintKind.reading => 'ふりがな',
-      HintKind.time => '時間+',
+      HintKind.reading => 'Pron.',
+      HintKind.time => 'Time+',
     };
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1058,7 +1063,7 @@ class _RewardedAdButtonState extends State<_RewardedAdButton> {
                 color: Colors.white, size: 18),
             const SizedBox(width: 8),
             Text(
-              'ヒント「$label」を獲得!',
+              'Item gained: $label',
               style: notoSansJp(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -1098,7 +1103,7 @@ class _RewardedAdButtonState extends State<_RewardedAdButton> {
             )
           : const Icon(Icons.play_circle_fill_rounded),
       label: Text(
-        _busy ? '広告を読み込み中…' : '動画を見てヒント +1',
+        _busy ? 'Loading ad...' : 'Watch video for item +1',
         style: notoSerifJp(
           fontSize: 14,
           fontWeight: FontWeight.w800,

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'data/audio_service.dart';
-import 'data/idiom_images.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -22,10 +21,7 @@ void main() {
     };
 
     try {
-      await Future.wait([
-        AudioService.instance.load(),
-        IdiomImageRegistry.instance.load(),
-      ]);
+      await AudioService.instance.load();
     } catch (e, st) {
       debugPrint('[bootstrap] asset load failed: $e\n$st');
     }
@@ -42,10 +38,10 @@ class IdiomsQuizApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '四字熟語道場',
+      title: 'Español Dojo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.light,
       home: const SplashScreen(),
     );
   }

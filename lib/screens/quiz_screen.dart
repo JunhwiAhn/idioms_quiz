@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../data/app_text.dart';
 import '../data/audio_service.dart';
-import '../data/idiom_images.dart';
 import '../data/quiz_session.dart';
 import '../data/score_service.dart';
 import '../data/stage_plan.dart' show starsForRound;
@@ -155,6 +155,7 @@ class _QuizScreenState extends State<QuizScreen> {
             total: widget.session.questions.length,
             longestStreak: widget.session.longestStreak,
             outcome: outcome,
+            language: widget.session.questions.first.language,
             isMarathon: widget.isMarathon,
           ),
         ),
@@ -179,10 +180,7 @@ class _QuizScreenState extends State<QuizScreen> {
         return _eliminated.length < 2;
       case HintKind.reading:
         if (_readingRevealed) return false;
-        // Only meaningful when the reading is hidden in the prompt.
-        // reverseLookup shows the meaning + choice readings already, so
-        // the hint adds nothing there.
-        return _q.mode == QuizMode.noReading;
+        return _q.mode != QuizMode.wordLookup;
       case HintKind.time:
         return _secondsLeft < kQuestionSeconds;
     }
@@ -219,10 +217,11 @@ class _QuizScreenState extends State<QuizScreen> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final progress = _index / _total;
+    final text = AppText(_q.language);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('問題 ${_index + 1} / $_total'),
+        title: Text(text.questionCounter(_index + 1, _total)),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () {
@@ -277,10 +276,9 @@ class _QuizScreenState extends State<QuizScreen> {
                   const SizedBox(height: 16),
                   Text(
                     switch (_q.mode) {
-                      QuizMode.reverseLookup =>
-                        'つぎの意味に当てはまる四字熟語は?',
-                      QuizMode.fillBlank => '空白に入る漢字は?',
-                      _ => 'つぎの四字熟語の意味は?',
+                      QuizMode.wordLookup => text.meaningToWord,
+                      QuizMode.sentenceBlank => text.blankQuestion,
+                      QuizMode.translationLookup => text.wordToMeaning,
                     },
                     textAlign: TextAlign.center,
                     style: notoSansJp(
@@ -294,28 +292,11 @@ class _QuizScreenState extends State<QuizScreen> {
                     readingRevealed: _readingRevealed,
                     fullReveal: _revealed,
                   ),
-                  if (IdiomImageRegistry.instance
-                      .has(_q.idiom.idiom)) ...[
-                    const SizedBox(height: 14),
-                    _IdiomImageCard(idiomKanji: _q.idiom.idiom)
-                        .animate(key: ValueKey(_q.idiom.idiom))
-                        .fadeIn(duration: 350.ms)
-                        .scale(
-                          begin: const Offset(0.96, 0.96),
-                          end: const Offset(1, 1),
-                          duration: 350.ms,
-                          curve: Curves.easeOut,
-                        ),
-                  ],
                   if (_revealed) ...[
-                    if (_q.mode == QuizMode.fillBlank ||
-                        _q.mode == QuizMode.reverseLookup ||
-                        _q.mode == QuizMode.noReading) ...[
-                      const SizedBox(height: 14),
-                      _MeaningRevealCard(idiom: _q.idiom)
-                          .animate()
-                          .fadeIn(duration: 300.ms),
-                    ],
+                    const SizedBox(height: 14),
+                    _MeaningRevealCard(question: _q)
+                        .animate()
+                        .fadeIn(duration: 300.ms),
                   ],
                   const SizedBox(height: 24),
                   _HintBar(
@@ -333,46 +314,23 @@ class _QuizScreenState extends State<QuizScreen> {
                         .slideY(begin: -0.2, end: 0, duration: 300.ms),
                   ],
                   const SizedBox(height: 20),
-                  if (_q.mode == QuizMode.fillBlank)
-                    GridView.count(
-                      crossAxisCount: 2,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 8,
-                      crossAxisSpacing: 8,
-                      childAspectRatio: 2.2,
-                      children: [
-                        for (int i = 0; i < _q.choices.length; i++)
-                          if (_shouldShowChoice(i))
-                            _KanjiChoiceTile(
-                              index: i,
-                              char: _q.choices[i],
-                              picked: _picked,
-                              correct: _q.correctIndex,
-                              revealed: _revealed,
-                              eliminated: _eliminated.contains(i),
-                              onTap: () => _pick(i),
-                            ),
-                      ],
-                    )
-                  else
-                    for (int i = 0; i < _q.choices.length; i++)
-                      if (_shouldShowChoice(i))
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: _ChoiceTile(
-                            index: i,
-                            text: _q.choices[i],
-                            subText: _q.mode == QuizMode.reverseLookup
-                                ? _q.readingOf[_q.choices[i]]
-                                : null,
-                            picked: _picked,
-                            correct: _q.correctIndex,
-                            revealed: _revealed,
-                            eliminated: _eliminated.contains(i),
-                            onTap: () => _pick(i),
-                          ),
+                  for (int i = 0; i < _q.choices.length; i++)
+                    if (_shouldShowChoice(i))
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _ChoiceTile(
+                          index: i,
+                          text: _q.choices[i],
+                          subText: _q.mode == QuizMode.wordLookup
+                              ? _q.readingOf[_q.choices[i]]
+                              : null,
+                          picked: _picked,
+                          correct: _q.correctIndex,
+                          revealed: _revealed,
+                          eliminated: _eliminated.contains(i),
+                          onTap: () => _pick(i),
                         ),
+                      ),
                 ],
               ),
             ),
@@ -389,8 +347,8 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
                 child: Text(
                   widget.session.currentIndex == _total - 1
-                      ? '結果を見る'
-                      : '次の問題へ',
+                      ? 'See result'
+                      : 'Next question',
                 ),
               ),
             ),
@@ -479,7 +437,7 @@ class _PromptDisplay extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final idiom = question.idiom;
 
-    if (question.mode == QuizMode.reverseLookup) {
+    if (question.mode == QuizMode.wordLookup) {
       return Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
@@ -487,53 +445,99 @@ class _PromptDisplay extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: scheme.outlineVariant),
         ),
-        child: Text(
-          idiom.meaning,
-          textAlign: TextAlign.center,
-          style: notoSerifJp(
-            fontSize: 17,
-            height: 1.6,
-            fontWeight: FontWeight.w600,
-            color: scheme.onSurface,
-          ),
+        child: Column(
+          children: [
+            Text(
+              idiom.meaningFor(question.language),
+              textAlign: TextAlign.center,
+              style: notoSerifJp(
+                fontSize: 17,
+                height: 1.6,
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 10),
+            _LevelChip(level: idiom.level),
+          ],
         ),
       );
     }
 
-    final chars = idiom.idiom.split('');
-    final showReading = fullReveal
-        ? true
-        : (question.mode == QuizMode.noReading ? readingRevealed : true);
+    if (question.mode == QuizMode.sentenceBlank) {
+      final showPronunciation = readingRevealed || fullReveal;
+      return Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: scheme.outlineVariant),
+        ),
+        child: Column(
+          children: [
+            Text(
+              idiom.blankedExample,
+              textAlign: TextAlign.center,
+              style: notoSerifJp(
+                fontSize: 19,
+                height: 1.6,
+                fontWeight: FontWeight.w700,
+                color: scheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 10),
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: showPronunciation ? 1 : 0,
+              child: Text(
+                showPronunciation ? idiom.answer : '•••••',
+                style: notoSansJp(
+                  fontSize: 13,
+                  color: scheme.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _LevelChip(level: idiom.level),
+          ],
+        ),
+      );
+    }
 
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            for (int i = 0; i < chars.length; i++) ...[
-              if (i > 0) const SizedBox(width: 10),
-              _IdiomChar(
-                ch: chars[i],
-                masked: question.mode == QuizMode.fillBlank &&
-                    question.maskedIndices.contains(i) &&
-                    !fullReveal,
-                highlight: fullReveal &&
-                    question.mode == QuizMode.fillBlank &&
-                    question.maskedIndices.contains(i),
-              ),
-            ],
-          ],
+        Text(
+          idiom.idiom,
+          textAlign: TextAlign.center,
+          style: AppTheme.idiomDisplay(context),
         ).animate(key: ValueKey(idiom.idiom)).fadeIn(duration: 350.ms),
         const SizedBox(height: 12),
         AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
-          opacity: showReading ? 1 : 0,
+          opacity: 1,
           child: Text(
-            showReading ? idiom.reading : '・・・・・',
+            idiom.reading,
             style: notoSansJp(
               fontSize: 14,
               color: scheme.onSurfaceVariant,
               letterSpacing: 2,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: scheme.primaryContainer,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            'DELE ${idiom.level}',
+            style: notoSansJp(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: scheme.onPrimaryContainer,
             ),
           ),
         ),
@@ -542,64 +546,27 @@ class _PromptDisplay extends StatelessWidget {
   }
 }
 
-class _IdiomChar extends StatelessWidget {
-  final String ch;
-  final bool masked;
-  final bool highlight;
-  const _IdiomChar({
-    required this.ch,
-    required this.masked,
-    this.highlight = false,
-  });
+class _LevelChip extends StatelessWidget {
+  final String level;
+  const _LevelChip({required this.level});
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    if (masked) {
-      return Container(
-        width: 52,
-        height: 58,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: scheme.outlineVariant,
-            width: 2,
-            style: BorderStyle.solid,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        'DELE $level',
+        style: notoSansJp(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: scheme.onPrimaryContainer,
         ),
-        child: Text(
-          '?',
-          style: notoSerifJp(
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            color: scheme.onSurfaceVariant,
-          ),
-        ),
-      );
-    }
-    if (highlight) {
-      return Container(
-        width: 52,
-        height: 58,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppTheme.correctBg,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          ch,
-          style: AppTheme.idiomDisplay(context).copyWith(
-            letterSpacing: 0,
-            color: AppTheme.correctFg,
-          ),
-        ),
-      );
-    }
-    return Text(
-      ch,
-      style: AppTheme.idiomDisplay(context).copyWith(letterSpacing: 0),
+      ),
     );
   }
 }
@@ -610,8 +577,8 @@ class _DropBanner extends StatelessWidget {
 
   String get _label => switch (kind) {
         HintKind.fiftyFifty => '50:50',
-        HintKind.reading => 'ふりがな',
-        HintKind.time => '時間+',
+        HintKind.reading => 'Pron.',
+        HintKind.time => 'Time+',
       };
 
   IconData get _icon => switch (kind) {
@@ -635,7 +602,7 @@ class _DropBanner extends StatelessWidget {
               color: scheme.onTertiaryContainer, size: 20),
           const SizedBox(width: 8),
           Text(
-            'ヒント獲得!',
+            'Item gained!',
             style: notoSerifJp(
               fontSize: 13,
               fontWeight: FontWeight.w800,
@@ -687,7 +654,7 @@ class _HintBar extends StatelessWidget {
         Expanded(
           child: _HintButton(
             icon: Icons.record_voice_over_rounded,
-            label: '読み',
+            label: 'Pron.',
             count: hints[HintKind.reading] ?? 0,
             enabled: usable[HintKind.reading] ?? false,
             onTap: () => onUse(HintKind.reading),
@@ -697,7 +664,7 @@ class _HintBar extends StatelessWidget {
         Expanded(
           child: _HintButton(
             icon: Icons.more_time_rounded,
-            label: '時間+',
+            label: 'Time+',
             count: hints[HintKind.time] ?? 0,
             enabled: usable[HintKind.time] ?? false,
             onTap: () => onUse(HintKind.time),
@@ -903,7 +870,6 @@ class _ChoiceTile extends StatelessWidget {
                                 ? FontWeight.w700
                                 : FontWeight.w500,
                             height: 1.5,
-                            letterSpacing: subText != null ? 4 : 0,
                             color: textColor,
                           ),
                         ),
@@ -957,116 +923,6 @@ class _ChoiceTile extends StatelessWidget {
   }
 }
 
-class _KanjiChoiceTile extends StatelessWidget {
-  final int index;
-  final String char;
-  final int? picked;
-  final int correct;
-  final bool revealed;
-  final bool eliminated;
-  final VoidCallback onTap;
-
-  const _KanjiChoiceTile({
-    required this.index,
-    required this.char,
-    required this.picked,
-    required this.correct,
-    required this.revealed,
-    required this.eliminated,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    Color bg = scheme.surface;
-    Color border = scheme.outlineVariant;
-    Color textColor = scheme.onSurface;
-    double opacity = eliminated ? 0.35 : 1;
-    final isCorrectReveal = revealed && index == correct;
-    List<BoxShadow>? shadows;
-
-    if (revealed) {
-      if (index == correct) {
-        bg = AppTheme.correctBg;
-        border = AppTheme.correctBorder;
-        textColor = AppTheme.correctFg;
-        shadows = [
-          BoxShadow(
-            color: AppTheme.correctBorder.withValues(alpha: 0.5),
-            blurRadius: 22,
-            spreadRadius: 1,
-          ),
-        ];
-      } else if (index == picked) {
-        bg = scheme.errorContainer;
-        border = scheme.error;
-        textColor = scheme.onErrorContainer;
-      }
-    } else if (picked == index) {
-      border = scheme.primary;
-    }
-
-    final tile = Opacity(
-      opacity: opacity,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: shadows,
-        ),
-        child: Material(
-          color: bg,
-          borderRadius: BorderRadius.circular(16),
-          child: InkWell(
-            onTap: revealed || eliminated ? null : onTap,
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: border,
-                  width: isCorrectReveal ? 2.4 : 1.8,
-                ),
-              ),
-              child: Text(
-                char,
-                style: notoSerifJp(
-                  fontSize: 34,
-                  fontWeight: FontWeight.w800,
-                  color: textColor,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    if (!isCorrectReveal) return tile;
-    return tile
-        .animate()
-        .scale(
-          begin: const Offset(1, 1),
-          end: const Offset(1.08, 1.08),
-          duration: 180.ms,
-          curve: Curves.easeOutBack,
-        )
-        .then()
-        .scale(
-          begin: const Offset(1.08, 1.08),
-          end: const Offset(1, 1),
-          duration: 220.ms,
-          curve: Curves.easeOut,
-        )
-        .shimmer(
-          delay: 120.ms,
-          duration: 900.ms,
-          color: Colors.white.withValues(alpha: 0.6),
-        );
-  }
-}
-
 class _TimerBar extends StatelessWidget {
   final int secondsLeft;
   final int totalSeconds;
@@ -1112,43 +968,15 @@ class _TimerBar extends StatelessWidget {
   }
 }
 
-class _IdiomImageCard extends StatelessWidget {
-  final String idiomKanji;
-  const _IdiomImageCard({required this.idiomKanji});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final path = IdiomImageRegistry.instance.pathFor(idiomKanji);
-    if (path == null) return const SizedBox.shrink();
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          width: 150,
-          height: 150,
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Image.asset(
-            path,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => const SizedBox.shrink(),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _MeaningRevealCard extends StatelessWidget {
-  final dynamic idiom; // Idiom — use dynamic to avoid extra import noise
-  const _MeaningRevealCard({required this.idiom});
+  final QuizQuestion question;
+  const _MeaningRevealCard({required this.question});
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final idiom = question.idiom;
+    final exampleTranslation = idiom.exampleMeaningFor(question.language);
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
       decoration: BoxDecoration(
@@ -1165,8 +993,23 @@ class _MeaningRevealCard extends StatelessWidget {
                 style: notoSerifJp(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 3,
                   color: scheme.onPrimaryContainer,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: scheme.onPrimaryContainer.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'DELE ${idiom.level}',
+                  style: notoSansJp(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onPrimaryContainer,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -1182,13 +1025,74 @@ class _MeaningRevealCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            idiom.meaning,
+            idiom.meaningFor(question.language),
             style: notoSerifJp(
               fontSize: 14,
               height: 1.6,
               color: scheme.onPrimaryContainer,
             ),
           ),
+          const SizedBox(height: 8),
+          _HighlightedExample(
+            example: idiom.example,
+            target: idiom.answer,
+            color: scheme.onPrimaryContainer,
+          ),
+          if (exampleTranslation.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              exampleTranslation,
+              style: notoSansJp(
+                fontSize: 12,
+                height: 1.5,
+                color: scheme.onPrimaryContainer.withValues(alpha: 0.78),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _HighlightedExample extends StatelessWidget {
+  final String example;
+  final String target;
+  final Color color;
+  const _HighlightedExample({
+    required this.example,
+    required this.target,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final lower = example.toLowerCase();
+    final needle = target.toLowerCase();
+    final start = needle.isEmpty ? -1 : lower.indexOf(needle);
+    if (start < 0) {
+      return Text(
+        example,
+        style: notoSansJp(fontSize: 13, height: 1.5, color: color),
+      );
+    }
+    final end = start + target.length;
+    return RichText(
+      text: TextSpan(
+        style: notoSansJp(fontSize: 13, height: 1.5, color: color),
+        children: [
+          TextSpan(text: example.substring(0, start)),
+          TextSpan(
+            text: example.substring(start, end),
+            style: notoSansJp(
+              fontSize: 13,
+              height: 1.5,
+              fontWeight: FontWeight.w900,
+              color: color,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+          TextSpan(text: example.substring(end)),
         ],
       ),
     );

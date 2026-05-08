@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../data/score_service.dart';
 import '../data/stage_plan.dart';
+import '../models/idiom.dart';
 import '../theme/app_theme.dart';
 import 'round_screen.dart';
 
 class StageScreen extends StatefulWidget {
   final StagePlan plan;
-  const StageScreen({super.key, required this.plan});
+  final StudyLanguage language;
+  const StageScreen({super.key, required this.plan, required this.language});
 
   @override
   State<StageScreen> createState() => _StageScreenState();
@@ -34,6 +36,7 @@ class _StageScreenState extends State<StageScreen> {
       MaterialPageRoute(
         builder: (_) => RoundScreen(
           plan: widget.plan,
+          language: widget.language,
           stageIndex: stage,
         ),
       ),
@@ -46,7 +49,7 @@ class _StageScreenState extends State<StageScreen> {
     final scheme = Theme.of(context).colorScheme;
     final snap = _snap;
     return Scaffold(
-      appBar: AppBar(title: const Text('ステージモード')),
+      appBar: AppBar(title: const Text('Stage Mode')),
       body: snap == null
           ? const Center(child: CircularProgressIndicator())
           : ListView.separated(
@@ -162,7 +165,7 @@ class _StageCard extends StatelessWidget {
                     Icon(Icons.chevron_right_rounded, color: textOn),
                   if (!unlocked)
                     Text(
-                      '前ステージを半分以上クリアで解放',
+                      'Clear half of previous stage',
                       style: notoSansJp(
                         fontSize: 10,
                         color: textOn.withValues(alpha: 0.85),

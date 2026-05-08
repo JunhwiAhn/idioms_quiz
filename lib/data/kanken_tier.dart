@@ -12,19 +12,15 @@ class KankenTier {
   });
 }
 
-/// Thresholds are based on mastered idiom count out of the app's 100-idiom
-/// pool, mapped loosely to 漢検 (Kanji Kentei) tier coverage.
-/// Percentiles are labeled as "推定 (estimated)" — there is no single
-/// authoritative public study for 四字熟語 distribution, so the values are a
-/// heuristic calibration meant as gamification, not as research data.
+/// Gamified tiers based on mastered Spanish vocabulary count.
 const kankenTiers = <KankenTier>[
-  KankenTier(min: 0,   label: '入門',    subtitle: '中学生レベル',       percentile: '推定 上位90%'),
-  KankenTier(min: 10,  label: '初級',    subtitle: '高校生レベル',       percentile: '推定 上位70%'),
-  KankenTier(min: 25,  label: '中級',    subtitle: '漢検3級相当',         percentile: '推定 上位50%'),
-  KankenTier(min: 45,  label: '上級',    subtitle: '漢検2級相当',         percentile: '推定 上位25%'),
-  KankenTier(min: 65,  label: '熟練',    subtitle: '漢検準1級相当',       percentile: '推定 上位10%'),
-  KankenTier(min: 85,  label: '達人',    subtitle: '漢検1級相当',         percentile: '推定 上位3%'),
-  KankenTier(min: 100, label: '師範',    subtitle: '全問制覇',             percentile: '推定 上位1%'),
+  KankenTier(min: 0,   label: 'A1 Starter', subtitle: 'Core survival words', percentile: 'Top 90% est.'),
+  KankenTier(min: 10,  label: 'A1 Explorer', subtitle: 'Daily-life vocabulary', percentile: 'Top 70% est.'),
+  KankenTier(min: 25,  label: 'A2 Builder', subtitle: 'Travel and routine words', percentile: 'Top 50% est.'),
+  KankenTier(min: 45,  label: 'B1 Speaker', subtitle: 'Opinions and experiences', percentile: 'Top 25% est.'),
+  KankenTier(min: 65,  label: 'B2 Analyst', subtitle: 'Abstract and news vocabulary', percentile: 'Top 10% est.'),
+  KankenTier(min: 85,  label: 'DELE Pro', subtitle: 'Exam-ready vocabulary', percentile: 'Top 3% est.'),
+  KankenTier(min: 100, label: 'DELE Master', subtitle: 'Complete mastery track', percentile: 'Top 1% est.'),
 ];
 
 KankenTier kankenTierFor(int masteredCount) {
@@ -44,14 +40,14 @@ KankenTier? nextKankenTierFor(int masteredCount) {
 
 /// Heuristic top-percentile label for a marathon score (correct/total).
 String marathonPercentile(int correct, int total) {
-  if (total <= 0) return '推定 上位90%';
+  if (total <= 0) return 'Top 90% est.';
   final rate = correct / total;
-  if (rate >= 1.0) return '推定 上位1%';
-  if (rate >= 0.9) return '推定 上位3%';
-  if (rate >= 0.8) return '推定 上位8%';
-  if (rate >= 0.7) return '推定 上位20%';
-  if (rate >= 0.6) return '推定 上位35%';
-  if (rate >= 0.5) return '推定 上位50%';
-  if (rate >= 0.4) return '推定 上位70%';
-  return '推定 上位85%';
+  if (rate >= 1.0) return 'Top 1% est.';
+  if (rate >= 0.9) return 'Top 3% est.';
+  if (rate >= 0.8) return 'Top 8% est.';
+  if (rate >= 0.7) return 'Top 20% est.';
+  if (rate >= 0.6) return 'Top 35% est.';
+  if (rate >= 0.5) return 'Top 50% est.';
+  if (rate >= 0.4) return 'Top 70% est.';
+  return 'Top 85% est.';
 }

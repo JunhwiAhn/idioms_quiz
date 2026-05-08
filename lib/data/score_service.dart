@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/idiom.dart';
 import 'rank.dart';
 
 const int kMasteryThreshold = 1;
@@ -135,6 +136,22 @@ class ScoreService {
   static const _kLastMarathon = 'last_marathon_score';
   static const _kLastMarathonTotal = 'last_marathon_total';
   static const _kRoundStarsPrefix = 'round_stars_';
+  static const _kStudyLanguage = 'study_language';
+
+  Future<StudyLanguage> studyLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    return StudyLanguage.fromCode(prefs.getString(_kStudyLanguage));
+  }
+
+  Future<void> setStudyLanguage(StudyLanguage language) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kStudyLanguage, language.code);
+  }
+
+  Future<bool> hasStudyLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_kStudyLanguage);
+  }
 
   Future<ScoreSnapshot> snapshot() async {
     final prefs = await SharedPreferences.getInstance();

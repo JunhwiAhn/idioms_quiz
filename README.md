@@ -1,134 +1,153 @@
-# 四字熟語道場 (Yojijukugo Dojo)
+# Español Dojo
 
-<p align="center">
-  <img src="docs/play_assets/icon_512.png" width="128" alt="App Icon" />
-</p>
+Español Dojo는 스페인어 DELE 어휘 학습용 Flutter 게임 앱입니다. 기존 사자성어 앱의 큰 흐름이었던 스테이지, 마라톤, 도감형 단어장, 오늘의 단어, 아이템 드롭, 랭크, 크로스워드 구조를 살리면서 콘텐츠를 스페인어 단어 학습으로 교체했습니다.
 
-<p align="center">
-  <b>400問の四字熟語を段位制で鍛える、和モダンな学習クイズアプリ。</b><br/>
-  Flutter / Material 3 / Noto Sans JP・Serif JP
-</p>
+현재는 사자성어 앱에서 스페인어 학습 앱으로 전환하는 중간 단계입니다. 핵심 게임 플레이는 스페인어 어휘 중심으로 바뀌었고, 스토어 문서와 최종 브랜드 이미지 등은 추후 릴리스 단계에서 다시 정리해야 합니다.
 
-<p align="center">
-  <img src="docs/play_assets/feature_graphic.png" width="800" alt="Feature Graphic" />
-</p>
+## 주요 기능
 
----
+- 스테이지 모드: 5개 스테이지, 스테이지당 8라운드, 라운드당 10문제
+- 마라톤 모드: 무작위 50문제 연속 풀이, 최고 기록 저장
+- 단어장: 정답을 맞힌 단어를 해금하고, 검색/필터/상세 모달로 복습
+- 크로스워드: 4글자 스페인어 단어 2개가 한 글자를 공유하는 퍼즐
+- 문제 유형:
+  - 스페인어 단어를 보고 뜻 고르기
+  - 뜻을 보고 스페인어 단어 고르기
+  - 예문 빈칸에 들어갈 단어 고르기
+- 학습 언어 선택:
+  - 한국어
+  - 영어
+  - 일본어
+- 첫 실행 시 언어 선택 다이얼로그 표시
+- 홈 화면에서 언어 재설정 가능
+- `shared_preferences`를 이용한 로컬 진행도 저장
+- 아이템 시스템:
+  - `50:50`
+  - `Pron.`
+  - `Time+`
+- 밝은 톤의 라이트 모드 전용 테마
+- 다크 모드 비활성화
 
-## 概要
+## 데이터
 
-中学生レベルの定番から漢検準1級・1級相当まで **400問以上** の四字熟語を収録。
-5ステージ×8ラウンドの段位制クイズ、50問マラソンの「道場破り」、漢字共有クロスワードの 3 モードで、意味・読み・漢字を多角的に定着させます。
+메인 어휘 데이터 파일:
 
-完全オフライン・外部通信なし・ユーザーデータはローカルのみ保存。
+```text
+assets/data/idioms.json
+```
 
-## 主な機能
+파일명은 기존 코드 호환성 때문에 아직 `idioms.json`을 유지하고 있지만, 실제 내용은 스페인어 어휘 데이터입니다.
 
-- **ステージモード** — 5ステージ × 8ラウンド × 10問 = 400問の4択クイズ。星評価でアンロック
-- **道場破り** — ランダム50問のマラソン。正解率で推定パーセンタイルを算出
-- **クロスワード** — 1漢字を共有する2つの熟語を4×4盤で完成させるパズル。ドラッグ&ドロップ操作
-- **図鑑** — 全熟語一覧。正解でアンロックされ、意味・読み・イラスト (一部) を閲覧
-- **4種類の出題形式** — ふつう / 穴埋め / 読みなし / 意味先出し。1問ごとにランダム切替
-- **段位 & レベル** — 白帯→名人まで。5正解ごとに Lv+1、昇段・レベルアップ時に紙吹雪演出
-- **本日の四字熟語** — 日替わりで 1 語ピックアップ、時間帯挨拶付き
-- **ヒントシステム** — 50:50 / 読み表示 / 時間+。正解ドロップで入手
-- **BGM & SFX** — クイズ BGM ループ、正解・クリア・パーフェクト等の効果音
+현재 데이터 구조:
 
-## スクリーンショット
+```json
+{
+  "spanish": "casa",
+  "pronunciation": "casa",
+  "meanings": {
+    "ko": "집",
+    "en": "house",
+    "ja": "家"
+  },
+  "example": "La palabra casa aparece en el examen.",
+  "exampleMeanings": {
+    "ko": "casa라는 단어가 시험에 나온다.",
+    "en": "The word casa appears on the exam.",
+    "ja": "casaという単語が試験に出ます。"
+  },
+  "blankedExample": "La palabra ____ aparece en el examen.",
+  "answer": "casa",
+  "level": "A1",
+  "partOfSpeech": "noun",
+  "wrongChoices": [],
+  "difficulty": 1
+}
+```
 
-| ホーム | クイズ | 図鑑 | クロスワード |
-|---|---|---|---|
-| <img src="docs/play_assets/screenshots/01_home.png" width="200" /> | <img src="docs/play_assets/screenshots/02_quiz.png" width="200" /> | <img src="docs/play_assets/screenshots/03_collection.png" width="200" /> | <img src="docs/play_assets/screenshots/04_crossword.png" width="200" /> |
+현재 데이터는 500개입니다. 자동 생성 느낌의 임시 표현은 제거했지만, 출시 전에는 실제 DELE 빈도/레벨 기준으로 단어와 예문을 검수하는 것이 좋습니다.
 
-## 技術スタック
+## 기술 스택
 
-| 領域 | 採用技術 |
+| 영역 | 사용 기술 |
 |---|---|
-| フレームワーク | Flutter 3.38 系 / Dart SDK `^3.10.4` |
-| UI | Material 3 (`useMaterial3: true`) |
-| 永続化 | `shared_preferences` |
-| 音声 | `audioplayers` |
-| アニメ | `flutter_animate` / `confetti` |
-| 広告 | `google_mobile_ads` (初回リリースは OFF) |
-| 外部リンク | `url_launcher` |
-| フォント | Noto Sans JP / Noto Serif JP (同梱) |
+| 프레임워크 | Flutter / Dart |
+| UI | Material 3 |
+| 로컬 저장 | `shared_preferences` |
+| 오디오 | `audioplayers` |
+| 애니메이션 | `flutter_animate`, `confetti` |
+| 외부 링크 | `url_launcher` |
+| 폰트 | Noto Sans JP / Noto Serif JP 번들 |
 
-## セットアップ
+## 실행 방법
 
 ```bash
-git clone https://github.com/JunhwiAhn/idioms_quiz.git
-cd idioms_quiz
 flutter pub get
 flutter run -d <device_id>
 ```
 
-### リリースビルド
+웹 서버로 확인:
 
 ```bash
-flutter build appbundle --release
-# → build/app/outputs/bundle/release/app-release.aab
+flutter run -d web-server --web-port 8080
 ```
 
-署名設定は `android/key.properties` (gitignored) を参照。`android/app/build.gradle.kts` が自動で読み込みます。
+## 검증
 
-## プロジェクト構成
-
+```bash
+flutter analyze
+flutter test
 ```
+
+현재 두 명령 모두 통과합니다.
+
+## 프로젝트 구조
+
+```text
 lib/
-├── main.dart                 — エントリ + グローバルエラーハンドラ
-├── theme/app_theme.dart      — Material 3 テーマ・フォントヘルパ
-├── models/idiom.dart         — Idiom モデル
+├── main.dart
+├── models/
+│   └── idiom.dart              # 스페인어 어휘 모델, 호환성 때문에 이름은 Idiom 유지
 ├── data/
-│   ├── ad_service*.dart      — AdMob (条件付きエクスポート: web=stub / mobile=実装)
-│   ├── audio_service.dart    — BGM / SFX 再生
-│   ├── crossword.dart        — 漢字共有ペアと 4×4 盤生成
-│   ├── daily.dart            — 日替わり熟語・挨拶
-│   ├── idiom_images.dart     — アセット画像レジストリ
-│   ├── idiom_repository.dart — idioms.json ロード
-│   ├── kanken_tier.dart      — 漢検相当レベル推定
-│   ├── level_tier.dart       — レベル→帯色
-│   ├── quiz_session.dart     — 出題生成・採点
-│   ├── rank.dart             — 段位 (白帯〜名人)
-│   ├── score_service.dart    — 進捗永続化・ヒント付与
-│   └── stage_plan.dart       — 5×8×10 配分 / 星計算
-└── screens/
-    ├── splash_screen.dart    — スプラッシュ
-    ├── home_screen.dart      — トップランチャー
-    ├── stage_screen.dart     — ステージ一覧
-    ├── round_screen.dart     — ラウンド一覧
-    ├── quiz_screen.dart      — クイズ本体
-    ├── result_screen.dart    — リザルト
-    ├── collection_screen.dart— 図鑑 (検索+フィルタ)
-    └── crossword_screen.dart — クロスワード
+│   ├── app_text.dart           # 선택 언어별 UI 문구
+│   ├── crossword.dart          # 스페인어 크로스워드 생성
+│   ├── daily.dart              # 오늘의 단어 문구
+│   ├── idiom_repository.dart   # 어휘 JSON 로더
+│   ├── kanken_tier.dart        # 어휘 마스터리 티어, 레거시 파일명
+│   ├── level_tier.dart         # 레벨 라벨/색상
+│   ├── quiz_session.dart       # 문제 생성/채점
+│   ├── rank.dart               # 랭크 이름/해금 기준
+│   ├── score_service.dart      # 진행도, 아이템, 언어 설정 저장
+│   └── stage_plan.dart         # 스테이지/라운드 구성
+├── screens/
+│   ├── collection_screen.dart
+│   ├── crossword_screen.dart
+│   ├── home_screen.dart
+│   ├── quiz_screen.dart
+│   ├── result_screen.dart
+│   ├── round_screen.dart
+│   ├── splash_screen.dart
+│   └── stage_screen.dart
+└── theme/
+    └── app_theme.dart
 ```
 
-## データ管理
+## 전환 작업에서 제거한 것
 
-- 問題データ: `assets/data/idioms.json` — `{idiom, reading, meaning, wrongChoices, difficulty}` の配列
-- 画像: `assets/images/*.webp` — ファイル名が 四字熟語と一致する場合に自動で表示
-- フォント: `assets/fonts/NotoSansJP-*.ttf` / `NotoSerifJP-*.ttf` (同梱・オフライン)
-- ユーザー進捗: `SharedPreferences` (端末ローカルのみ、外部送信なし)
+- 사자성어별 생성 `.webp` 이미지
+- 이미지 프롬프트 문서
+- 이미지 레지스트리 코드
+- 기존 Play Store 피처 그래픽
+- 기존 Play Store 스크린샷
+- 다크 모드 지원
 
-## プライバシー
+## 남은 정리 작업
 
-- 外部サーバーへのデータ送信なし
-- トラッキング SDK 未搭載
-- 詳細: [プライバシーポリシー](docs/privacy_policy.md)
+- `Idiom`, `idiom_repository.dart`, `idioms.json`, `kanken_tier.dart` 등 레거시 이름 변경
+- 스페인어 앱에 맞는 앱 아이콘/파비콘 교체
+- 스토어 문서, 개인정보처리방침, Play Console 문서 재작성
+- 500개 어휘 데이터를 실제 DELE 기준으로 검수
+- 크로스워드의 가변 길이 단어/가변 그리드 지원
 
-## ライセンス / 著作権
+## 라이선스
 
-**© 2026 Junhwi Ahn. All rights reserved.**
-
-本リポジトリ (ソースコード・デザイン・アセット・データ・ドキュメント等) は Junhwi Ahn が所有するプロプライエタリ (所有権保留) 作品です。詳細は [LICENSE](LICENSE) を参照。
-
-- 本リポジトリを閲覧することは、複製・改変・再配布・商用利用の権利を付与するものではありません
-- アプリのリパッケージ公開 (Google Play Store / App Store 等) は禁止
-- 個人学習・教育目的での閲覧は許可
-
-第三者アセット (Noto フォント、依存パッケージ等) はそれぞれ元のライセンスに従います: [NOTICE.md](NOTICE.md) 参照。OSS 依存パッケージのライセンスはアプリ内「ライセンス」メニュー (Flutter 標準 `showLicensePage`) からも閲覧可能。
-
-## 開発ドキュメント
-
-- [仕様書 / メンテナンスガイド](../../../../Desktop/四字熟語道場_仕様書.md) (ローカル)
-- [Play Console 提出用テキストパック](docs/play_console_pack.md)
-- [Play ストア掲載用アセット](docs/play_assets/)
+이 저장소는 별도 명시가 없는 한 proprietary 프로젝트입니다. 자세한 내용은 [LICENSE](LICENSE), [NOTICE.md](NOTICE.md)를 참고하세요.

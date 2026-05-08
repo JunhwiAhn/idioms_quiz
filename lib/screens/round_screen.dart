@@ -4,15 +4,18 @@ import '../data/audio_service.dart';
 import '../data/quiz_session.dart';
 import '../data/score_service.dart';
 import '../data/stage_plan.dart';
+import '../models/idiom.dart';
 import '../theme/app_theme.dart';
 import 'quiz_screen.dart';
 
 class RoundScreen extends StatefulWidget {
   final StagePlan plan;
+  final StudyLanguage language;
   final int stageIndex;
   const RoundScreen({
     super.key,
     required this.plan,
+    required this.language,
     required this.stageIndex,
   });
 
@@ -39,7 +42,11 @@ class _RoundScreenState extends State<RoundScreen> {
     final idioms = widget.plan.idiomsFor(
       RoundRef(widget.stageIndex, roundIndex),
     );
-    final session = QuizSession.build(idioms, count: idioms.length);
+    final session = QuizSession.build(
+      idioms,
+      count: idioms.length,
+      language: widget.language,
+    );
     final snap = _snap;
     if (snap == null) return;
     await AudioService.instance.playBgm(Bgm.quiz);
@@ -83,7 +90,7 @@ class _RoundScreenState extends State<RoundScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '累計 ☆ ${snap.starsInStage(widget.stageIndex)} / ${rounds * 5}',
+                    'Total stars ${snap.starsInStage(widget.stageIndex)} / ${rounds * 5}',
                     style: notoSerifJp(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -170,7 +177,7 @@ class _RoundTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'ラウンド ${index + 1}',
+                'Round ${index + 1}',
                 style: notoSerifJp(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -205,7 +212,7 @@ class _RoundTile extends StatelessWidget {
                         size: 12, color: scheme.onSurfaceVariant),
                     const SizedBox(width: 2),
                     Text(
-                      '前ラウンドをクリア',
+                      'Clear previous round',
                       style: notoSansJp(
                         fontSize: 10,
                         color: scheme.onSurfaceVariant,
