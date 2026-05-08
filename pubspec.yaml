@@ -1,7 +1,7 @@
 name: idioms_quiz
 description: "四字熟語道場 — 400問の四字熟語を段位で鍛えるクイズアプリ。"
 publish_to: 'none'
-version: 1.0.0+4
+version: 1.0.0+5
 
 environment:
   sdk: ^3.10.4
