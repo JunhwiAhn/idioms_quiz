@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/ad_service.dart';
+import '../data/app_text.dart';
 import '../data/audio_service.dart';
 import '../data/quiz_session.dart';
 import '../data/score_service.dart';
@@ -71,6 +72,7 @@ class _RoundScreenState extends State<RoundScreen> {
     final scheme = Theme.of(context).colorScheme;
     final snap = _snap;
     final rounds = widget.plan.roundsIn(widget.stageIndex);
+    final text = AppText(widget.language);
 
     return Scaffold(
       appBar: AppBar(title: Text(kStageTitles[widget.stageIndex])),
@@ -90,7 +92,7 @@ class _RoundScreenState extends State<RoundScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Total stars ${snap.starsInStage(widget.stageIndex)} / ${rounds * 5}',
+                    '${text.totalStars} ${snap.starsInStage(widget.stageIndex)} / ${rounds * 5}',
                     style: notoSerifJp(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -102,24 +104,23 @@ class _RoundScreenState extends State<RoundScreen> {
                     child: GridView.builder(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisExtent: 120,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                      ),
+                            crossAxisCount: 2,
+                            mainAxisExtent: 120,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                          ),
                       itemCount: rounds,
                       itemBuilder: (context, i) {
-                        final stars =
-                            snap.starsForRound(widget.stageIndex, i);
+                        final stars = snap.starsForRound(widget.stageIndex, i);
                         final prevStars = i == 0
                             ? 5
-                            : snap.starsForRound(
-                                widget.stageIndex, i - 1);
+                            : snap.starsForRound(widget.stageIndex, i - 1);
                         final unlocked = i == 0 || prevStars >= 1;
                         return _RoundTile(
                           index: i,
                           stars: stars,
                           unlocked: unlocked,
+                          text: text,
                           onTap: unlocked ? () => _startRound(i) : null,
                         );
                       },
@@ -136,11 +137,13 @@ class _RoundTile extends StatelessWidget {
   final int index;
   final int stars;
   final bool unlocked;
+  final AppText text;
   final VoidCallback? onTap;
   const _RoundTile({
     required this.index,
     required this.stars,
     required this.unlocked,
+    required this.text,
     required this.onTap,
   });
 
@@ -151,13 +154,13 @@ class _RoundTile extends StatelessWidget {
     final bg = !unlocked
         ? scheme.surfaceContainerHigh
         : completed
-            ? scheme.primaryContainer
-            : scheme.surface;
+        ? scheme.primaryContainer
+        : scheme.surface;
     final textColor = !unlocked
         ? scheme.onSurfaceVariant
         : completed
-            ? scheme.onPrimaryContainer
-            : scheme.onSurface;
+        ? scheme.onPrimaryContainer
+        : scheme.onSurface;
     return Material(
       color: bg,
       borderRadius: BorderRadius.circular(16),
@@ -177,7 +180,7 @@ class _RoundTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Round ${index + 1}',
+                text.roundLabel(index + 1),
                 style: notoSerifJp(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -196,9 +199,10 @@ class _RoundTile extends StatelessWidget {
                       size: 18,
                       color: unlocked
                           ? (s < stars
-                              ? Colors.amber
-                              : scheme.onSurfaceVariant
-                                  .withValues(alpha: 0.35))
+                                ? Colors.amber
+                                : scheme.onSurfaceVariant.withValues(
+                                    alpha: 0.35,
+                                  ))
                           : scheme.onSurfaceVariant.withValues(alpha: 0.3),
                     ),
                 ],
@@ -208,11 +212,14 @@ class _RoundTile extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.lock_rounded,
-                        size: 12, color: scheme.onSurfaceVariant),
+                    Icon(
+                      Icons.lock_rounded,
+                      size: 12,
+                      color: scheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 2),
                     Text(
-                      'Clear previous round',
+                      text.clearPreviousRound,
                       style: notoSansJp(
                         fontSize: 10,
                         color: scheme.onSurfaceVariant,

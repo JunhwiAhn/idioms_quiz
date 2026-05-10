@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/idiom.dart';
 import 'rank.dart';
@@ -140,7 +141,11 @@ class ScoreService {
 
   Future<StudyLanguage> studyLanguage() async {
     final prefs = await SharedPreferences.getInstance();
-    return StudyLanguage.fromCode(prefs.getString(_kStudyLanguage));
+    final saved = prefs.getString(_kStudyLanguage);
+    if (saved != null) return StudyLanguage.fromCode(saved);
+    return StudyLanguage.fromLocaleCode(
+      PlatformDispatcher.instance.locale.languageCode,
+    );
   }
 
   Future<void> setStudyLanguage(StudyLanguage language) async {

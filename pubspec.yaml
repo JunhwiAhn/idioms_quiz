@@ -1,5 +1,5 @@
 name: idioms_quiz
-description: "Español Dojo — DELE語彙をステージ・マラソン・単語帳で鍛えるスペイン語学習アプリ。"
+description: "Vocab Dojo: Spanish(DELE) — DELE語彙をステージ・マラソン・単語帳で鍛えるスペイン語学習アプリ。"
 publish_to: 'none'
 version: 1.0.0+5
 
@@ -16,6 +16,7 @@ dependencies:
   audioplayers: ^6.1.0
   confetti: ^0.8.0
   url_launcher: ^6.3.1
+  flutter_tts: ^4.2.5
 
 dev_dependencies:
   flutter_test:

@@ -15,7 +15,7 @@ import '../data/score_service.dart';
 import '../data/stage_plan.dart';
 import '../models/idiom.dart';
 import 'collection_screen.dart';
-import 'crossword_screen.dart';
+import 'crossword_stage_screen.dart';
 import 'quiz_screen.dart';
 import 'stage_screen.dart';
 
@@ -128,13 +128,15 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _muted = next);
   }
 
-  Future<void> _startQuiz(int questionCount,
-      {bool isMarathon = false}) async {
+  Future<void> _startQuiz(int questionCount, {bool isMarathon = false}) async {
     final idioms = _idioms;
     final snap = _snap;
     if (idioms == null || snap == null) return;
-    final session =
-        QuizSession.build(idioms, count: questionCount, language: _language);
+    final session = QuizSession.build(
+      idioms,
+      count: questionCount,
+      language: _language,
+    );
     AudioService.instance.playSfx(Sfx.modeStart, multiplier: 2.0);
     // Interstitial every few mode-starts (shares counter with round-end).
     await AdService.instance.maybeShowAfterRound(frequency: 3);
@@ -166,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => CrosswordScreen(bank: bank, language: _language),
+        builder: (_) => CrosswordStageScreen(bank: bank, language: _language),
       ),
     );
     await AudioService.instance.stopBgm();
@@ -196,13 +198,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final ok = await launchUrl(url, mode: LaunchMode.externalApplication);
     if (!ok && ctx.mounted) {
       ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(content: Text('Could not open the feedback form.')),
+        SnackBar(content: Text(AppText(_language).feedbackOpenFailed)),
       );
     }
   }
 
   void _openAppInfoSheet() {
     final scheme = Theme.of(context).colorScheme;
+    final text = AppText(_language);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -218,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Español Dojo',
+                    text.appName,
                     style: notoSerifJp(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -227,17 +230,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Version: 1.0.0',
-                    style: notoSansJp(
-                      fontSize: 11,
-                      color: s.onSurfaceVariant,
-                    ),
+                    '${text.versionLabel}: 1.0.0',
+                    style: notoSansJp(fontSize: 11, color: s.onSurfaceVariant),
                   ),
                   const SizedBox(height: 16),
                   Divider(color: s.outlineVariant),
                   const SizedBox(height: 12),
                   Text(
-                    'Data storage',
+                    text.dataStorage,
                     style: notoSerifJp(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -246,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Quiz progress, mastered words, items, and language settings are stored only on this device. No study data is sent to an external server. Uninstalling the app deletes the local data.',
+                    text.dataStorageBody,
                     style: notoSansJp(
                       fontSize: 12,
                       height: 1.5,
@@ -261,15 +261,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(8),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 8),
+                        horizontal: 4,
+                        vertical: 8,
+                      ),
                       child: Row(
                         children: [
-                          Icon(Icons.feedback_outlined,
-                              size: 18, color: s.primary),
+                          Icon(
+                            Icons.feedback_outlined,
+                            size: 18,
+                            color: s.primary,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Feedback',
+                              text.feedback,
                               style: notoSerifJp(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w800,
@@ -277,9 +282,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          Icon(Icons.open_in_new_rounded,
-                              size: 14,
-                              color: s.onSurfaceVariant),
+                          Icon(
+                            Icons.open_in_new_rounded,
+                            size: 14,
+                            color: s.onSurfaceVariant,
+                          ),
                         ],
                       ),
                     ),
@@ -288,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Divider(color: s.outlineVariant),
                   const SizedBox(height: 12),
                   Text(
-                    'Licenses',
+                    text.licenses,
                     style: notoSerifJp(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -303,14 +310,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.of(ctx).pop();
                         showLicensePage(
                           context: context,
-                          applicationName: 'Español Dojo',
+                          applicationName: text.appName,
                           applicationVersion: '1.0.0',
                         );
                       },
-                      icon: Icon(Icons.description_outlined,
-                          size: 16, color: s.primary),
+                      icon: Icon(
+                        Icons.description_outlined,
+                        size: 16,
+                        color: s.primary,
+                      ),
                       label: Text(
-                        'Open source licenses',
+                        text.openSourceLicenses,
                         style: notoSansJp(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -325,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: FilledButton(
                       onPressed: () => Navigator.of(ctx).pop(),
                       child: Text(
-                        'Close',
+                        text.close,
                         style: notoSerifJp(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -366,7 +376,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final text = AppText(_language);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         centerTitle: false,
         titleSpacing: 8,
         leadingWidth: 48,
@@ -385,36 +398,33 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        title: const Text('Español Dojo'),
+        title: Text(text.appName),
         actions: [
           PopupMenuButton<StudyLanguage>(
-            tooltip: 'Language',
+            tooltip: text.languageMenu,
             icon: const Icon(Icons.language_rounded),
             initialValue: _language,
             onSelected: _setLanguage,
             itemBuilder: (context) => [
               for (final language in StudyLanguage.values)
-                PopupMenuItem(
-                  value: language,
-                  child: Text(language.label),
-                ),
+                PopupMenuItem(value: language, child: Text(language.label)),
             ],
           ),
           IconButton(
-            icon: Icon(_muted
-                ? Icons.volume_off_rounded
-                : Icons.volume_up_rounded),
-            tooltip: _muted ? 'Unmute' : 'Mute',
+            icon: Icon(
+              _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+            ),
+            tooltip: _muted ? text.unmute : text.mute,
             onPressed: _toggleMute,
           ),
           IconButton(
             icon: const Icon(Icons.info_outline_rounded),
-            tooltip: 'App info',
+            tooltip: text.appInfo,
             onPressed: _openAppInfoSheet,
           ),
           IconButton(
             icon: const Icon(Icons.collections_bookmark_rounded),
-            tooltip: 'Wordbook',
+            tooltip: text.wordbook,
             onPressed: idioms == null ? null : _openCollection,
           ),
         ],
@@ -423,67 +433,75 @@ class _HomeScreenState extends State<HomeScreen> {
         child: (idioms == null || snap == null)
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _DailyStrip(
-                      idioms: idioms,
-                      language: _language,
-                      text: text,
-                    ),
-                    const SizedBox(height: 12),
-                    _RankCard(snap: snap)
-                        .animate()
-                        .fadeIn(duration: 400.ms)
-                        .slideY(
-                          begin: -0.1,
-                          end: 0,
-                          duration: 400.ms,
-                          curve: Curves.easeOut,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _HomeHero(
+                              snap: snap,
+                              total: idioms.length,
+                              idioms: idioms,
+                              language: _language,
+                              text: text,
+                            )
+                            .animate()
+                            .fadeIn(duration: 420.ms)
+                            .slideY(
+                              begin: -0.05,
+                              end: 0,
+                              duration: 420.ms,
+                              curve: Curves.easeOut,
+                            ),
+                        const SizedBox(height: 20),
+                        _ModeSectionHeader(
+                          title: text.practiceModes,
+                          actionLabel: text.wordbook,
+                          onAction: _openCollection,
                         ),
-                    const SizedBox(height: 18),
-                    _PlayModeTile(
-                      title: text.stage,
-                      subtitle: text.stageSubtitle,
-                      icon: Icons.stars_rounded,
-                      gradient: [
-                        Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.tertiary,
+                        const SizedBox(height: 10),
+                        _PlayModeTile(
+                          title: text.stage,
+                          subtitle: text.stageSubtitle,
+                          icon: Icons.quiz_rounded,
+                          badge: text.recommended,
+                          gradient: const [
+                            Color(0xFF1D3557),
+                            Color(0xFF2A9D8F),
+                          ],
+                          onTap: _openStageMode,
+                        ),
+                        const SizedBox(height: 12),
+                        _PlayModeTile(
+                          title: text.fiftyQuestionQuiz,
+                          subtitle: text.marathonFocusedSubtitle,
+                          icon: Icons.fact_check_rounded,
+                          badge: '50 Q',
+                          gradient: const [
+                            Color(0xFFB23A48),
+                            Color(0xFFF4A261),
+                          ],
+                          onTap: () => _startQuiz(50, isMarathon: true),
+                        ),
+                        const SizedBox(height: 12),
+                        _PlayModeTile(
+                          title: text.crossword,
+                          subtitle: text.crosswordSubtitle,
+                          icon: Icons.grid_on_rounded,
+                          badge: text.puzzleBadge,
+                          gradient: const [
+                            Color(0xFF4A4E69),
+                            Color(0xFF588157),
+                          ],
+                          onTap: _openCrossword,
+                        ),
+                        const SizedBox(height: 20),
+                        Center(child: AdService.instance.buildBanner()),
                       ],
-                      onTap: _openStageMode,
                     ),
-                    const SizedBox(height: 12),
-                    _PlayModeTile(
-                      title: text.marathon,
-                      subtitle: text.marathonSubtitle,
-                      icon: Icons.emoji_events_rounded,
-                      gradient: [
-                        const Color(0xFFC46A2E),
-                        const Color(0xFFE6A817),
-                      ],
-                      onTap: () => _startQuiz(50, isMarathon: true),
-                    ),
-                    const SizedBox(height: 12),
-                    _PlayModeTile(
-                      title: text.crossword,
-                      subtitle: text.crosswordSubtitle,
-                      icon: Icons.grid_on_rounded,
-                      gradient: [
-                        const Color(0xFF4A6FA5),
-                        const Color(0xFF8CB369),
-                      ],
-                      onTap: _openCrossword,
-                    ),
-                    const SizedBox(height: 24),
-                    _StatsRow(
-                      snap: snap,
-                      total: idioms.length,
-                      text: text,
-                    ),
-                    const SizedBox(height: 20),
-                    Center(child: AdService.instance.buildBanner()),
-                  ],
+                  ),
                 ),
               ),
       ),
@@ -491,11 +509,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _DailyStrip extends StatelessWidget {
+class _HomeHero extends StatelessWidget {
+  final ScoreSnapshot snap;
+  final int total;
   final List<Idiom> idioms;
   final StudyLanguage language;
   final AppText text;
-  const _DailyStrip({
+  const _HomeHero({
+    required this.snap,
+    required this.total,
     required this.idioms,
     required this.language,
     required this.text,
@@ -504,71 +526,176 @@ class _DailyStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final now = DateTime.now();
-    final idiom = idiomOfTheDay(idioms, now);
-    final greeting = greetingFor(now);
+    final next = snap.next;
+    final toGo = next == null ? 0 : next.threshold - snap.totalCorrect;
+    final today = idiomOfTheDay(idioms, DateTime.now());
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
       decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: scheme.outlineVariant),
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF182135), Color(0xFF1D3557), Color(0xFF0F766E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1D3557).withValues(alpha: 0.24),
+            blurRadius: 24,
+            offset: const Offset(0, 14),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                text.todaysWord,
-                style: notoSansJp(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: scheme.primary,
+              _RankEmblem(level: snap.level),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _HeroDailyWord(
+                  idiom: today,
+                  language: language,
+                  text: text,
                 ),
+              ),
+              _HeroPill(
+                icon: Icons.local_fire_department_rounded,
+                label: '${text.level} ${snap.level}',
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 18),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                idiom.idiom,
-                style: notoSerifJp(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onSurface,
+              Expanded(
+                child: _HeroMetric(
+                  label: text.rank,
+                  value: snap.rank.name,
+                  alignStart: true,
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                idiom.reading,
-                style: notoSansJp(
-                  fontSize: 11,
-                  color: scheme.onSurfaceVariant,
-                  letterSpacing: 1,
-                ),
+              _HeroMetric(
+                label: text.wordbook,
+                value: '${snap.mastered.length}/$total',
+              ),
+              const SizedBox(width: 14),
+              _HeroMetric(
+                label: text.correctCount,
+                value: '${snap.totalCorrect}',
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            idiom.meaningFor(language),
-            style: notoSerifJp(
-              fontSize: 12,
-              height: 1.5,
-              color: scheme.onSurface.withValues(alpha: 0.9),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: snap.levelProgress,
+              minHeight: 7,
+              backgroundColor: Colors.white.withValues(alpha: 0.16),
+              valueColor: AlwaysStoppedAnimation<Color>(scheme.tertiary),
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            '— $greeting',
-            style: notoSansJp(
-              fontSize: 10,
-              fontStyle: FontStyle.italic,
-              color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                text.nextLevel(snap.remainingToNextLevel),
+                style: notoSansJp(
+                  fontSize: 11,
+                  color: Colors.white.withValues(alpha: 0.72),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                next == null ? text.maxRank : text.nextRank(next.name, toGo),
+                style: notoSansJp(
+                  fontSize: 11,
+                  color: Colors.white.withValues(alpha: 0.72),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RankEmblem extends StatelessWidget {
+  final int level;
+
+  const _RankEmblem({required this.level});
+
+  @override
+  Widget build(BuildContext context) {
+    final tier = ((level - 1) ~/ 5).clamp(0, 4);
+    final colors = switch (tier) {
+      0 => const [Color(0xFFB23A48), Color(0xFFF4A261)],
+      1 => const [Color(0xFFC1121F), Color(0xFFFFC857)],
+      2 => const [Color(0xFF006D77), Color(0xFFFFD166)],
+      3 => const [Color(0xFF7B2CBF), Color(0xFFFFC857)],
+      _ => const [Color(0xFF9D0208), Color(0xFFFFD60A)],
+    };
+    final icon = switch (tier) {
+      0 => Icons.military_tech_rounded,
+      1 => Icons.workspace_premium_rounded,
+      2 => Icons.emoji_events_rounded,
+      3 => Icons.shield_rounded,
+      _ => Icons.auto_awesome_rounded,
+    };
+    return Container(
+      width: 62,
+      height: 62,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+        boxShadow: [
+          BoxShadow(
+            color: colors.first.withValues(alpha: 0.38),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            top: 8,
+            child: Container(
+              width: 26,
+              height: 7,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          Icon(icon, color: Colors.white, size: 31),
+          Positioned(
+            bottom: 7,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                '$level',
+                style: notoSansJp(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],
@@ -577,6 +704,191 @@ class _DailyStrip extends StatelessWidget {
   }
 }
 
+class _HeroPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _HeroPill({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: const Color(0xFFFFD166)),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: notoSansJp(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool alignStart;
+  const _HeroMetric({
+    required this.label,
+    required this.value,
+    this.alignStart = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: alignStart
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.end,
+      children: [
+        Text(
+          label,
+          style: notoSansJp(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: Colors.white.withValues(alpha: 0.58),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: notoSerifJp(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ModeSectionHeader extends StatelessWidget {
+  final String title;
+  final String actionLabel;
+  final VoidCallback onAction;
+  const _ModeSectionHeader({
+    required this.title,
+    required this.actionLabel,
+    required this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: notoSerifJp(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: scheme.onSurface,
+            ),
+          ),
+        ),
+        TextButton.icon(
+          onPressed: onAction,
+          icon: const Icon(Icons.collections_bookmark_rounded, size: 17),
+          label: Text(actionLabel),
+          style: TextButton.styleFrom(
+            foregroundColor: scheme.primary,
+            textStyle: notoSansJp(fontSize: 12, fontWeight: FontWeight.w800),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroDailyWord extends StatelessWidget {
+  final Idiom idiom;
+  final StudyLanguage language;
+  final AppText text;
+
+  const _HeroDailyWord({
+    required this.idiom,
+    required this.language,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          text.todaysWord,
+          style: notoSansJp(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFFFFD166),
+          ),
+        ),
+        const SizedBox(height: 3),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Flexible(
+              child: Text(
+                idiom.idiom,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: notoSerifJp(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              idiom.reading,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: notoSansJp(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.white.withValues(alpha: 0.72),
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 3),
+        Text(
+          idiom.meaningFor(language),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: notoSerifJp(
+            fontSize: 12,
+            height: 1.4,
+            color: Colors.white.withValues(alpha: 0.82),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ignore: unused_element
 class _RankCard extends StatelessWidget {
   final ScoreSnapshot snap;
   const _RankCard({required this.snap});
@@ -604,8 +916,7 @@ class _RankCard extends StatelessWidget {
               _LevelBadge(level: snap.level),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 7, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(999),
@@ -642,20 +953,12 @@ class _RankCard extends StatelessWidget {
             children: [
               Text(
                 'Next level +${snap.remainingToNextLevel}',
-                style: notoSansJp(
-                  fontSize: 9,
-                  color: scheme.onSurfaceVariant,
-                ),
+                style: notoSansJp(fontSize: 9, color: scheme.onSurfaceVariant),
               ),
               const Spacer(),
               Text(
-                next == null
-                    ? 'Max rank'
-                    : 'Next rank ${next.name} +$toGo',
-                style: notoSansJp(
-                  fontSize: 9,
-                  color: scheme.onSurfaceVariant,
-                ),
+                next == null ? 'Max rank' : 'Next rank ${next.name} +$toGo',
+                style: notoSansJp(fontSize: 9, color: scheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -707,17 +1010,13 @@ class _LevelBadge extends StatelessWidget {
 class _InlineHintsCompact extends StatelessWidget {
   final ScoreSnapshot snap;
   final Color onColor;
-  const _InlineHintsCompact(
-      {required this.snap, required this.onColor});
+  const _InlineHintsCompact({required this.snap, required this.onColor});
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    TextStyle small(Color c) => notoSansJp(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: c,
-        );
+    TextStyle small(Color c) =>
+        notoSansJp(fontSize: 10, fontWeight: FontWeight.w700, color: c);
     Widget chip(IconData icon, String label, int count) {
       return Row(
         mainAxisSize: MainAxisSize.min,
@@ -736,12 +1035,17 @@ class _InlineHintsCompact extends StatelessWidget {
       runSpacing: 2,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        chip(Icons.filter_alt_rounded, '50:50',
-            snap.hints[HintKind.fiftyFifty] ?? 0),
-        chip(Icons.record_voice_over_rounded, 'Pron.',
-            snap.hints[HintKind.reading] ?? 0),
-        chip(Icons.more_time_rounded, 'Time+',
-            snap.hints[HintKind.time] ?? 0),
+        chip(
+          Icons.filter_alt_rounded,
+          '50:50',
+          snap.hints[HintKind.fiftyFifty] ?? 0,
+        ),
+        chip(
+          Icons.record_voice_over_rounded,
+          'Pron.',
+          snap.hints[HintKind.reading] ?? 0,
+        ),
+        chip(Icons.more_time_rounded, 'Time+', snap.hints[HintKind.time] ?? 0),
       ],
     );
   }
@@ -757,15 +1061,15 @@ class _InlineMarathonLine extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(Icons.emoji_events_outlined,
-            size: 13, color: scheme.onSurfaceVariant),
+        Icon(
+          Icons.emoji_events_outlined,
+          size: 13,
+          color: scheme.onSurfaceVariant,
+        ),
         const SizedBox(width: 5),
         Text(
           'Marathon best',
-          style: notoSansJp(
-            fontSize: 10,
-            color: scheme.onSurfaceVariant,
-          ),
+          style: notoSansJp(fontSize: 10, color: scheme.onSurfaceVariant),
         ),
         const SizedBox(width: 6),
         Text(
@@ -779,16 +1083,14 @@ class _InlineMarathonLine extends StatelessWidget {
         const SizedBox(width: 5),
         Text(
           '(${marathonPercentile(snap.bestMarathonScore, snap.bestMarathonTotal)})',
-          style: notoSansJp(
-            fontSize: 9,
-            color: scheme.onSurfaceVariant,
-          ),
+          style: notoSansJp(fontSize: 9, color: scheme.onSurfaceVariant),
         ),
       ],
     );
   }
 }
 
+// ignore: unused_element
 class _StatsRow extends StatelessWidget {
   final ScoreSnapshot snap;
   final int total;
@@ -850,10 +1152,7 @@ class _StatBox extends StatelessWidget {
         children: [
           Text(
             label,
-            style: notoSansJp(
-              fontSize: 11,
-              color: scheme.onSurfaceVariant,
-            ),
+            style: notoSansJp(fontSize: 11, color: scheme.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
           Text(
@@ -870,11 +1169,11 @@ class _StatBox extends StatelessWidget {
   }
 }
 
-
 class _PlayModeTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  final String badge;
   final List<Color> gradient;
   final VoidCallback onTap;
 
@@ -882,6 +1181,7 @@ class _PlayModeTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
+    required this.badge,
     required this.gradient,
     required this.onTap,
   });
@@ -890,17 +1190,17 @@ class _PlayModeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final onColor = scheme.onPrimary;
-    final iconBg = scheme.onPrimary.withValues(alpha: 0.2);
+    final iconBg = scheme.onPrimary.withValues(alpha: 0.16);
     final iconColor = scheme.onPrimary;
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(22),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(22),
             gradient: LinearGradient(
               colors: gradient,
               begin: Alignment.topLeft,
@@ -908,32 +1208,54 @@ class _PlayModeTile extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: gradient.first.withValues(alpha: 0.22),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
+                color: gradient.first.withValues(alpha: 0.20),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
             child: Row(
               children: [
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: 54,
+                  height: 54,
                   decoration: BoxDecoration(
                     color: iconBg,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: onColor.withValues(alpha: 0.18)),
                   ),
-                  child: Icon(icon, color: iconColor, size: 30),
+                  child: Icon(icon, color: iconColor, size: 28),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: onColor.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          badge,
+                          style: notoSansJp(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: onColor.withValues(alpha: 0.9),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
                       Text(
                         title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: notoSerifJp(
                           fontSize: 19,
                           fontWeight: FontWeight.w800,
@@ -943,6 +1265,8 @@ class _PlayModeTile extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: notoSansJp(
                           fontSize: 12,
                           height: 1.4,
@@ -954,27 +1278,17 @@ class _PlayModeTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                  width: 42,
+                  height: 42,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: onColor.withValues(alpha: 0.22),
-                    borderRadius: BorderRadius.circular(999),
+                    color: onColor.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.play_arrow_rounded,
-                          size: 16, color: onColor),
-                      const SizedBox(width: 2),
-                      Text(
-                        'Start',
-                        style: notoSerifJp(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: onColor,
-                        ),
-                      ),
-                    ],
+                  child: Icon(
+                    Icons.play_arrow_rounded,
+                    size: 24,
+                    color: onColor,
                   ),
                 ),
               ],

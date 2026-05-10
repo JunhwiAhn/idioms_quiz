@@ -38,7 +38,7 @@ class IdiomsQuizApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Español Dojo',
+      title: 'Vocab Dojo: Spanish(DELE)',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       themeMode: ThemeMode.light,

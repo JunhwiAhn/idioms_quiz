@@ -47,8 +47,8 @@ class _ResultScreenState extends State<ResultScreen> {
       final perfect = widget.outcome.isRoundRun
           ? widget.correct >= 8
           : widget.total > 0 && widget.correct == widget.total;
-      final failed = widget.outcome.isRoundRun &&
-          roundFailed(correct: widget.correct);
+      final failed =
+          widget.outcome.isRoundRun && roundFailed(correct: widget.correct);
       if (failed) {
         audio.playSfx(Sfx.wrong);
       } else if (perfect) {
@@ -73,7 +73,10 @@ class _ResultScreenState extends State<ResultScreen> {
     await showDialog<void>(
       context: context,
       barrierDismissible: true,
-      builder: (_) => _LevelUpDialog(outcome: widget.outcome),
+      builder: (_) => _LevelUpDialog(
+        outcome: widget.outcome,
+        text: AppText(widget.language),
+      ),
     );
   }
 
@@ -81,14 +84,6 @@ class _ResultScreenState extends State<ResultScreen> {
     final snap = await ScoreService().snapshot();
     if (!mounted) return;
     setState(() => _masteredCount = snap.mastered.length);
-  }
-
-  String get _title {
-    final rate = widget.total == 0 ? 0.0 : widget.correct / widget.total;
-    if (rate == 1.0) return 'Perfect!';
-    if (rate >= 0.8) return 'Great work!';
-    if (rate >= 0.5) return 'Keep going!';
-    return 'Try the next run.';
   }
 
   @override
@@ -99,27 +94,29 @@ class _ResultScreenState extends State<ResultScreen> {
     final longestStreak = widget.longestStreak;
     final outcome = widget.outcome;
     final text = AppText(widget.language);
+    final rate = widget.total == 0 ? 0.0 : widget.correct / widget.total;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Result')),
+      appBar: AppBar(title: Text(text.result)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
           child: Column(
             children: [
               const SizedBox(height: 12),
-              Icon(Icons.emoji_events_rounded,
-                      size: 80, color: scheme.primary)
-                  .animate()
-                  .scale(
-                    begin: const Offset(0.6, 0.6),
-                    end: const Offset(1, 1),
-                    duration: 400.ms,
-                    curve: Curves.easeOutBack,
-                  ),
+              Icon(
+                Icons.emoji_events_rounded,
+                size: 80,
+                color: scheme.primary,
+              ).animate().scale(
+                begin: const Offset(0.6, 0.6),
+                end: const Offset(1, 1),
+                duration: 400.ms,
+                curve: Curves.easeOutBack,
+              ),
               const SizedBox(height: 8),
               Text(
-                _title,
+                text.resultTitle(rate),
                 style: notoSerifJp(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -129,10 +126,11 @@ class _ResultScreenState extends State<ResultScreen> {
               const SizedBox(height: 24),
               if (outcome.isRoundRun)
                 _RoundStarsCard(
-                  outcome: outcome,
-                  correct: correct,
-                  total: total,
-                )
+                      outcome: outcome,
+                      correct: correct,
+                      total: total,
+                      text: text,
+                    )
                     .animate()
                     .fadeIn(duration: 300.ms)
                     .scale(
@@ -145,7 +143,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 _ScoreCircle(correct: correct, total: total),
               const SizedBox(height: 28),
               if (outcome.leveledUp)
-                _LevelUpCard(outcome: outcome)
+                _LevelUpCard(outcome: outcome, text: text)
                     .animate()
                     .fadeIn(delay: 150.ms, duration: 400.ms)
                     .scale(
@@ -156,7 +154,7 @@ class _ResultScreenState extends State<ResultScreen> {
                     ),
               if (outcome.leveledUp) const SizedBox(height: 12),
               if (outcome.rankUp)
-                _RankUpCard(outcome: outcome)
+                _RankUpCard(outcome: outcome, text: text)
                     .animate()
                     .fadeIn(delay: 250.ms, duration: 400.ms)
                     .scale(
@@ -168,10 +166,11 @@ class _ResultScreenState extends State<ResultScreen> {
               if (outcome.rankUp) const SizedBox(height: 16),
               if (widget.isMarathon) ...[
                 _MarathonScoreCard(
-                  correct: correct,
-                  total: total,
-                  outcome: outcome,
-                )
+                      correct: correct,
+                      total: total,
+                      outcome: outcome,
+                      text: text,
+                    )
                     .animate()
                     .fadeIn(delay: 300.ms, duration: 400.ms)
                     .scale(
@@ -183,35 +182,34 @@ class _ResultScreenState extends State<ResultScreen> {
                 const SizedBox(height: 12),
               ],
               if (widget.isMarathon && _masteredCount != null) ...[
-                _MarathonTierCard(masteredCount: _masteredCount!)
-                    .animate()
-                    .fadeIn(delay: 400.ms, duration: 400.ms),
+                _MarathonTierCard(
+                  masteredCount: _masteredCount!,
+                  text: text,
+                ).animate().fadeIn(delay: 400.ms, duration: 400.ms),
                 const SizedBox(height: 16),
               ],
               if (outcome.totalDropped > 0)
-                _DropsCard(outcome: outcome)
-                    .animate()
-                    .fadeIn(delay: 450.ms, duration: 400.ms),
+                _DropsCard(
+                  outcome: outcome,
+                  text: text,
+                ).animate().fadeIn(delay: 450.ms, duration: 400.ms),
               if (outcome.totalDropped > 0) const SizedBox(height: 16),
-              _StatRow(
-                label: 'Level',
-                value: '${outcome.newLevel}',
-              ),
+              _StatRow(label: text.level, value: '${outcome.newLevel}'),
               _StatRow(label: text.correctCount, value: '$correct / $total'),
-              _StatRow(label: 'Best streak', value: '$longestStreak'),
+              _StatRow(label: text.bestStreak, value: '$longestStreak'),
               _StatRow(
-                label: 'Run points',
+                label: text.runPoints,
                 value: '+${outcome.earned} pt',
                 highlight: true,
               ),
               _StatRow(
-                label: 'Total points',
+                label: text.totalPoints,
                 value: '${outcome.newTotalPoints} pt',
                 highlight: true,
               ),
-              _StatRow(label: 'Current rank', value: outcome.newRank.name),
+              _StatRow(label: text.currentRank, value: outcome.newRank.name),
               const SizedBox(height: 24),
-              _RewardedAdButton(),
+              _RewardedAdButton(text: text),
               const SizedBox(height: 12),
               FilledButton(
                 onPressed: () {
@@ -221,7 +219,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
                 ),
-                child: const Text('Back home'),
+                child: Text(text.backHome),
               ),
             ],
           ),
@@ -233,19 +231,20 @@ class _ResultScreenState extends State<ResultScreen> {
 
 class _DropsCard extends StatelessWidget {
   final RunOutcome outcome;
-  const _DropsCard({required this.outcome});
+  final AppText text;
+  const _DropsCard({required this.outcome, required this.text});
 
   String _labelFor(HintKind k) => switch (k) {
-        HintKind.fiftyFifty => '50:50',
-        HintKind.reading => 'Pron.',
-        HintKind.time => 'Time+',
-      };
+    HintKind.fiftyFifty => '50:50',
+    HintKind.reading => 'Pron.',
+    HintKind.time => 'Time+',
+  };
 
   IconData _iconFor(HintKind k) => switch (k) {
-        HintKind.fiftyFifty => Icons.filter_alt_rounded,
-        HintKind.reading => Icons.record_voice_over_rounded,
-        HintKind.time => Icons.more_time_rounded,
-      };
+    HintKind.fiftyFifty => Icons.filter_alt_rounded,
+    HintKind.reading => Icons.record_voice_over_rounded,
+    HintKind.time => Icons.more_time_rounded,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -265,11 +264,14 @@ class _DropsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.card_giftcard_rounded,
-                  color: scheme.onTertiaryContainer, size: 20),
+              Icon(
+                Icons.card_giftcard_rounded,
+                color: scheme.onTertiaryContainer,
+                size: 20,
+              ),
               const SizedBox(width: 6),
               Text(
-                'Items gained ×${outcome.totalDropped}',
+                text.itemsGained(outcome.totalDropped),
                 style: notoSerifJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -286,7 +288,9 @@ class _DropsCard extends StatelessWidget {
               for (final e in entries)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 6),
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: scheme.onTertiaryContainer.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(999),
@@ -294,8 +298,11 @@ class _DropsCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(_iconFor(e.key),
-                          size: 14, color: scheme.onTertiaryContainer),
+                      Icon(
+                        _iconFor(e.key),
+                        size: 14,
+                        color: scheme.onTertiaryContainer,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${_labelFor(e.key)} ×${e.value}',
@@ -318,7 +325,8 @@ class _DropsCard extends StatelessWidget {
 
 class _LevelUpCard extends StatelessWidget {
   final RunOutcome outcome;
-  const _LevelUpCard({required this.outcome});
+  final AppText text;
+  const _LevelUpCard({required this.outcome, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -333,11 +341,14 @@ class _LevelUpCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.trending_up_rounded,
-              color: scheme.onTertiaryContainer, size: 22),
+          Icon(
+            Icons.trending_up_rounded,
+            color: scheme.onTertiaryContainer,
+            size: 22,
+          ),
           const SizedBox(width: 10),
           Text(
-            'Level up!',
+            text.levelUp,
             style: notoSerifJp(
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -354,8 +365,11 @@ class _LevelUpCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Icon(Icons.arrow_forward_rounded,
-                color: scheme.onTertiaryContainer, size: 18),
+            child: Icon(
+              Icons.arrow_forward_rounded,
+              color: scheme.onTertiaryContainer,
+              size: 18,
+            ),
           ),
           Text(
             '${outcome.newLevel}',
@@ -373,7 +387,8 @@ class _LevelUpCard extends StatelessWidget {
 
 class _RankUpCard extends StatelessWidget {
   final RunOutcome outcome;
-  const _RankUpCard({required this.outcome});
+  final AppText text;
+  const _RankUpCard({required this.outcome, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -394,11 +409,14 @@ class _RankUpCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome_rounded,
-                  color: scheme.onPrimary, size: 20),
+              Icon(
+                Icons.auto_awesome_rounded,
+                color: scheme.onPrimary,
+                size: 20,
+              ),
               const SizedBox(width: 6),
               Text(
-                'Rank up!',
+                text.rankUp,
                 style: notoSansJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -420,8 +438,11 @@ class _RankUpCard extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Icon(Icons.arrow_forward_rounded,
-                    color: scheme.onPrimary, size: 20),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: scheme.onPrimary,
+                  size: 20,
+                ),
               ),
               Text(
                 outcome.newRank.name,
@@ -443,10 +464,12 @@ class _RoundStarsCard extends StatelessWidget {
   final RunOutcome outcome;
   final int correct;
   final int total;
+  final AppText text;
   const _RoundStarsCard({
     required this.outcome,
     required this.correct,
     required this.total,
+    required this.text,
   });
 
   @override
@@ -473,11 +496,10 @@ class _RoundStarsCard extends StatelessWidget {
       child: Column(
         children: [
           if (failed) ...[
-            Icon(Icons.error_outline_rounded,
-                color: onGrad, size: 46),
+            Icon(Icons.error_outline_rounded, color: onGrad, size: 46),
             const SizedBox(height: 8),
             Text(
-              'Round failed',
+              text.roundFailed,
               style: notoSerifJp(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
@@ -486,7 +508,7 @@ class _RoundStarsCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'You need at least $kMinCorrectToClear correct answers to clear this round ($correct / $total).',
+              text.roundFailedBody(kMinCorrectToClear, correct, total),
               textAlign: TextAlign.center,
               style: notoSansJp(
                 fontSize: 12,
@@ -515,8 +537,8 @@ class _RoundStarsCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               improved
-                  ? (prev == 0 ? 'Cleared!' : 'Best updated!')
-                  : 'This run: ☆ $stars',
+                  ? (prev == 0 ? text.cleared : text.bestUpdated)
+                  : text.thisRunStars(stars),
               style: notoSerifJp(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
@@ -526,7 +548,7 @@ class _RoundStarsCard extends StatelessWidget {
             if (prev > 0) ...[
               const SizedBox(height: 4),
               Text(
-                'Best ☆ ${stars > prev ? stars : prev}',
+                text.bestStars(stars > prev ? stars : prev),
                 style: notoSansJp(
                   fontSize: 12,
                   color: onGrad.withValues(alpha: 0.85),
@@ -544,17 +566,20 @@ class _MarathonScoreCard extends StatelessWidget {
   final int correct;
   final int total;
   final RunOutcome outcome;
+  final AppText text;
   const _MarathonScoreCard({
     required this.correct,
     required this.total,
     required this.outcome,
+    required this.text,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final updated = outcome.marathonBestUpdated;
-    final prevHasRecord = outcome.previousBestMarathon > 0 ||
+    final prevHasRecord =
+        outcome.previousBestMarathon > 0 ||
         (outcome.marathonBestUpdated && outcome.previousBestMarathon == 0);
     return Container(
       width: double.infinity,
@@ -585,7 +610,7 @@ class _MarathonScoreCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                updated ? 'Marathon best updated!' : 'Marathon record',
+                updated ? text.marathonBestUpdated : text.marathonRecord,
                 style: notoSerifJp(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -619,8 +644,10 @@ class _MarathonScoreCard extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: updated
                       ? scheme.onPrimary.withValues(alpha: 0.18)
@@ -628,7 +655,7 @@ class _MarathonScoreCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  marathonPercentile(correct, total),
+                  text.percentileLabel(marathonPercentile(correct, total)),
                   style: notoSansJp(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -643,17 +670,26 @@ class _MarathonScoreCard extends StatelessWidget {
           if (prevHasRecord && !updated) ...[
             const SizedBox(height: 6),
             Text(
-              'Best: ${outcome.newBestMarathon} / ${outcome.newBestMarathonTotal} (${marathonPercentile(outcome.newBestMarathon, outcome.newBestMarathonTotal)})',
-              style: notoSansJp(
-                fontSize: 11,
-                color: scheme.onSurfaceVariant,
+              text.bestScore(
+                outcome.newBestMarathon,
+                outcome.newBestMarathonTotal,
+                text.percentileLabel(
+                  marathonPercentile(
+                    outcome.newBestMarathon,
+                    outcome.newBestMarathonTotal,
+                  ),
+                ),
               ),
+              style: notoSansJp(fontSize: 11, color: scheme.onSurfaceVariant),
             ),
           ],
           if (updated && outcome.previousBestMarathon > 0) ...[
             const SizedBox(height: 6),
             Text(
-              'Previous best: ${outcome.previousBestMarathon} / ${outcome.newBestMarathonTotal}',
+              text.previousBest(
+                outcome.previousBestMarathon,
+                outcome.newBestMarathonTotal,
+              ),
               style: notoSansJp(
                 fontSize: 11,
                 color: scheme.onPrimary.withValues(alpha: 0.8),
@@ -668,7 +704,8 @@ class _MarathonScoreCard extends StatelessWidget {
 
 class _MarathonTierCard extends StatelessWidget {
   final int masteredCount;
-  const _MarathonTierCard({required this.masteredCount});
+  final AppText text;
+  const _MarathonTierCard({required this.masteredCount, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -689,14 +726,16 @@ class _MarathonTierCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.primaryContainer,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  'Vocabulary tier',
+                  text.vocabularyTier,
                   style: notoSansJp(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -706,7 +745,7 @@ class _MarathonTierCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                tier.percentile,
+                text.percentileLabel(tier.percentile),
                 style: notoSansJp(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -721,7 +760,7 @@ class _MarathonTierCard extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                tier.label,
+                text.tierLabel(tier.label),
                 style: notoSerifJp(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
@@ -731,7 +770,7 @@ class _MarathonTierCard extends StatelessWidget {
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  tier.subtitle,
+                  text.tierSubtitle(tier.subtitle),
                   style: notoSansJp(
                     fontSize: 12,
                     color: scheme.onSurfaceVariant,
@@ -743,12 +782,13 @@ class _MarathonTierCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             next == null
-                ? '$masteredCount mastered ・ top tier reached'
-                : '$masteredCount mastered ・ ${next.min - masteredCount} to ${next.label}',
-            style: notoSansJp(
-              fontSize: 11,
-              color: scheme.onSurfaceVariant,
-            ),
+                ? text.masteredTopTier(masteredCount)
+                : text.masteredToNext(
+                    masteredCount,
+                    next.min - masteredCount,
+                    text.tierLabel(next.label),
+                  ),
+            style: notoSansJp(fontSize: 11, color: scheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -794,10 +834,7 @@ class _ScoreCircle extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 '%',
-                style: notoSansJp(
-                  fontSize: 13,
-                  color: scheme.onSurfaceVariant,
-                ),
+                style: notoSansJp(fontSize: 13, color: scheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -826,10 +863,7 @@ class _StatRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: notoSansJp(
-              fontSize: 14,
-              color: scheme.onSurfaceVariant,
-            ),
+            style: notoSansJp(fontSize: 14, color: scheme.onSurfaceVariant),
           ),
           const Spacer(),
           Text(
@@ -848,7 +882,8 @@ class _StatRow extends StatelessWidget {
 
 class _LevelUpDialog extends StatefulWidget {
   final RunOutcome outcome;
-  const _LevelUpDialog({required this.outcome});
+  final AppText text;
+  const _LevelUpDialog({required this.outcome, required this.text});
 
   @override
   State<_LevelUpDialog> createState() => _LevelUpDialogState();
@@ -876,6 +911,7 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final o = widget.outcome;
+    final text = widget.text;
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 28),
@@ -903,8 +939,11 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.workspace_premium_rounded,
-                        size: 72, color: scheme.onPrimary)
+                Icon(
+                      Icons.workspace_premium_rounded,
+                      size: 72,
+                      color: scheme.onPrimary,
+                    )
                     .animate()
                     .scale(
                       begin: const Offset(0.3, 0.3),
@@ -919,13 +958,13 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
                     ),
                 const SizedBox(height: 12),
                 Text(
-                  'Level up!',
-                  style: notoSerifJp(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: scheme.onPrimary,
-                  ),
-                )
+                      text.levelUp,
+                      style: notoSerifJp(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: scheme.onPrimary,
+                      ),
+                    )
                     .animate()
                     .fadeIn(delay: 200.ms, duration: 300.ms)
                     .slideY(begin: 0.2, end: 0, duration: 400.ms),
@@ -944,8 +983,11 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Icon(Icons.arrow_forward_rounded,
-                          color: scheme.onPrimary, size: 24),
+                      child: Icon(
+                        Icons.arrow_forward_rounded,
+                        color: scheme.onPrimary,
+                        size: 24,
+                      ),
                     ),
                     Text(
                       '${o.newLevel}',
@@ -955,20 +997,18 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
                         height: 1,
                         color: scheme.onPrimary,
                       ),
-                    )
-                        .animate()
-                        .scale(
-                          begin: const Offset(0.6, 0.6),
-                          end: const Offset(1, 1),
-                          delay: 300.ms,
-                          duration: 500.ms,
-                          curve: Curves.easeOutBack,
-                        ),
+                    ).animate().scale(
+                      begin: const Offset(0.6, 0.6),
+                      end: const Offset(1, 1),
+                      delay: 300.ms,
+                      duration: 500.ms,
+                      curve: Curves.easeOutBack,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'New level reached!',
+                  text.newLevelReached,
                   style: notoSerifJp(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -984,7 +1024,7 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
                       backgroundColor: scheme.onPrimary,
                       foregroundColor: scheme.primary,
                     ),
-                    child: const Text('Continue'),
+                    child: Text(text.continueLabel),
                   ),
                 ),
               ],
@@ -1017,6 +1057,9 @@ class _LevelUpDialogState extends State<_LevelUpDialog> {
 }
 
 class _RewardedAdButton extends StatefulWidget {
+  final AppText text;
+  const _RewardedAdButton({required this.text});
+
   @override
   State<_RewardedAdButton> createState() => _RewardedAdButtonState();
 }
@@ -1040,7 +1083,7 @@ class _RewardedAdButtonState extends State<_RewardedAdButton> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Could not load the ad. Please try again later.',
+            widget.text.adLoadFailed,
             style: notoSansJp(fontSize: 12),
           ),
           behavior: SnackBarBehavior.floating,
@@ -1059,11 +1102,14 @@ class _RewardedAdButtonState extends State<_RewardedAdButton> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.card_giftcard_rounded,
-                color: Colors.white, size: 18),
+            const Icon(
+              Icons.card_giftcard_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
             const SizedBox(width: 8),
             Text(
-              'Item gained: $label',
+              widget.text.itemGainedWithLabel(label),
               style: notoSansJp(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -1097,17 +1143,13 @@ class _RewardedAdButtonState extends State<_RewardedAdButton> {
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(scheme.primary),
+                valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
               ),
             )
           : const Icon(Icons.play_circle_fill_rounded),
       label: Text(
-        _busy ? 'Loading ad...' : 'Watch video for item +1',
-        style: notoSerifJp(
-          fontSize: 14,
-          fontWeight: FontWeight.w800,
-        ),
+        _busy ? widget.text.loadingAd : widget.text.watchVideoForItem,
+        style: notoSerifJp(fontSize: 14, fontWeight: FontWeight.w800),
       ),
     );
   }

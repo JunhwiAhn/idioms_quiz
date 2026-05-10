@@ -13,6 +13,13 @@ enum StudyLanguage {
     }
     return StudyLanguage.ko;
   }
+
+  static StudyLanguage fromLocaleCode(String? code) {
+    final normalized = code?.toLowerCase();
+    if (normalized == 'ko') return StudyLanguage.ko;
+    if (normalized == 'ja') return StudyLanguage.ja;
+    return StudyLanguage.en;
+  }
 }
 
 class Idiom {

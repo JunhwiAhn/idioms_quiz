@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../data/app_text.dart';
+import '../data/pronunciation_service.dart';
 import '../data/score_service.dart' show kMasteryThreshold;
 import '../theme/app_theme.dart';
 import '../models/idiom.dart';
@@ -72,31 +74,36 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   List<Idiom> get _visible {
     final q = _query.trim();
-    return _sorted.where((idiom) {
-      if (_filter == _Filter.mastered &&
-          !widget.mastered.contains(idiom.idiom)) {
-        return false;
-      }
-      if (_filter == _Filter.locked &&
-          widget.mastered.contains(idiom.idiom)) {
-        return false;
-      }
-      if (q.isEmpty) return true;
-      return idiom.idiom.contains(q) ||
-          idiom.reading.contains(q) ||
-          idiom.meaningFor(widget.language).contains(q) ||
-          idiom.level.toLowerCase().contains(q.toLowerCase());
-    }).toList(growable: false);
+    return _sorted
+        .where((idiom) {
+          if (_filter == _Filter.mastered &&
+              !widget.mastered.contains(idiom.idiom)) {
+            return false;
+          }
+          if (_filter == _Filter.locked &&
+              widget.mastered.contains(idiom.idiom)) {
+            return false;
+          }
+          if (q.isEmpty) return true;
+          return idiom.idiom.contains(q) ||
+              idiom.reading.contains(q) ||
+              idiom.meaningFor(widget.language).contains(q) ||
+              idiom.level.toLowerCase().contains(q.toLowerCase());
+        })
+        .toList(growable: false);
   }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final visible = _visible;
+    final text = AppText(widget.language);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Wordbook ${widget.mastered.length}/${widget.idioms.length}'),
+        title: Text(
+          text.wordbookTitle(widget.mastered.length, widget.idioms.length),
+        ),
       ),
       floatingActionButton: AnimatedSlide(
         duration: const Duration(milliseconds: 200),
@@ -106,7 +113,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
           opacity: _showToTop ? 1 : 0,
           child: FloatingActionButton.small(
             heroTag: 'collection-to-top',
-            tooltip: 'Back to top',
+            tooltip: text.backToTop,
             onPressed: _showToTop ? _scrollToTop : null,
             child: const Icon(Icons.keyboard_arrow_up_rounded),
           ),
@@ -117,20 +124,22 @@ class _CollectionScreenState extends State<CollectionScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: scheme.secondaryContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline_rounded,
-                      size: 16, color: scheme.onSecondaryContainer),
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: scheme.onSecondaryContainer,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Unlock: answer correctly $kMasteryThreshold time or more',
+                      text.unlockHint(kMasteryThreshold),
                       style: notoSansJp(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -149,18 +158,20 @@ class _CollectionScreenState extends State<CollectionScreen> {
               textInputAction: TextInputAction.search,
               style: notoSansJp(fontSize: 14, color: scheme.onSurface),
               decoration: InputDecoration(
-                hintText: 'Search Spanish, meaning, or level',
+                hintText: text.searchWordbookHint,
                 hintStyle: notoSansJp(
                   fontSize: 13,
                   color: scheme.onSurfaceVariant,
                 ),
-                prefixIcon: Icon(Icons.search_rounded,
-                    color: scheme.onSurfaceVariant),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: scheme.onSurfaceVariant,
+                ),
                 suffixIcon: _query.isEmpty
                     ? null
                     : IconButton(
                         icon: const Icon(Icons.close_rounded),
-                        tooltip: 'Clear',
+                        tooltip: text.clear,
                         onPressed: () {
                           _searchCtrl.clear();
                           setState(() => _query = '');
@@ -170,7 +181,9 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 filled: true,
                 fillColor: scheme.surfaceContainerHighest,
                 contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -184,19 +197,19 @@ class _CollectionScreenState extends State<CollectionScreen> {
             child: Row(
               children: [
                 _FilterChip(
-                  label: 'All',
+                  label: text.filterAll,
                   selected: _filter == _Filter.all,
                   onTap: () => setState(() => _filter = _Filter.all),
                 ),
                 const SizedBox(width: 6),
                 _FilterChip(
-                  label: 'Unlocked',
+                  label: text.unlocked,
                   selected: _filter == _Filter.mastered,
                   onTap: () => setState(() => _filter = _Filter.mastered),
                 ),
                 const SizedBox(width: 6),
                 _FilterChip(
-                  label: 'Locked',
+                  label: text.locked,
                   selected: _filter == _Filter.locked,
                   onTap: () => setState(() => _filter = _Filter.locked),
                 ),
@@ -217,29 +230,28 @@ class _CollectionScreenState extends State<CollectionScreen> {
           ),
           Expanded(
             child: visible.isEmpty
-                ? _EmptyState(query: _query)
+                ? _EmptyState(query: _query, text: text)
                 : GridView.builder(
                     controller: _scrollCtrl,
                     padding: const EdgeInsets.fromLTRB(16, 6, 16, 80),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisExtent: 140,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
+                          crossAxisCount: 2,
+                          mainAxisExtent: 140,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
                     cacheExtent: 600,
                     itemCount: visible.length,
                     itemBuilder: (context, i) {
                       final idiom = visible[i];
-                      final isMastered =
-                          widget.mastered.contains(idiom.idiom);
-                      final count =
-                          widget.correctCounts[idiom.idiom] ?? 0;
+                      final isMastered = widget.mastered.contains(idiom.idiom);
+                      final count = widget.correctCounts[idiom.idiom] ?? 0;
                       return _CollectionCard(
                         key: ValueKey(idiom.idiom),
                         idiom: idiom,
                         language: widget.language,
+                        text: text,
                         mastered: isMastered,
                         correctCount: count,
                         onTap: () => showDialog<void>(
@@ -257,6 +269,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                               child: _IdiomSheet(
                                 idiom: idiom,
                                 language: widget.language,
+                                text: text,
                                 mastered: isMastered,
                                 correctCount: count,
                               ),
@@ -293,8 +306,7 @@ class _FilterChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         onTap: onTap,
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Text(
             label,
             style: notoSansJp(
@@ -311,7 +323,8 @@ class _FilterChip extends StatelessWidget {
 
 class _EmptyState extends StatelessWidget {
   final String query;
-  const _EmptyState({required this.query});
+  final AppText text;
+  const _EmptyState({required this.query, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -320,15 +333,15 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.search_off_rounded,
-              size: 48, color: scheme.onSurfaceVariant),
+          Icon(
+            Icons.search_off_rounded,
+            size: 48,
+            color: scheme.onSurfaceVariant,
+          ),
           const SizedBox(height: 10),
           Text(
-            query.trim().isEmpty ? 'No words found' : 'No words match "$query"',
-            style: notoSansJp(
-              fontSize: 13,
-              color: scheme.onSurfaceVariant,
-            ),
+            query.trim().isEmpty ? text.noWordsFound : text.noWordsMatch(query),
+            style: notoSansJp(fontSize: 13, color: scheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -339,6 +352,7 @@ class _EmptyState extends StatelessWidget {
 class _CollectionCard extends StatelessWidget {
   final Idiom idiom;
   final StudyLanguage language;
+  final AppText text;
   final bool mastered;
   final int correctCount;
   final VoidCallback? onTap;
@@ -347,6 +361,7 @@ class _CollectionCard extends StatelessWidget {
     super.key,
     required this.idiom,
     required this.language,
+    required this.text,
     required this.mastered,
     required this.correctCount,
     required this.onTap,
@@ -375,10 +390,7 @@ class _CollectionCard extends StatelessWidget {
               color: mastered ? null : scheme.surface,
               border: mastered
                   ? null
-                  : Border.all(
-                      color: scheme.outlineVariant,
-                      width: 1,
-                    ),
+                  : Border.all(color: scheme.outlineVariant, width: 1),
               boxShadow: mastered
                   ? [
                       BoxShadow(
@@ -404,8 +416,7 @@ class _CollectionCard extends StatelessWidget {
                           fontWeight: FontWeight.w800,
                           color: mastered
                               ? scheme.onPrimary
-                              : scheme.onSurface
-                                  .withValues(alpha: 0.55),
+                              : scheme.onSurface.withValues(alpha: 0.55),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -415,8 +426,7 @@ class _CollectionCard extends StatelessWidget {
                           fontSize: 12,
                           color: mastered
                               ? scheme.onPrimary.withValues(alpha: 0.85)
-                              : scheme.onSurfaceVariant
-                                  .withValues(alpha: 0.7),
+                              : scheme.onSurfaceVariant.withValues(alpha: 0.7),
                           letterSpacing: 1,
                         ),
                       ),
@@ -429,7 +439,9 @@ class _CollectionCard extends StatelessWidget {
                     right: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: scheme.onPrimary.withValues(alpha: 0.22),
                         borderRadius: BorderRadius.circular(999),
@@ -437,11 +449,14 @@ class _CollectionCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.check_rounded,
-                              size: 12, color: scheme.onPrimary),
+                          Icon(
+                            Icons.check_rounded,
+                            size: 12,
+                            color: scheme.onPrimary,
+                          ),
                           const SizedBox(width: 2),
                           Text(
-                            'Unlocked',
+                            text.unlocked,
                             style: notoSansJp(
                               fontSize: 9,
                               fontWeight: FontWeight.w800,
@@ -458,7 +473,9 @@ class _CollectionCard extends StatelessWidget {
                     right: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: scheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(999),
@@ -478,7 +495,9 @@ class _CollectionCard extends StatelessWidget {
                   left: 8,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 2),
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: (mastered ? scheme.onPrimary : scheme.primary)
                           .withValues(alpha: 0.18),
@@ -506,11 +525,13 @@ class _CollectionCard extends StatelessWidget {
 class _IdiomSheet extends StatelessWidget {
   final Idiom idiom;
   final StudyLanguage language;
+  final AppText text;
   final bool mastered;
   final int correctCount;
   const _IdiomSheet({
     required this.idiom,
     required this.language,
+    required this.text,
     required this.mastered,
     required this.correctCount,
   });
@@ -528,7 +549,9 @@ class _IdiomSheet extends StatelessWidget {
             Center(
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.primaryContainer,
                   borderRadius: BorderRadius.circular(999),
@@ -536,11 +559,14 @@ class _IdiomSheet extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.check_rounded,
-                        size: 14, color: scheme.onPrimaryContainer),
+                    Icon(
+                      Icons.check_rounded,
+                      size: 14,
+                      color: scheme.onPrimaryContainer,
+                    ),
                     const SizedBox(width: 4),
                     Text(
-                      'Unlocked',
+                      text.unlocked,
                       style: notoSansJp(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
@@ -555,7 +581,9 @@ class _IdiomSheet extends StatelessWidget {
             Center(
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(999),
@@ -563,11 +591,14 @@ class _IdiomSheet extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.lock_outline_rounded,
-                        size: 14, color: scheme.onSurfaceVariant),
+                    Icon(
+                      Icons.lock_outline_rounded,
+                      size: 14,
+                      color: scheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 4),
                     Text(
-                      'Locked ($correctCount / $kMasteryThreshold)',
+                      text.lockedProgress(correctCount, kMasteryThreshold),
                       style: notoSansJp(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
@@ -579,15 +610,28 @@ class _IdiomSheet extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 12),
-          Center(
-            child: Text(
-              idiom.idiom,
-              style: notoSerifJp(
-                fontSize: 38,
-                fontWeight: FontWeight.w800,
-                color: scheme.onSurface,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  idiom.idiom,
+                  textAlign: TextAlign.center,
+                  style: notoSerifJp(
+                    fontSize: 38,
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onSurface,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                tooltip: text.playPronunciation,
+                onPressed: () =>
+                    PronunciationService.instance.speakSpanish(idiom.idiom),
+                icon: const Icon(Icons.volume_up_rounded),
+              ),
+            ],
           ),
           const SizedBox(height: 6),
           Center(
@@ -614,15 +658,13 @@ class _IdiomSheet extends StatelessWidget {
               style: notoSerifJp(
                 fontSize: 15,
                 height: 1.6,
-                color: mastered
-                    ? scheme.onPrimaryContainer
-                    : scheme.onSurface,
+                color: mastered ? scheme.onPrimaryContainer : scheme.onSurface,
               ),
             ),
           ),
           const SizedBox(height: 12),
           _InfoRow(label: 'DELE', value: idiom.level),
-          _InfoRow(label: 'Tipo', value: idiom.partOfSpeech),
+          _InfoRow(label: text.partOfSpeech, value: idiom.partOfSpeech),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(14),
@@ -634,7 +676,7 @@ class _IdiomSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Ejemplo',
+                  text.example,
                   style: notoSansJp(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -656,11 +698,8 @@ class _IdiomSheet extends StatelessWidget {
           if (!mastered) ...[
             const SizedBox(height: 10),
             Text(
-              'Answer correctly $kMasteryThreshold time or more to unlock this word.',
-              style: notoSansJp(
-                fontSize: 11,
-                color: scheme.onSurfaceVariant,
-              ),
+              text.lockedUnlockBody(kMasteryThreshold),
+              style: notoSansJp(fontSize: 11, color: scheme.onSurfaceVariant),
             ),
           ],
         ],

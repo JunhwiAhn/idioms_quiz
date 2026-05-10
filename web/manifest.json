@@ -1,6 +1,6 @@
 {
-    "name": "Español Dojo",
-    "short_name": "Español Dojo",
+    "name": "Vocab Dojo: Spanish(DELE)",
+    "short_name": "Vocab Dojo",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFF8EF",

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../data/app_text.dart';
+import '../models/idiom.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
 
@@ -26,9 +28,7 @@ class _SplashScreenState extends State<SplashScreen>
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.06),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
     _goHomeAfter();
   }
@@ -55,6 +55,11 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final text = AppText(
+      StudyLanguage.fromLocaleCode(
+        Localizations.localeOf(context).languageCode,
+      ),
+    );
     return Scaffold(
       backgroundColor: scheme.surface,
       body: Center(
@@ -77,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Español Dojo',
+                  text.appName,
                   style: notoSerifJp(
                     fontSize: 32,
                     fontWeight: FontWeight.w800,
@@ -86,7 +91,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Una palabra al día',
+                  text.oneWordADay,
                   style: notoSansJp(
                     fontSize: 12,
                     fontStyle: FontStyle.italic,

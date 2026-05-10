@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../data/app_text.dart';
 import '../data/score_service.dart';
 import '../data/stage_plan.dart';
 import '../models/idiom.dart';
@@ -48,8 +49,9 @@ class _StageScreenState extends State<StageScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final snap = _snap;
+    final text = AppText(widget.language);
     return Scaffold(
-      appBar: AppBar(title: const Text('Stage Mode')),
+      appBar: AppBar(title: Text(text.stageMode)),
       body: snap == null
           ? const Center(child: CircularProgressIndicator())
           : ListView.separated(
@@ -69,6 +71,7 @@ class _StageScreenState extends State<StageScreen> {
                   unlocked: unlocked,
                   onTap: unlocked ? () => _openStage(i) : null,
                   scheme: scheme,
+                  text: text,
                 );
               },
             ),
@@ -83,6 +86,7 @@ class _StageCard extends StatelessWidget {
   final bool unlocked;
   final VoidCallback? onTap;
   final ColorScheme scheme;
+  final AppText text;
 
   const _StageCard({
     required this.index,
@@ -91,6 +95,7 @@ class _StageCard extends StatelessWidget {
     required this.unlocked,
     required this.onTap,
     required this.scheme,
+    required this.text,
   });
 
   @override
@@ -101,10 +106,7 @@ class _StageCard extends StatelessWidget {
               Color.lerp(scheme.primary, scheme.tertiary, index / 4)!,
               Color.lerp(scheme.tertiary, scheme.primary, index / 4)!,
             ]
-          : [
-              scheme.surfaceContainerHighest,
-              scheme.surfaceContainerHigh,
-            ],
+          : [scheme.surfaceContainerHighest, scheme.surfaceContainerHigh],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     );
@@ -165,7 +167,7 @@ class _StageCard extends StatelessWidget {
                     Icon(Icons.chevron_right_rounded, color: textOn),
                   if (!unlocked)
                     Text(
-                      'Clear half of previous stage',
+                      text.clearHalfPreviousStage,
                       style: notoSansJp(
                         fontSize: 10,
                         color: textOn.withValues(alpha: 0.85),

@@ -1,6 +1,25 @@
 import 'dart:math';
 import '../models/idiom.dart';
 
+const int kCrosswordStageCount = 20;
+const int kCrosswordPuzzlesPerStage = 12;
+const int kCrosswordWordsPerStage = kCrosswordPuzzlesPerStage * 2;
+
+class CrosswordStageSpec {
+  final int index;
+  final String level;
+  final int targetDifficulty;
+
+  const CrosswordStageSpec({
+    required this.index,
+    required this.level,
+    required this.targetDifficulty,
+  });
+
+  String get title => 'Puzzle ${index + 1}';
+  String get levelLabel => 'DELE $level';
+}
+
 /// A compact crossword puzzle consisting of two 4-letter Spanish words that
 /// share exactly one letter. Laid out on a 4×4 grid.
 class CrosswordPuzzle {
@@ -61,6 +80,22 @@ class CrosswordBank {
 
   int get pairCount => _pairs.length;
 
+  CrosswordStageSpec stageSpec(int index) {
+    final safe = index.clamp(0, kCrosswordStageCount - 1).toInt();
+    final level = switch (safe ~/ 4) {
+      0 => 'A1',
+      1 => 'A2',
+      2 => 'B1',
+      3 => 'B2',
+      _ => 'C1',
+    };
+    return CrosswordStageSpec(
+      index: safe,
+      level: level,
+      targetDifficulty: 1 + (safe * 4 ~/ kCrosswordStageCount),
+    );
+  }
+
   static CrosswordBank build(List<Idiom> pool) {
     final crosswordPool =
         pool.where((entry) => entry.idiom.split('').length == 4).toList();
@@ -90,6 +125,34 @@ class CrosswordBank {
     final indices = List<int>.generate(_pairs.length, (i) => i)..shuffle(rng);
     final picked = indices.take(n).toList();
     return picked.map((i) => _buildPuzzle(_pairs[i], rng)).toList();
+  }
+
+  List<CrosswordPuzzle> sampleStagePuzzles(
+    int stageIndex, {
+    int count = kCrosswordPuzzlesPerStage,
+    int? seed,
+  }) {
+    final spec = stageSpec(stageIndex);
+    final rng = Random(seed ?? DateTime.now().microsecondsSinceEpoch);
+    final ranked = List<_PairRef>.from(_pairs)
+      ..sort((a, b) {
+        final aDelta = (_pairScore(a) - spec.targetDifficulty).abs();
+        final bDelta = (_pairScore(b) - spec.targetDifficulty).abs();
+        if (aDelta != bDelta) return aDelta.compareTo(bDelta);
+        return _pairScore(a).compareTo(_pairScore(b));
+      });
+
+    final windowSize = max(count * 5, 60).clamp(count, ranked.length).toInt();
+    final window = ranked.take(windowSize).toList()..shuffle(rng);
+    final picked = window.take(count).toList()
+      ..sort((a, b) => _pairScore(a).compareTo(_pairScore(b)));
+    return picked.map((p) => _buildPuzzle(p, rng)).toList();
+  }
+
+  double _pairScore(_PairRef p) {
+    final a = _pool[p.a];
+    final b = _pool[p.b];
+    return (a.difficulty + b.difficulty) / 2;
   }
 
   CrosswordPuzzle _buildPuzzle(_PairRef p, Random rng) {

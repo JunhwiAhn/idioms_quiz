@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../data/app_text.dart';
 import '../data/audio_service.dart';
+import '../data/pronunciation_service.dart';
 import '../data/quiz_session.dart';
 import '../data/score_service.dart';
 import '../data/stage_plan.dart' show starsForRound;
+import '../models/idiom.dart';
 import '../theme/app_theme.dart';
 import 'result_screen.dart';
 
@@ -29,8 +31,7 @@ class QuizScreen extends StatefulWidget {
     this.roundRoundIndex,
   });
 
-  bool get isStageRound =>
-      roundStageIndex != null && roundRoundIndex != null;
+  bool get isStageRound => roundStageIndex != null && roundRoundIndex != null;
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -81,15 +82,6 @@ class _QuizScreenState extends State<QuizScreen> {
     });
   }
 
-  bool _shouldShowChoice(int i) {
-    if (!_revealed) return true;
-    // Answer was correct → show all for completeness.
-    if (_picked == _q.correctIndex) return true;
-    // Answer was wrong (or timed out) → show only the picked wrong tile
-    // and the correct answer; hide everything else.
-    return i == _picked || i == _q.correctIndex;
-  }
-
   void _timeOut() {
     if (_revealed) return;
     // Treat as wrong — submit a pick that cannot match correct.
@@ -125,6 +117,9 @@ class _QuizScreenState extends State<QuizScreen> {
       }
     });
   }
+
+  Future<void> _speak(String text) =>
+      PronunciationService.instance.speakSpanish(text);
 
   Future<void> _next() async {
     widget.session.advance();
@@ -205,8 +200,10 @@ class _QuizScreenState extends State<QuizScreen> {
           _readingRevealed = true;
           break;
         case HintKind.time:
-          _secondsLeft = (_secondsLeft + kTimeHintBonus)
-              .clamp(0, kQuestionSeconds);
+          _secondsLeft = (_secondsLeft + kTimeHintBonus).clamp(
+            0,
+            kQuestionSeconds,
+          );
           break;
       }
     });
@@ -234,14 +231,16 @@ class _QuizScreenState extends State<QuizScreen> {
             padding: const EdgeInsets.only(right: 8),
             child: Center(
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.primaryContainer,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  _q.mode.label,
+                  text.quizModeLabel(_q.mode.name),
                   style: notoSansJp(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -259,102 +258,107 @@ class _QuizScreenState extends State<QuizScreen> {
             children: [
               LinearProgressIndicator(
                 value: progress,
-            minHeight: 4,
-            backgroundColor: scheme.surfaceContainerHighest,
-            valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _TimerBar(
-                    secondsLeft: _secondsLeft,
-                    totalSeconds: kQuestionSeconds,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    switch (_q.mode) {
-                      QuizMode.wordLookup => text.meaningToWord,
-                      QuizMode.sentenceBlank => text.blankQuestion,
-                      QuizMode.translationLookup => text.wordToMeaning,
-                    },
-                    textAlign: TextAlign.center,
-                    style: notoSansJp(
-                      fontSize: 14,
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _PromptDisplay(
-                    question: _q,
-                    readingRevealed: _readingRevealed,
-                    fullReveal: _revealed,
-                  ),
-                  if (_revealed) ...[
-                    const SizedBox(height: 14),
-                    _MeaningRevealCard(question: _q)
-                        .animate()
-                        .fadeIn(duration: 300.ms),
-                  ],
-                  const SizedBox(height: 24),
-                  _HintBar(
-                    hints: _hints,
-                    usable: {
-                      for (final k in HintKind.values) k: _hintUsable(k),
-                    },
-                    onUse: _useHint,
-                  ),
-                  if (_lastDrop != null) ...[
-                    const SizedBox(height: 10),
-                    _DropBanner(kind: _lastDrop!)
-                        .animate(key: ValueKey(_index))
-                        .fadeIn(duration: 250.ms)
-                        .slideY(begin: -0.2, end: 0, duration: 300.ms),
-                  ],
-                  const SizedBox(height: 20),
-                  for (int i = 0; i < _q.choices.length; i++)
-                    if (_shouldShowChoice(i))
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _ChoiceTile(
-                          index: i,
-                          text: _q.choices[i],
-                          subText: _q.mode == QuizMode.wordLookup
-                              ? _q.readingOf[_q.choices[i]]
-                              : null,
-                          picked: _picked,
-                          correct: _q.correctIndex,
-                          revealed: _revealed,
-                          eliminated: _eliminated.contains(i),
-                          onTap: () => _pick(i),
+                minHeight: 4,
+                backgroundColor: scheme.surfaceContainerHighest,
+                valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _TimerBar(
+                        secondsLeft: _secondsLeft,
+                        totalSeconds: kQuestionSeconds,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        switch (_q.mode) {
+                          QuizMode.wordLookup => text.meaningToWord,
+                          QuizMode.sentenceBlank => text.blankQuestion,
+                          QuizMode.translationLookup => text.wordToMeaning,
+                        },
+                        textAlign: TextAlign.center,
+                        style: notoSansJp(
+                          fontSize: 14,
+                          color: scheme.onSurfaceVariant,
                         ),
                       ),
-                ],
-              ),
-            ),
-          ),
-          SafeArea(
-            minimum: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: _revealed ? 1 : 0,
-              child: FilledButton(
-                onPressed: _revealed ? _next : null,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
+                      const SizedBox(height: 24),
+                      _PromptDisplay(
+                        question: _q,
+                        readingRevealed: _readingRevealed,
+                        fullReveal: _revealed,
+                        onSpeak: _speak,
+                      ),
+                      if (_revealed) ...[
+                        const SizedBox(height: 14),
+                        _MeaningRevealCard(
+                          question: _q,
+                          onSpeak: _speak,
+                        ).animate().fadeIn(duration: 300.ms),
+                      ],
+                      const SizedBox(height: 24),
+                      _HintBar(
+                        hints: _hints,
+                        usable: {
+                          for (final k in HintKind.values) k: _hintUsable(k),
+                        },
+                        onUse: _useHint,
+                      ),
+                      if (_lastDrop != null) ...[
+                        const SizedBox(height: 10),
+                        _DropBanner(kind: _lastDrop!, language: _q.language)
+                            .animate(key: ValueKey(_index))
+                            .fadeIn(duration: 250.ms)
+                            .slideY(begin: -0.2, end: 0, duration: 300.ms),
+                      ],
+                      const SizedBox(height: 20),
+                      for (int i = 0; i < _q.choices.length; i++)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _ChoiceTile(
+                            index: i,
+                            text: _q.choices[i],
+                            subText: _q.mode == QuizMode.wordLookup
+                                ? _q.readingOf[_q.choices[i]]
+                                : null,
+                            picked: _picked,
+                            correct: _q.correctIndex,
+                            revealed: _revealed,
+                            eliminated: _eliminated.contains(i),
+                            speakTooltip: text.playPronunciation,
+                            onSpeak: _q.mode == QuizMode.wordLookup
+                                ? () => _speak(_q.choices[i])
+                                : null,
+                            onTap: () => _pick(i),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-                child: Text(
-                  widget.session.currentIndex == _total - 1
-                      ? 'See result'
-                      : 'Next question',
+              ),
+              SafeArea(
+                minimum: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: _revealed ? 1 : 0,
+                  child: FilledButton(
+                    onPressed: _revealed ? _next : null,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(56),
+                    ),
+                    child: Text(
+                      widget.session.currentIndex == _total - 1
+                          ? text.seeResult
+                          : text.nextQuestion,
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
           // Top center burst
           Align(
             alignment: Alignment.topCenter,
@@ -425,11 +429,13 @@ class _PromptDisplay extends StatelessWidget {
   final QuizQuestion question;
   final bool readingRevealed;
   final bool fullReveal;
+  final Future<void> Function(String text) onSpeak;
 
   const _PromptDisplay({
     required this.question,
     required this.readingRevealed,
     required this.fullReveal,
+    required this.onSpeak,
   });
 
   @override
@@ -507,10 +513,22 @@ class _PromptDisplay extends StatelessWidget {
 
     return Column(
       children: [
-        Text(
-          idiom.idiom,
-          textAlign: TextAlign.center,
-          style: AppTheme.idiomDisplay(context),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(
+                idiom.idiom,
+                textAlign: TextAlign.center,
+                style: AppTheme.idiomDisplay(context),
+              ),
+            ),
+            const SizedBox(width: 8),
+            _SpeakButton(
+              tooltip: AppText(question.language).playPronunciation,
+              onPressed: () => onSpeak(idiom.idiom),
+            ),
+          ],
         ).animate(key: ValueKey(idiom.idiom)).fadeIn(duration: 350.ms),
         const SizedBox(height: 12),
         AnimatedOpacity(
@@ -573,23 +591,25 @@ class _LevelChip extends StatelessWidget {
 
 class _DropBanner extends StatelessWidget {
   final HintKind kind;
-  const _DropBanner({required this.kind});
+  final StudyLanguage language;
+  const _DropBanner({required this.kind, required this.language});
 
   String get _label => switch (kind) {
-        HintKind.fiftyFifty => '50:50',
-        HintKind.reading => 'Pron.',
-        HintKind.time => 'Time+',
-      };
+    HintKind.fiftyFifty => '50:50',
+    HintKind.reading => 'Pron.',
+    HintKind.time => 'Time+',
+  };
 
   IconData get _icon => switch (kind) {
-        HintKind.fiftyFifty => Icons.filter_alt_rounded,
-        HintKind.reading => Icons.record_voice_over_rounded,
-        HintKind.time => Icons.more_time_rounded,
-      };
+    HintKind.fiftyFifty => Icons.filter_alt_rounded,
+    HintKind.reading => Icons.record_voice_over_rounded,
+    HintKind.time => Icons.more_time_rounded,
+  };
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final text = AppText(language);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -598,11 +618,14 @@ class _DropBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.card_giftcard_rounded,
-              color: scheme.onTertiaryContainer, size: 20),
+          Icon(
+            Icons.card_giftcard_rounded,
+            color: scheme.onTertiaryContainer,
+            size: 20,
+          ),
           const SizedBox(width: 8),
           Text(
-            'Item gained!',
+            text.itemGained,
             style: notoSerifJp(
               fontSize: 13,
               fontWeight: FontWeight.w800,
@@ -754,6 +777,8 @@ class _ChoiceTile extends StatelessWidget {
   final int correct;
   final bool revealed;
   final bool eliminated;
+  final String speakTooltip;
+  final VoidCallback? onSpeak;
   final VoidCallback onTap;
 
   const _ChoiceTile({
@@ -764,6 +789,8 @@ class _ChoiceTile extends StatelessWidget {
     required this.correct,
     required this.revealed,
     required this.eliminated,
+    required this.speakTooltip,
+    required this.onSpeak,
     required this.onTap,
   });
 
@@ -887,6 +914,14 @@ class _ChoiceTile extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (onSpeak != null) ...[
+                    const SizedBox(width: 8),
+                    _SpeakButton(
+                      tooltip: speakTooltip,
+                      onPressed: onSpeak!,
+                      compact: true,
+                    ),
+                  ],
                   if (trailing != null) ...[
                     const SizedBox(width: 8),
                     Icon(trailing, color: trailingColor),
@@ -970,7 +1005,8 @@ class _TimerBar extends StatelessWidget {
 
 class _MeaningRevealCard extends StatelessWidget {
   final QuizQuestion question;
-  const _MeaningRevealCard({required this.question});
+  final Future<void> Function(String text) onSpeak;
+  const _MeaningRevealCard({required this.question, required this.onSpeak});
 
   @override
   Widget build(BuildContext context) {
@@ -988,15 +1024,22 @@ class _MeaningRevealCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                idiom.idiom,
-                style: notoSerifJp(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onPrimaryContainer,
+              Expanded(
+                child: Text(
+                  idiom.idiom,
+                  style: notoSerifJp(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onPrimaryContainer,
+                  ),
                 ),
               ),
-              const SizedBox(width: 10),
+              _SpeakButton(
+                tooltip: AppText(question.language).playPronunciation,
+                onPressed: () => onSpeak(idiom.idiom),
+                compact: true,
+              ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
@@ -1050,6 +1093,34 @@ class _MeaningRevealCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _SpeakButton extends StatelessWidget {
+  final String tooltip;
+  final VoidCallback onPressed;
+  final bool compact;
+
+  const _SpeakButton({
+    required this.tooltip,
+    required this.onPressed,
+    this.compact = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return IconButton.filledTonal(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(Icons.volume_up_rounded, size: compact ? 18 : 20),
+      style: IconButton.styleFrom(
+        minimumSize: Size.square(compact ? 34 : 40),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        backgroundColor: scheme.secondaryContainer,
+        foregroundColor: scheme.onSecondaryContainer,
       ),
     );
   }
