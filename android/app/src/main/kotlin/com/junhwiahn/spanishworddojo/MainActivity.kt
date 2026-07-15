@@ -1,4 +1,4 @@
-package com.junhwiahn.idioms_quiz
+package com.junhwiahn.spanishworddojo
 
 import io.flutter.embedding.android.FlutterActivity
 
