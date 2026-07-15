@@ -49,3 +49,8 @@ app.*.map.json
 **/*.jks
 **/*.keystore
 android/build/
+
+# Local work dirs
+/tmp/
+emulator_screen.png
+codex_web_test.*

@@ -16,25 +16,36 @@ class _SplashScreenState extends State<SplashScreen>
   late final AnimationController _controller;
   late final Animation<double> _fade;
   late final Animation<Offset> _slide;
+  late final Animation<double> _progress;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 1600),
     );
-    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _slide = Tween<Offset>(
-      begin: const Offset(0, 0.06),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _controller.forward();
+    _fade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0, 0.45, curve: Curves.easeOut),
+    );
+    _slide = Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0, 0.45, curve: Curves.easeOut),
+          ),
+        );
+    _progress = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _goHomeAfter();
   }
 
   Future<void> _goHomeAfter() async {
-    await Future<void>.delayed(const Duration(milliseconds: 1600));
+    try {
+      await _controller.forward().orCancel;
+    } on TickerCanceled {
+      return;
+    }
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
@@ -70,17 +81,6 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    'assets/images/favicon.png',
-                    width: 96,
-                    height: 96,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                  ),
-                ),
-                const SizedBox(height: 20),
                 Text(
                   text.appName,
                   style: notoSerifJp(
@@ -89,13 +89,33 @@ class _SplashScreenState extends State<SplashScreen>
                     color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 14),
                 Text(
                   text.oneWordADay,
                   style: notoSansJp(
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
                     color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
+                  ),
+                ),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: 220,
+                  child: AnimatedBuilder(
+                    animation: _progress,
+                    builder: (context, _) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          value: _progress.value,
+                          minHeight: 6,
+                          backgroundColor: scheme.surfaceContainerHighest,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            scheme.primary,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

@@ -7,7 +7,7 @@ and original assets of this project (see `LICENSE`).
 
 ## Fonts
 
-- **Noto Sans JP / Noto Serif JP** (Regular / SemiBold / Bold / ExtraBold)
+- **Noto Sans KR / Noto Sans JP / Noto Serif JP** (variable and static weights)
   - License: SIL Open Font License 1.1 (OFL-1.1)
   - Copyright: Copyright 2014-2021 Google LLC
   - Source: https://fonts.google.com/noto

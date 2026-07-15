@@ -1,5 +1,5 @@
 name: idioms_quiz
-description: "Vocab Dojo: Spanish(DELE) — DELE語彙をステージ・マラソン・単語帳で鍛えるスペイン語学習アプリ。"
+description: "DELE Voca Dojo - Spanish vocabulary quiz app for DELE prep (A1-B1)."
 publish_to: 'none'
 version: 1.0.0+5
 
@@ -17,6 +17,7 @@ dependencies:
   confetti: ^0.8.0
   url_launcher: ^6.3.1
   flutter_tts: ^4.2.5
+  google_mobile_ads: ^9.0.0
 
 dev_dependencies:
   flutter_test:
@@ -29,22 +30,29 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/images/app_icon.png"
   adaptive_icon_background: "#FAF6F2"
-  adaptive_icon_foreground: "assets/images/app_icon.png"
+  adaptive_icon_foreground: "assets/images/home_brand_icon.png"
+  adaptive_icon_foreground_inset: 24
   web:
     generate: true
-    image_path: "assets/images/favicon.png"
+    image_path: "assets/images/app_icon.png"
     background_color: "#FAF6F2"
     theme_color: "#B03A2E"
+  macos:
+    generate: true
+    image_path: "assets/images/app_icon.png"
 
 flutter:
   uses-material-design: true
 
   assets:
-    - assets/data/idioms.json
+    - assets/data/dele_a1_a2_b1_problem_bank.enriched.json
     - assets/audio/
     - assets/images/
 
   fonts:
+    - family: Noto Sans KR
+      fonts:
+        - asset: assets/fonts/NotoSansKR-VF.ttf
     - family: Noto Sans JP
       fonts:
         - asset: assets/fonts/NotoSansJP-Regular.ttf

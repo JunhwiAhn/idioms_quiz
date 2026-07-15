@@ -1,11 +1,11 @@
 {
-    "name": "Vocab Dojo: Spanish(DELE)",
-    "short_name": "Vocab Dojo",
+    "name": "DELE Voca Dojo",
+    "short_name": "DELE Voca Dojo",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FFF8EF",
-    "theme_color": "#C44D2D",
-    "description": "DELE語彙をゲーム感覚で鍛えるスペイン語学習アプリ。",
+    "background_color": "#FAF6F2",
+    "theme_color": "#B03A2E",
+    "description": "DELE A1 to B1 Spanish vocabulary quiz app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

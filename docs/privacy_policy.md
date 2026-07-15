@@ -1,48 +1,136 @@
-# プライバシーポリシー — 四字熟語道場
+# 개인정보처리방침 / Privacy Policy — DELE Voca Dojo
 
-**最終更新日: 2026年4月23日**
+**최종 업데이트 / Last updated: 2026-07-13**
 
-本プライバシーポリシーは、Junhwi Ahn (以下「当方」) が提供するモバイルアプリケーション「四字熟語道場」(以下「本アプリ」) における利用者情報の取り扱いについて定めるものです。
+본 문서는 한국어와 영어로 제공됩니다. 해석에 차이가 있는 경우 한국어 버전을 우선합니다.
+This document is provided in Korean and English. In case of discrepancy, the Korean version prevails.
 
-## 1. 収集する情報
+---
 
-本アプリは、**ユーザーの個人を特定できる情報を一切収集・送信しません**。
+## 한국어
 
-以下のデータはすべて **ユーザー端末のローカル領域 (SharedPreferences) にのみ保存** され、当方を含む外部サーバーへ送信されることはありません。
+본 개인정보처리방침은 Junhwi Ahn(이하 "개발자")이 제공하는 모바일 애플리케이션 「DELE Voca Dojo」(이하 "본 앱")의 이용자 정보 취급에 대해 규정합니다.
 
-- クイズの回答履歴・正解数・段位・レベル
-- マスター済みの四字熟語リスト
-- 道場破り (50問挑戦) の自己ベスト・直近スコア
-- ステージごとの星獲得状況
-- ヒントアイテムの保有数
-- 音量・ミュート設定
+### 1. 수집하는 정보
 
-本アプリは外部ネットワーク通信を行いません (ご意見・お問い合わせフォームへのリンクをユーザーが任意でタップしてブラウザで開いた場合を除きます)。
+#### 1-1. 개발자가 직접 수집하는 정보
 
-## 2. 情報の利用目的
+개발자는 이용자의 개인정보를 **직접 수집하지 않습니다**. 계정 생성, 로그인, 이름·이메일 입력이 필요 없습니다.
 
-- クイズの進行状況・スコアを **ユーザー端末上のみで** 保存・表示するため
+다음 데이터는 모두 **이용자 기기 내부(로컬 저장소)에만 저장**되며, 개발자의 서버로 전송되지 않습니다.
 
-## 3. 第三者提供
+- 퀴즈 진행도, 정답/오답 기록, 랭크·레벨
+- 해금된 단어장 목록, 오답노트
+- 마라톤 모드 최고/최근 기록
+- 아이템 보유 수, 음량·언어 설정
 
-当方はユーザーの情報を **第三者に提供・販売しません**。本アプリ内部で第三者のトラッキング・解析 SDK を使用することもありません。
+#### 1-2. 광고 서비스(Google AdMob)를 통해 수집될 수 있는 정보
 
-## 4. データの保持と削除
+본 앱은 Google AdMob을 통해 광고를 표시합니다. 광고 게재 과정에서 Google이 다음 정보를 자동으로 수집·처리할 수 있습니다.
 
-本アプリが保存するすべてのローカルデータは、**アプリをアンインストールすることで完全に削除されます**。当方側にはバックアップや記録は残りません。
+- 광고 식별자(Advertising ID)
+- IP 주소(대략적 위치 추정에 사용될 수 있음)
+- 기기 정보(모델, OS 버전 등) 및 앱 이용 관련 진단 정보
+- 광고 상호작용 정보(노출, 클릭 등)
 
-## 5. 対象年齢
+Google의 데이터 처리에 대한 자세한 내용은 다음을 참조하십시오.
 
-本アプリは **18 歳以上の方** を対象としており、13 歳未満の児童向けサービスではありません。
+- Google 개인정보처리방침: https://policies.google.com/privacy
+- Google 광고 정책: https://policies.google.com/technologies/ads
 
-## 6. 将来の広告配信について
+### 2. 광고 개인화 및 동의
 
-将来的に広告配信機能を追加する場合は、Google AdMob 等のサービスを利用する可能性があります。その場合は、アプリ更新時に本プライバシーポリシーを改訂し、広告識別子・端末情報の取扱いについて事前に明示します。
+- 유럽경제지역(EEA)·영국 등 규제 지역의 이용자에게는 앱 최초 실행 시 Google UMP(User Messaging Platform) 동의 양식이 표시되며, 이용자는 개인 맞춤 광고에 대한 동의 여부를 선택할 수 있습니다.
+- 동의하지 않는 경우에도 비개인화 광고가 표시되거나 광고가 제한될 수 있습니다.
+- 동의 설정은 기기의 광고 설정 또는 앱 재설치를 통해 변경할 수 있습니다.
 
-## 7. ポリシーの変更
+### 3. 정보의 이용 목적
 
-本プライバシーポリシーは、法令の変更やサービス内容の変更に応じて改訂される場合があります。重要な変更がある場合は、アプリ内またはストアの説明欄にて通知します。
+- 앱 기능 제공(학습 진행도 저장·표시 — 기기 내부에서만 처리)
+- 광고 게재 및 광고 성과 측정(Google AdMob)
 
-## 8. お問い合わせ
+### 4. 제3자 제공
 
-本プライバシーポリシーに関するご質問・ご意見は、アプリ内「ご意見・お問い合わせ」のリンクよりお送りください。
+개발자는 이용자의 정보를 제3자에게 판매하지 않습니다. 광고 게재를 위해 Google AdMob SDK가 위 1-2항의 정보를 Google에 전송하는 것 외에, 어떠한 외부 전송도 없습니다.
+
+### 5. 데이터 보관 및 삭제
+
+- 학습 데이터는 기기 내부에만 저장되며, **앱을 삭제(제거)하면 모두 삭제**됩니다.
+- Google이 수집한 광고 관련 데이터의 보관·삭제는 Google의 정책을 따릅니다. 기기 설정에서 광고 식별자를 재설정하거나 삭제할 수 있습니다.
+
+### 6. 아동의 개인정보
+
+본 앱은 **만 18세 이상**을 대상으로 하며, 아동을 대상으로 설계되지 않았습니다. 개발자는 아동의 개인정보를 고의로 수집하지 않습니다.
+
+### 7. 문의처
+
+개인정보 취급에 관한 문의: **ajk678678@gmail.com**
+
+### 8. 방침의 변경
+
+본 방침이 변경되는 경우 본 페이지에 갱신하여 공지합니다.
+
+---
+
+## English
+
+This Privacy Policy describes how Junhwi Ahn ("the developer") handles user information in the mobile application "DELE Voca Dojo" ("the App").
+
+### 1. Information Collected
+
+#### 1-1. Information collected directly by the developer
+
+The developer does **not** directly collect any personal information. No account, login, name, or email is required.
+
+All of the following data is stored **only in local storage on your device** and is never transmitted to the developer's servers:
+
+- Quiz progress, correct/incorrect answer history, rank and level
+- Unlocked vocabulary list and wrong-answer notes
+- Marathon mode best/recent scores
+- Item counts, volume and language settings
+
+#### 1-2. Information that may be collected via advertising (Google AdMob)
+
+The App displays ads via Google AdMob. In the course of serving ads, Google may automatically collect and process:
+
+- Advertising ID
+- IP address (may be used to infer approximate location)
+- Device information (model, OS version) and app diagnostics
+- Ad interaction data (impressions, clicks)
+
+For details on Google's data practices, see:
+
+- Google Privacy Policy: https://policies.google.com/privacy
+- How Google uses ads data: https://policies.google.com/technologies/ads
+
+### 2. Ad Personalization and Consent
+
+- Users in regulated regions (EEA, UK, etc.) are shown a Google UMP (User Messaging Platform) consent form on first launch and can choose whether to allow personalized ads.
+- If consent is declined, non-personalized ads may be shown or ads may be limited.
+- Consent choices can be changed via device ad settings or by reinstalling the App.
+
+### 3. Purpose of Use
+
+- Providing app functionality (saving/displaying learning progress — processed on-device only)
+- Serving ads and measuring ad performance (Google AdMob)
+
+### 4. Third-Party Sharing
+
+The developer does not sell user information. Other than the Google AdMob SDK transmitting the data described in 1-2 to Google for ad serving, no data leaves the device.
+
+### 5. Data Retention and Deletion
+
+- Learning data is stored only on your device and is **fully deleted when you uninstall the App**.
+- Retention and deletion of ad-related data collected by Google follow Google's policies. You can reset or delete your Advertising ID in your device settings.
+
+### 6. Children's Privacy
+
+The App is intended for users **aged 18 and over** and is not designed for children. The developer does not knowingly collect personal information from children.
+
+### 7. Contact
+
+For privacy inquiries: **ajk678678@gmail.com**
+
+### 8. Changes to This Policy
+
+Any changes to this policy will be announced by updating this page.

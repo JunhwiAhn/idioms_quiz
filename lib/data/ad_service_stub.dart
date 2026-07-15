@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// No-op AdService for platforms without AdMob support (web, desktop).
@@ -7,6 +8,9 @@ class AdService {
   static final AdService instance = AdService._();
 
   bool get isSupported => false;
+  bool get canRequestAds => false;
+  final ValueNotifier<bool> _rewardedReady = ValueNotifier(false);
+  ValueListenable<bool> get rewardedReadyListenable => _rewardedReady;
 
   Future<void> ensureInitialized() async {}
 

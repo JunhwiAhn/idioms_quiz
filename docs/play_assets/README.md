@@ -1,53 +1,37 @@
-# Play Console 提出用アセット
+# Play Console 제출용 그래픽 자산
 
-## 既に用意されているもの
+## 상태 (2026-07-13)
 
-| ファイル | 用途 | サイズ |
+이 폴더의 기존 자산(아이콘·피처 그래픽·스크린샷)은 **전부 이전 앱(四字熟語道場) 기준이라 사용할 수 없으며 이미 제거되었습니다.**
+DELE Voca Dojo 기준으로 아래 자산을 새로 제작해야 합니다.
+
+## 새로 만들어야 하는 것
+
+| 자산 | 요건 | 비고 |
 |---|---|---|
-| `icon_512.png` | 高解像度アイコン (Play Console「高解像度アイコン」欄) | 512 × 512 |
-| `feature_graphic.png` | フィーチャーグラフィック | 1024 × 500 |
-| `screenshots/00_splash.png` | スクリーンショット #1 — スプラッシュ | 1080 × 2400 |
-| `screenshots/01_home.png` | スクリーンショット #2 — ホーム画面 | 1080 × 2400 |
-| `screenshots/02_quiz.png` | スクリーンショット #3 — クイズ画面 (正解/不正解ハイライト) | 1080 × 2400 |
-| `screenshots/03_collection.png` | スクリーンショット #4 — 図鑑 (検索+フィルタ付き) | 1080 × 2400 |
-| `screenshots/04_crossword.png` | スクリーンショット #5 — クロスワードモード | 1080 × 2400 |
+| `icon_512.png` | 512×512 PNG, 알파 포함 | `assets/images/app_icon.png`에서 리사이즈 |
+| `feature_graphic.png` | 1024×500 JPG/PNG, 불투명 | 앱 이름 + 캐치프레이즈 중앙 배치 |
+| `screenshots/*.png` | 1080×1920 이상 (9:16 권장), 2~8장 | 아래 추천 구성 참조 |
 
-Play Console のスクリーンショット要件は **最低 2 枚**、上限 8 枚。5 枚揃っています。
+## 스크린샷 추천 구성 (6장)
 
-## 追加で撮るとより訴求力が上がるもの
+1. 홈 화면 (브랜드·메뉴)
+2. 스테이지 선택 (별점 보이게)
+3. 퀴즈 화면 (4지선다 + 예문)
+4. 정답 공개 화면 (예문 밑줄 + 번역 + DELE 레벨)
+5. 마라톤 결과 화면
+6. 단어장 (검색/필터)
 
-エミュレータ (emulator-5554) 起動中に、以下をターミナルで実行すると追加スクリーンショットが撮れます:
+## 촬영 방법 (에뮬레이터)
+
+에뮬레이터 실행 중 각 화면으로 이동한 뒤:
 
 ```bash
-ADB=~/Library/Android/sdk/platform-tools/adb
-DIR=/Users/anjunhwi/Documents/GitHub/idioms_quiz/docs/play_assets/screenshots
-
-# 図鑑 (右上 📚 アイコンをタップしてから実行)
-$ADB exec-out screencap -p > $DIR/03_collection.png
-
-# ステージ選択 (ステージタイルをタップしてから実行)
-$ADB exec-out screencap -p > $DIR/04_stage.png
-
-# クロスワード (クロスワードタイルをタップしてから実行)
-$ADB exec-out screencap -p > $DIR/05_crossword.png
-
-# リザルト画面 (1 クイズ完走してから実行)
-$ADB exec-out screencap -p > $DIR/06_result.png
+adb exec-out screencap -p > docs/play_assets/screenshots/01_home.png
 ```
 
-## プライバシーポリシー公開手順 (GitHub Pages)
+## 개인정보처리방침 공개 (GitHub Pages)
 
-1. GitHub リポジトリの **Settings → Pages**
-2. **Build and deployment → Source**: `Deploy from a branch`
-3. **Branch**: `main` / **folder**: `/docs`
-4. **Save** → 数分後に `https://junhwiahn.github.io/idioms_quiz/` で公開
-5. そのまま Play Console の「プライバシーポリシー URL」欄に貼り付け
-
-GitHub Pages が有効になると `docs/index.html` がトップページとして表示されます。
-
-## 使い方まとめ
-
-1. Play Console の該当フォームに `docs/play_console_pack.md` の各セクションをコピー&ペースト
-2. グラフィック類はこのフォルダから直接アップロード
-3. AAB は `build/app/outputs/bundle/release/app-release.aab` をアップロード
-4. 内部テスト → クローズドテスト → 製品版の順で昇格
+1. GitHub 리포지토리 → **Settings → Pages**
+2. Source: `Deploy from a branch`, Branch: `main`, 폴더: `/docs` → Save
+3. 공개 URL (예: `https://junhwiahn.github.io/idioms_quiz/`)을 Play Console에 입력

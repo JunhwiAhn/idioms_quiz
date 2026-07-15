@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 
-const String _sansJp = 'Noto Sans JP';
-const String _serifJp = 'Noto Serif JP';
+// Korean is the primary UI language. Keep the bundled JP faces as a reliable
+// fallback for Japanese and Latin glyphs, then fall back to platform CJK fonts.
+const String _sansUi = 'Noto Sans KR';
+const List<String> _sansFallback = [
+  'Noto Sans JP',
+  'Malgun Gothic',
+  'Apple SD Gothic Neo',
+  'sans-serif',
+];
+const String _serifUi = 'Noto Serif JP';
+const List<String> _serifFallback = [
+  'Noto Sans KR',
+  'Batang',
+  'AppleMyungjo',
+  'serif',
+];
 
 TextStyle notoSansJp({
   double? fontSize,
@@ -12,18 +26,18 @@ TextStyle notoSansJp({
   double? height,
   TextDecoration? decoration,
   FontStyle? fontStyle,
-}) =>
-    TextStyle(
-      fontFamily: _sansJp,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      color: color,
-      letterSpacing: letterSpacing,
-      wordSpacing: wordSpacing,
-      height: height,
-      decoration: decoration,
-      fontStyle: fontStyle,
-    );
+}) => TextStyle(
+  fontFamily: _sansUi,
+  fontFamilyFallback: _sansFallback,
+  fontSize: fontSize,
+  fontWeight: fontWeight,
+  color: color,
+  letterSpacing: letterSpacing,
+  wordSpacing: wordSpacing,
+  height: height,
+  decoration: decoration,
+  fontStyle: fontStyle,
+);
 
 TextStyle notoSerifJp({
   double? fontSize,
@@ -34,21 +48,21 @@ TextStyle notoSerifJp({
   double? height,
   TextDecoration? decoration,
   FontStyle? fontStyle,
-}) =>
-    TextStyle(
-      fontFamily: _serifJp,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      color: color,
-      letterSpacing: letterSpacing,
-      wordSpacing: wordSpacing,
-      height: height,
-      decoration: decoration,
-      fontStyle: fontStyle,
-    );
+}) => TextStyle(
+  fontFamily: _serifUi,
+  fontFamilyFallback: _serifFallback,
+  fontSize: fontSize,
+  fontWeight: fontWeight,
+  color: color,
+  letterSpacing: letterSpacing,
+  wordSpacing: wordSpacing,
+  height: height,
+  decoration: decoration,
+  fontStyle: fontStyle,
+);
 
 class AppTheme {
-  static const Color _seed = Color(0xFFFF6B35);
+  static const Color _seed = Color(0xFFC44720);
 
   /// Success/correct color, distinct from the red-ish primary seed.
   static const Color correctBg = Color(0xFFDDF8E8);
@@ -61,14 +75,16 @@ class AppTheme {
       brightness: Brightness.light,
     );
     final scheme = generated.copyWith(
-      primary: const Color(0xFFFF6B35),
+      primary: const Color(0xFFC44720),
       onPrimary: Colors.white,
       primaryContainer: const Color(0xFFFFE1D5),
       onPrimaryContainer: const Color(0xFF7A2508),
-      secondary: const Color(0xFF00B4D8),
+      secondary: const Color(0xFF007C99),
+      onSecondary: Colors.white,
       secondaryContainer: const Color(0xFFD8F6FF),
       onSecondaryContainer: const Color(0xFF004E62),
-      tertiary: const Color(0xFFFFBE0B),
+      tertiary: const Color(0xFF8B6500),
+      onTertiary: Colors.white,
       tertiaryContainer: const Color(0xFFFFF2B8),
       onTertiaryContainer: const Color(0xFF5F4300),
       surface: Colors.white,
@@ -76,10 +92,13 @@ class AppTheme {
       surfaceContainerHighest: const Color(0xFFFFEBD8),
       outlineVariant: const Color(0xFFFFC8A8),
     );
-    final base = ThemeData(colorScheme: scheme, useMaterial3: true);
+    final base = ThemeData(
+      colorScheme: scheme,
+      useMaterial3: true,
+      fontFamily: _sansUi,
+      fontFamilyFallback: _sansFallback,
+    );
     return base.copyWith(
-      textTheme: base.textTheme.apply(fontFamily: _sansJp),
-      primaryTextTheme: base.primaryTextTheme.apply(fontFamily: _sansJp),
       brightness: Brightness.light,
       scaffoldBackgroundColor: const Color(0xFFFFFBF2),
       appBarTheme: AppBarTheme(
@@ -95,8 +114,12 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: scheme.surface,
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: scheme.outlineVariant),
+        ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
@@ -106,18 +129,15 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: notoSansJp(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: notoSansJp(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
 
   static TextStyle idiomDisplay(BuildContext context) => notoSerifJp(
-        fontSize: 42,
-        fontWeight: FontWeight.w800,
-        color: Theme.of(context).colorScheme.onSurface,
-      );
+    fontSize: 42,
+    fontWeight: FontWeight.w800,
+    color: Theme.of(context).colorScheme.onSurface,
+  );
 }

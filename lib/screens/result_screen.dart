@@ -7,9 +7,11 @@ import '../data/ad_service.dart';
 import '../data/app_text.dart';
 import '../data/audio_service.dart';
 import '../data/kanken_tier.dart';
+import '../data/pronunciation_service.dart';
 import '../data/score_service.dart';
-import '../data/stage_plan.dart' show kMinCorrectToClear, roundFailed;
+import '../data/stage_plan.dart' show roundFailed;
 import '../models/idiom.dart';
+import '../widgets/app_ui.dart';
 
 class ResultScreen extends StatefulWidget {
   final int correct;
@@ -42,42 +44,17 @@ class _ResultScreenState extends State<ResultScreen> {
     _loadMastered();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final audio = AudioService.instance;
-      // Stage rounds treat 8+ / 10 as "great" → perfect SFX. Marathon and
-      // other runs need 100% correct.
-      final perfect = widget.outcome.isRoundRun
-          ? widget.correct >= 8
-          : widget.total > 0 && widget.correct == widget.total;
+      final perfect = widget.total > 0 && widget.correct == widget.total;
       final failed =
           widget.outcome.isRoundRun && roundFailed(correct: widget.correct);
       if (failed) {
         audio.playSfx(Sfx.wrong);
       } else if (perfect) {
-        audio.playSfx(Sfx.perfect);
+        PronunciationService.instance.speakSpanish('Muy bueno. Perfecto.');
       } else {
         audio.playSfx(Sfx.clear);
-        Future.delayed(const Duration(milliseconds: 400), () {
-          if (!mounted) return;
-          audio.playSfx(Sfx.clearVoice);
-        });
-      }
-      if (widget.outcome.leveledUp && mounted) {
-        Future.delayed(const Duration(milliseconds: 600), () {
-          if (!mounted) return;
-          _showLevelUpDialog();
-        });
       }
     });
-  }
-
-  Future<void> _showLevelUpDialog() async {
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (_) => _LevelUpDialog(
-        outcome: widget.outcome,
-        text: AppText(widget.language),
-      ),
-    );
   }
 
   Future<void> _loadMastered() async {
@@ -88,142 +65,646 @@ class _ResultScreenState extends State<ResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final correct = widget.correct;
     final total = widget.total;
     final longestStreak = widget.longestStreak;
     final outcome = widget.outcome;
     final text = AppText(widget.language);
-    final rate = widget.total == 0 ? 0.0 : widget.correct / widget.total;
+    final failed = outcome.isRoundRun && roundFailed(correct: correct);
+    final allCombo = total > 0 && correct == total;
 
     return Scaffold(
-      appBar: AppBar(title: Text(text.result)),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-          child: Column(
+          primary: false,
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Column(
+                children: [
+                  _ResultCelebrationHero(
+                        correct: correct,
+                        total: total,
+                        longestStreak: longestStreak,
+                        earned: outcome.earned,
+                        language: widget.language,
+                        isMarathon: widget.isMarathon,
+                        failed: failed,
+                        roundStars: outcome.roundStars,
+                      )
+                      .animate()
+                      .fadeIn(duration: 240.ms)
+                      .scale(
+                        begin: const Offset(0.9, 0.9),
+                        end: const Offset(1, 1),
+                        duration: allCombo ? 620.ms : 420.ms,
+                        curve: Curves.easeOutBack,
+                      )
+                      .shimmer(
+                        delay: allCombo ? 500.ms : 5.seconds,
+                        duration: allCombo ? 1100.ms : 1.ms,
+                        color: Colors.white.withValues(alpha: 0.5),
+                      ),
+                  const SizedBox(height: 16),
+                  _ResultActions(
+                        language: widget.language,
+                        failed: failed,
+                        text: text,
+                      )
+                      .animate()
+                      .fadeIn(delay: 180.ms, duration: 300.ms)
+                      .slideY(begin: 0.12, end: 0, duration: 360.ms),
+                  const SizedBox(height: 20),
+                  if (outcome.leveledUp)
+                    _LevelUpCard(outcome: outcome, text: text)
+                        .animate()
+                        .fadeIn(delay: 150.ms, duration: 400.ms)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                          duration: 400.ms,
+                          curve: Curves.easeOutBack,
+                        ),
+                  if (outcome.leveledUp) const SizedBox(height: 12),
+                  if (outcome.rankUp)
+                    _RankUpCard(outcome: outcome, text: text)
+                        .animate()
+                        .fadeIn(delay: 250.ms, duration: 400.ms)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                          duration: 400.ms,
+                          curve: Curves.easeOut,
+                        ),
+                  if (outcome.rankUp) const SizedBox(height: 16),
+                  _MasteryProgressCard(
+                        outcome: outcome,
+                        language: widget.language,
+                      )
+                      .animate()
+                      .fadeIn(delay: 280.ms, duration: 400.ms)
+                      .slideY(begin: 0.08, end: 0, duration: 420.ms),
+                  const SizedBox(height: 16),
+                  if (widget.isMarathon) ...[
+                    _MarathonScoreCard(
+                          correct: correct,
+                          total: total,
+                          outcome: outcome,
+                          text: text,
+                        )
+                        .animate()
+                        .fadeIn(delay: 300.ms, duration: 400.ms)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                          duration: 400.ms,
+                          curve: Curves.easeOut,
+                        ),
+                    const SizedBox(height: 12),
+                  ],
+                  if (widget.isMarathon && _masteredCount != null) ...[
+                    _MarathonTierCard(
+                      masteredCount: _masteredCount!,
+                      text: text,
+                    ).animate().fadeIn(delay: 400.ms, duration: 400.ms),
+                    const SizedBox(height: 16),
+                  ],
+                  if (outcome.totalDropped > 0)
+                    _DropsCard(
+                      outcome: outcome,
+                      text: text,
+                    ).animate().fadeIn(delay: 450.ms, duration: 400.ms),
+                  if (outcome.totalDropped > 0) const SizedBox(height: 16),
+                  _StatRow(label: text.level, value: '${outcome.newLevel}'),
+                  _StatRow(
+                    label: text.totalPoints,
+                    value: '${outcome.newTotalPoints} pt',
+                    highlight: true,
+                  ),
+                  _StatRow(
+                    label: text.currentRank,
+                    value: text.rankLabel(outcome.newRank.name),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ResultCelebrationHero extends StatelessWidget {
+  final int correct;
+  final int total;
+  final int longestStreak;
+  final int earned;
+  final StudyLanguage language;
+  final bool isMarathon;
+  final bool failed;
+  final int? roundStars;
+
+  const _ResultCelebrationHero({
+    required this.correct,
+    required this.total,
+    required this.longestStreak,
+    required this.earned,
+    required this.language,
+    required this.isMarathon,
+    required this.failed,
+    required this.roundStars,
+  });
+
+  bool get _allCombo => total > 0 && correct == total;
+
+  String get _eyebrow => switch (language) {
+    StudyLanguage.ko => isMarathon ? '마라톤 완료' : '퀴즈 완료',
+    StudyLanguage.en => isMarathon ? 'MARATHON COMPLETE' : 'QUIZ COMPLETE',
+    StudyLanguage.ja => isMarathon ? 'マラソン完走' : 'クイズ完了',
+  };
+
+  String get _title {
+    if (_allCombo) return 'ALL COMBO!';
+    if (failed) {
+      return switch (language) {
+        StudyLanguage.ko => '아깝다, 한 번 더!',
+        StudyLanguage.en => 'So close—one more go!',
+        StudyLanguage.ja => '惜しい、もう一度！',
+      };
+    }
+    return switch (language) {
+      StudyLanguage.ko => '멋지게 끝냈어요!',
+      StudyLanguage.en => 'Great finish!',
+      StudyLanguage.ja => 'ナイスフィニッシュ！',
+    };
+  }
+
+  String get _subtitle {
+    if (_allCombo) {
+      return switch (language) {
+        StudyLanguage.ko => '한 문제도 놓치지 않은 완벽한 플레이예요',
+        StudyLanguage.en => 'A flawless run without a single miss',
+        StudyLanguage.ja => '一問も逃さないパーフェクトプレイ！',
+      };
+    }
+    return switch (language) {
+      StudyLanguage.ko => '오늘의 기록을 멋지게 쌓았어요',
+      StudyLanguage.en => 'Another strong result in the books',
+      StudyLanguage.ja => '今日も素敵な記録を残しました',
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final rate = total == 0 ? 0 : ((correct / total) * 100).round();
+    final colors = _allCombo
+        ? const [Color(0xFFFFB300), Color(0xFFF06423)]
+        : failed
+        ? [scheme.secondary, const Color(0xFF4959A8)]
+        : [scheme.primary, const Color(0xFFE86A28)];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: colors.first.withValues(alpha: 0.32),
+            blurRadius: 28,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 12),
               Icon(
-                Icons.emoji_events_rounded,
-                size: 80,
-                color: scheme.primary,
-              ).animate().scale(
-                begin: const Offset(0.6, 0.6),
-                end: const Offset(1, 1),
-                duration: 400.ms,
-                curve: Curves.easeOutBack,
+                _allCombo ? Icons.auto_awesome_rounded : Icons.flag_rounded,
+                size: 16,
+                color: Colors.white.withValues(alpha: 0.9),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(width: 6),
               Text(
-                text.resultTitle(rate),
-                style: notoSerifJp(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onSurface,
+                _eyebrow,
+                style: notoSansJp(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.6,
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
-              ),
-              const SizedBox(height: 24),
-              if (outcome.isRoundRun)
-                _RoundStarsCard(
-                      outcome: outcome,
-                      correct: correct,
-                      total: total,
-                      text: text,
-                    )
-                    .animate()
-                    .fadeIn(duration: 300.ms)
-                    .scale(
-                      begin: const Offset(0.9, 0.9),
-                      end: const Offset(1, 1),
-                      duration: 500.ms,
-                      curve: Curves.easeOutBack,
-                    )
-              else
-                _ScoreCircle(correct: correct, total: total),
-              const SizedBox(height: 28),
-              if (outcome.leveledUp)
-                _LevelUpCard(outcome: outcome, text: text)
-                    .animate()
-                    .fadeIn(delay: 150.ms, duration: 400.ms)
-                    .scale(
-                      begin: const Offset(0.95, 0.95),
-                      end: const Offset(1, 1),
-                      duration: 400.ms,
-                      curve: Curves.easeOutBack,
-                    ),
-              if (outcome.leveledUp) const SizedBox(height: 12),
-              if (outcome.rankUp)
-                _RankUpCard(outcome: outcome, text: text)
-                    .animate()
-                    .fadeIn(delay: 250.ms, duration: 400.ms)
-                    .scale(
-                      begin: const Offset(0.95, 0.95),
-                      end: const Offset(1, 1),
-                      duration: 400.ms,
-                      curve: Curves.easeOut,
-                    ),
-              if (outcome.rankUp) const SizedBox(height: 16),
-              if (widget.isMarathon) ...[
-                _MarathonScoreCard(
-                      correct: correct,
-                      total: total,
-                      outcome: outcome,
-                      text: text,
-                    )
-                    .animate()
-                    .fadeIn(delay: 300.ms, duration: 400.ms)
-                    .scale(
-                      begin: const Offset(0.95, 0.95),
-                      end: const Offset(1, 1),
-                      duration: 400.ms,
-                      curve: Curves.easeOut,
-                    ),
-                const SizedBox(height: 12),
-              ],
-              if (widget.isMarathon && _masteredCount != null) ...[
-                _MarathonTierCard(
-                  masteredCount: _masteredCount!,
-                  text: text,
-                ).animate().fadeIn(delay: 400.ms, duration: 400.ms),
-                const SizedBox(height: 16),
-              ],
-              if (outcome.totalDropped > 0)
-                _DropsCard(
-                  outcome: outcome,
-                  text: text,
-                ).animate().fadeIn(delay: 450.ms, duration: 400.ms),
-              if (outcome.totalDropped > 0) const SizedBox(height: 16),
-              _StatRow(label: text.level, value: '${outcome.newLevel}'),
-              _StatRow(label: text.correctCount, value: '$correct / $total'),
-              _StatRow(label: text.bestStreak, value: '$longestStreak'),
-              _StatRow(
-                label: text.runPoints,
-                value: '+${outcome.earned} pt',
-                highlight: true,
-              ),
-              _StatRow(
-                label: text.totalPoints,
-                value: '${outcome.newTotalPoints} pt',
-                highlight: true,
-              ),
-              _StatRow(label: text.currentRank, value: outcome.newRank.name),
-              const SizedBox(height: 24),
-              _RewardedAdButton(text: text),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () {
-                  AudioService.instance.stopBgm();
-                  Navigator.of(context).pop(true);
-                },
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                ),
-                child: Text(text.backHome),
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          if (_allCombo)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (var i = 0; i < 5; i++)
+                  Icon(
+                        Icons.star_rounded,
+                        color: Colors.white,
+                        size: i == 2 ? 34 : 25,
+                      )
+                      .animate(delay: (80 * i).ms)
+                      .scale(
+                        begin: const Offset(0, 0),
+                        end: const Offset(1, 1),
+                        duration: 420.ms,
+                        curve: Curves.elasticOut,
+                      ),
+              ],
+            )
+          else
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isMarathon ? Icons.emoji_events_rounded : Icons.check_rounded,
+                color: Colors.white,
+                size: 38,
+              ),
+            ),
+          const SizedBox(height: 8),
+          Text(
+            _title,
+            textAlign: TextAlign.center,
+            style: notoSerifJp(
+              fontSize: _allCombo ? 30 : 26,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            _subtitle,
+            textAlign: TextAlign.center,
+            style: notoSansJp(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.88),
+            ),
+          ),
+          if (roundStars != null && !_allCombo) ...[
+            const SizedBox(height: 12),
+            AppStarRating(
+              value: roundStars!,
+              size: 29,
+              filledColor: Colors.white,
+              emptyColor: Colors.white.withValues(alpha: 0.3),
+              mainAxisAlignment: MainAxisAlignment.center,
+            ),
+          ],
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              children: [
+                _ResultMetric(
+                  icon: Icons.check_circle_rounded,
+                  value: '$correct/$total',
+                  label: switch (language) {
+                    StudyLanguage.ko => '정답',
+                    StudyLanguage.en => 'CORRECT',
+                    StudyLanguage.ja => '正解',
+                  },
+                ),
+                _ResultMetricDivider(),
+                _ResultMetric(
+                  icon: Icons.local_fire_department_rounded,
+                  value: '$longestStreak',
+                  label: switch (language) {
+                    StudyLanguage.ko => '최고 콤보',
+                    StudyLanguage.en => 'BEST COMBO',
+                    StudyLanguage.ja => '最高コンボ',
+                  },
+                ),
+                _ResultMetricDivider(),
+                _ResultMetric(
+                  icon: Icons.bolt_rounded,
+                  value: '+$earned',
+                  label: switch (language) {
+                    StudyLanguage.ko => '획득 점수',
+                    StudyLanguage.en => 'POINTS',
+                    StudyLanguage.ja => '獲得点数',
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: total == 0 ? 0 : correct / total,
+              minHeight: 8,
+              backgroundColor: Colors.white.withValues(alpha: 0.22),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '$rate%',
+              style: notoSansJp(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResultMetric extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+
+  const _ResultMetric({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, size: 19, color: Colors.white),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: notoSerifJp(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            maxLines: 1,
+            style: notoSansJp(
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              color: Colors.white.withValues(alpha: 0.78),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResultMetricDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 54,
+      color: Colors.white.withValues(alpha: 0.22),
+    );
+  }
+}
+
+class _ResultActions extends StatelessWidget {
+  final StudyLanguage language;
+  final bool failed;
+  final AppText text;
+
+  const _ResultActions({
+    required this.language,
+    required this.failed,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () =>
+                    Navigator.of(context).popUntil((route) => route.isFirst),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                ),
+                icon: const Icon(Icons.home_rounded),
+                label: Text(text.backHome),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              flex: 2,
+              child: FilledButton.icon(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                  elevation: 5,
+                ),
+                icon: Icon(
+                  failed
+                      ? Icons.view_module_rounded
+                      : Icons.arrow_forward_rounded,
+                ),
+                label: Text(_primaryAction(language, failed)),
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            const Spacer(),
+            const SizedBox(width: 10),
+            Expanded(flex: 2, child: _RewardedAdButton(text: text)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+String _primaryAction(StudyLanguage language, bool failed) {
+  if (failed) {
+    return switch (language) {
+      StudyLanguage.ko => '라운드로 돌아가기',
+      StudyLanguage.en => 'Back to rounds',
+      StudyLanguage.ja => 'ラウンドへ戻る',
+    };
+  }
+  return switch (language) {
+    StudyLanguage.ko => '계속하기',
+    StudyLanguage.en => 'Continue',
+    StudyLanguage.ja => '続ける',
+  };
+}
+
+class _MasteryProgressCard extends StatelessWidget {
+  final RunOutcome outcome;
+  final StudyLanguage language;
+  const _MasteryProgressCard({required this.outcome, required this.language});
+
+  int get _target {
+    const milestones = [10, 30, 50, 100, 300, 500, 1000, 1500];
+    return milestones.firstWhere(
+      (value) => outcome.newMasteredCount < value,
+      orElse: () => milestones.last,
+    );
+  }
+
+  String _title(StudyLanguage language) => switch (language) {
+    StudyLanguage.ko => '학습한 단어',
+    StudyLanguage.ja => '覚えた単語',
+    _ => 'Words learned',
+  };
+
+  String _gained(StudyLanguage language, int count) {
+    if (count <= 0) {
+      return switch (language) {
+        StudyLanguage.ko => '이번 학습이 단어장에 반영됐어요',
+        StudyLanguage.ja => '今回の学習が単語帳に反映されました',
+        _ => 'This run updated your wordbook',
+      };
+    }
+    return switch (language) {
+      StudyLanguage.ko => '+$count개 새로 익힘',
+      StudyLanguage.ja => '+$count語を新しく習得',
+      _ => '+$count newly learned',
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final target = _target;
+    final previous = outcome.previousMasteredCount.clamp(0, target);
+    final current = outcome.newMasteredCount.clamp(0, target);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(AppUi.cardRadius),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.collections_bookmark_rounded, color: scheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _title(language),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: notoSerifJp(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onSurface,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _gained(language, outcome.masteredGained),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: notoSansJp(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: scheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: previous / target, end: current / target),
+            duration: const Duration(milliseconds: 900),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, _) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: value,
+                  minHeight: 9,
+                  backgroundColor: scheme.surfaceContainerHighest,
+                  valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          TweenAnimationBuilder<int>(
+            tween: IntTween(
+              begin: outcome.previousMasteredCount,
+              end: outcome.newMasteredCount,
+            ),
+            duration: const Duration(milliseconds: 900),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, _) {
+              return Row(
+                children: [
+                  Text(
+                    '$value',
+                    style: notoSerifJp(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      height: 1,
+                      color: scheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                      '/ $target',
+                      style: notoSansJp(
+                        fontSize: 12,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -236,13 +717,13 @@ class _DropsCard extends StatelessWidget {
 
   String _labelFor(HintKind k) => switch (k) {
     HintKind.fiftyFifty => '50:50',
-    HintKind.reading => 'Pron.',
+    HintKind.reading => '50:50',
     HintKind.time => 'Time+',
   };
 
   IconData _iconFor(HintKind k) => switch (k) {
     HintKind.fiftyFifty => Icons.filter_alt_rounded,
-    HintKind.reading => Icons.record_voice_over_rounded,
+    HintKind.reading => Icons.filter_alt_rounded,
     HintKind.time => Icons.more_time_rounded,
   };
 
@@ -257,7 +738,7 @@ class _DropsCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: scheme.tertiaryContainer,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppUi.cardRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,7 +816,7 @@ class _LevelUpCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppUi.cardRadius),
         color: scheme.tertiaryContainer,
         border: Border.all(color: scheme.tertiary, width: 1.5),
       ),
@@ -347,15 +828,19 @@ class _LevelUpCard extends StatelessWidget {
             size: 22,
           ),
           const SizedBox(width: 10),
-          Text(
-            text.levelUp,
-            style: notoSerifJp(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: scheme.onTertiaryContainer,
+          Expanded(
+            child: Text(
+              text.levelUp,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: notoSerifJp(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: scheme.onTertiaryContainer,
+              ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 8),
           Text(
             '${outcome.previousLevel}',
             style: notoSerifJp(
@@ -397,7 +882,7 @@ class _RankUpCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppUi.cardRadius),
         gradient: LinearGradient(
           colors: [scheme.primary, scheme.tertiary],
           begin: Alignment.topLeft,
@@ -429,11 +914,15 @@ class _RankUpCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                outcome.previousRank.name,
-                style: notoSerifJp(
-                  fontSize: 20,
-                  color: scheme.onPrimary.withValues(alpha: 0.7),
+              Flexible(
+                child: Text(
+                  text.rankLabel(outcome.previousRank.name),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: notoSerifJp(
+                    fontSize: 20,
+                    color: scheme.onPrimary.withValues(alpha: 0.7),
+                  ),
                 ),
               ),
               Padding(
@@ -444,118 +933,20 @@ class _RankUpCard extends StatelessWidget {
                   size: 20,
                 ),
               ),
-              Text(
-                outcome.newRank.name,
-                style: notoSerifJp(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onPrimary,
+              Flexible(
+                child: Text(
+                  text.rankLabel(outcome.newRank.name),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: notoSerifJp(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onPrimary,
+                  ),
                 ),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RoundStarsCard extends StatelessWidget {
-  final RunOutcome outcome;
-  final int correct;
-  final int total;
-  final AppText text;
-  const _RoundStarsCard({
-    required this.outcome,
-    required this.correct,
-    required this.total,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final stars = outcome.roundStars ?? 0;
-    final prev = outcome.previousRoundStars ?? 0;
-    final improved = outcome.roundStarsImproved;
-    final failed = roundFailed(correct: correct);
-    final gradient = failed
-        ? [scheme.error, scheme.errorContainer]
-        : [scheme.primary, scheme.tertiary];
-    final onGrad = failed ? scheme.onError : scheme.onPrimary;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: gradient,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Column(
-        children: [
-          if (failed) ...[
-            Icon(Icons.error_outline_rounded, color: onGrad, size: 46),
-            const SizedBox(height: 8),
-            Text(
-              text.roundFailed,
-              style: notoSerifJp(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: onGrad,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              text.roundFailedBody(kMinCorrectToClear, correct, total),
-              textAlign: TextAlign.center,
-              style: notoSansJp(
-                fontSize: 12,
-                color: onGrad.withValues(alpha: 0.85),
-              ),
-            ),
-          ] else ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (int i = 0; i < 5; i++)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: Icon(
-                      i < stars
-                          ? Icons.star_rounded
-                          : Icons.star_outline_rounded,
-                      size: 46,
-                      color: i < stars
-                          ? Colors.amber
-                          : onGrad.withValues(alpha: 0.4),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              improved
-                  ? (prev == 0 ? text.cleared : text.bestUpdated)
-                  : text.thisRunStars(stars),
-              style: notoSerifJp(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: onGrad,
-              ),
-            ),
-            if (prev > 0) ...[
-              const SizedBox(height: 4),
-              Text(
-                text.bestStars(stars > prev ? stars : prev),
-                style: notoSansJp(
-                  fontSize: 12,
-                  color: onGrad.withValues(alpha: 0.85),
-                ),
-              ),
-            ],
-          ],
         ],
       ),
     );
@@ -585,7 +976,7 @@ class _MarathonScoreCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppUi.cardRadius),
         gradient: updated
             ? LinearGradient(
                 colors: [scheme.primary, scheme.tertiary],
@@ -642,29 +1033,6 @@ class _MarathonScoreCard extends StatelessWidget {
                       : scheme.onSurfaceVariant,
                 ),
               ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: updated
-                      ? scheme.onPrimary.withValues(alpha: 0.18)
-                      : scheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  text.percentileLabel(marathonPercentile(correct, total)),
-                  style: notoSansJp(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: updated
-                        ? scheme.onPrimary
-                        : scheme.onPrimaryContainer,
-                  ),
-                ),
-              ),
             ],
           ),
           if (prevHasRecord && !updated) ...[
@@ -673,12 +1041,6 @@ class _MarathonScoreCard extends StatelessWidget {
               text.bestScore(
                 outcome.newBestMarathon,
                 outcome.newBestMarathonTotal,
-                text.percentileLabel(
-                  marathonPercentile(
-                    outcome.newBestMarathon,
-                    outcome.newBestMarathonTotal,
-                  ),
-                ),
               ),
               style: notoSansJp(fontSize: 11, color: scheme.onSurfaceVariant),
             ),
@@ -717,7 +1079,7 @@ class _MarathonTierCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppUi.cardRadius),
         border: Border.all(color: scheme.outlineVariant),
       ),
       child: Column(
@@ -741,15 +1103,6 @@ class _MarathonTierCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     color: scheme.onPrimaryContainer,
                   ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                text.percentileLabel(tier.percentile),
-                style: notoSansJp(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: scheme.primary,
                 ),
               ),
             ],
@@ -796,54 +1149,6 @@ class _MarathonTierCard extends StatelessWidget {
   }
 }
 
-class _ScoreCircle extends StatelessWidget {
-  final int correct;
-  final int total;
-  const _ScoreCircle({required this.correct, required this.total});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final rate = total == 0 ? 0.0 : correct / total;
-    return SizedBox(
-      width: 160,
-      height: 160,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox.expand(
-            child: CircularProgressIndicator(
-              value: rate,
-              strokeWidth: 12,
-              backgroundColor: scheme.surfaceContainerHighest,
-              valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
-            ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${(rate * 100).round()}',
-                style: notoSerifJp(
-                  fontSize: 44,
-                  fontWeight: FontWeight.w800,
-                  height: 1,
-                  color: scheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '%',
-                style: notoSansJp(fontSize: 13, color: scheme.onSurfaceVariant),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _StatRow extends StatelessWidget {
   final String label;
   final String value;
@@ -861,17 +1166,26 @@ class _StatRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Text(
-            label,
-            style: notoSansJp(fontSize: 14, color: scheme.onSurfaceVariant),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: notoSansJp(fontSize: 14, color: scheme.onSurfaceVariant),
+            ),
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: notoSerifJp(
-              fontSize: highlight ? 20 : 16,
-              fontWeight: FontWeight.w700,
-              color: highlight ? scheme.primary : scheme.onSurface,
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: notoSerifJp(
+                fontSize: highlight ? 20 : 16,
+                fontWeight: FontWeight.w700,
+                color: highlight ? scheme.primary : scheme.onSurface,
+              ),
             ),
           ),
         ],
@@ -1095,7 +1409,7 @@ class _RewardedAdButtonState extends State<_RewardedAdButton> {
     if (!mounted) return;
     final label = switch (kind) {
       HintKind.fiftyFifty => '50:50',
-      HintKind.reading => 'Pron.',
+      HintKind.reading => '50:50',
       HintKind.time => 'Time+',
     };
     ScaffoldMessenger.of(context).showSnackBar(
@@ -1130,27 +1444,33 @@ class _RewardedAdButtonState extends State<_RewardedAdButton> {
       return const SizedBox.shrink();
     }
     final scheme = Theme.of(context).colorScheme;
-    return OutlinedButton.icon(
-      onPressed: _busy ? null : _onTap,
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size.fromHeight(52),
-        side: BorderSide(color: scheme.primary, width: 1.4),
-        foregroundColor: scheme.primary,
-      ),
-      icon: _busy
-          ? SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
-              ),
-            )
-          : const Icon(Icons.play_circle_fill_rounded),
-      label: Text(
-        _busy ? widget.text.loadingAd : widget.text.watchVideoForItem,
-        style: notoSerifJp(fontSize: 14, fontWeight: FontWeight.w800),
-      ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: AdService.instance.rewardedReadyListenable,
+      builder: (context, ready, _) {
+        if (!ready && !_busy) return const SizedBox.shrink();
+        return OutlinedButton.icon(
+          onPressed: ready && !_busy ? _onTap : null,
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(52),
+            side: BorderSide(color: scheme.primary, width: 1.4),
+            foregroundColor: scheme.primary,
+          ),
+          icon: _busy
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
+                  ),
+                )
+              : const Icon(Icons.card_giftcard_rounded),
+          label: Text(
+            _busy ? widget.text.loadingAd : widget.text.watchVideoForItem,
+            style: notoSerifJp(fontSize: 14, fontWeight: FontWeight.w800),
+          ),
+        );
+      },
     );
   }
 }

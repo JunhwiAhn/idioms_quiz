@@ -1,6 +1,6 @@
-# Español Dojo
+# DELE Voca Dojo
 
-Español Dojo는 스페인어 DELE 어휘 학습용 Flutter 게임 앱입니다. 기존 사자성어 앱의 큰 흐름이었던 스테이지, 마라톤, 도감형 단어장, 오늘의 단어, 아이템 드롭, 랭크, 크로스워드 구조를 살리면서 콘텐츠를 스페인어 단어 학습으로 교체했습니다.
+DELE Voca Dojo는 스페인어 DELE 어휘 학습용 Flutter 게임 앱입니다. 스테이지, 마라톤, 도감형 단어장, 오늘의 단어, 아이템 드롭, 랭크, 오답노트 구조로 스페인어 단어 학습을 반복할 수 있게 구성했습니다.
 
 현재는 사자성어 앱에서 스페인어 학습 앱으로 전환하는 중간 단계입니다. 핵심 게임 플레이는 스페인어 어휘 중심으로 바뀌었고, 스토어 문서와 최종 브랜드 이미지 등은 추후 릴리스 단계에서 다시 정리해야 합니다.
 
@@ -9,7 +9,7 @@ Español Dojo는 스페인어 DELE 어휘 학습용 Flutter 게임 앱입니다.
 - 스테이지 모드: 5개 스테이지, 스테이지당 8라운드, 라운드당 10문제
 - 마라톤 모드: 무작위 50문제 연속 풀이, 최고 기록 저장
 - 단어장: 정답을 맞힌 단어를 해금하고, 검색/필터/상세 모달로 복습
-- 크로스워드: 4글자 스페인어 단어 2개가 한 글자를 공유하는 퍼즐
+- 오답노트: 퀴즈에서 틀린 단어를 자동 저장하고 다시 맞히면 정리
 - 문제 유형:
   - 스페인어 단어를 보고 뜻 고르기
   - 뜻을 보고 스페인어 단어 고르기
@@ -33,10 +33,10 @@ Español Dojo는 스페인어 DELE 어휘 학습용 Flutter 게임 앱입니다.
 메인 어휘 데이터 파일:
 
 ```text
-assets/data/idioms.json
+assets/data/dele_a1_a2_b1_problem_bank.enriched.json
 ```
 
-파일명은 기존 코드 호환성 때문에 아직 `idioms.json`을 유지하고 있지만, 실제 내용은 스페인어 어휘 데이터입니다.
+최상위 `entries` 배열에 어휘 엔트리가 들어 있습니다.
 
 현재 데이터 구조:
 
@@ -64,7 +64,7 @@ assets/data/idioms.json
 }
 ```
 
-현재 데이터는 500개입니다. 자동 생성 느낌의 임시 표현은 제거했지만, 출시 전에는 실제 DELE 빈도/레벨 기준으로 단어와 예문을 검수하는 것이 좋습니다.
+현재 데이터는 1,257개(A1 489 / A2 466 / B1 302)입니다. 뜻·예문이 비어 있던 시드 엔트리는 제거했지만, 상당수 예문이 자동 생성 템플릿("Uso el X en una situacion diaria." 등)이라 출시 전 예문 품질 개선이 필요합니다.
 
 ## 기술 스택
 
@@ -76,7 +76,7 @@ assets/data/idioms.json
 | 오디오 | `audioplayers` |
 | 애니메이션 | `flutter_animate`, `confetti` |
 | 외부 링크 | `url_launcher` |
-| 폰트 | Noto Sans JP / Noto Serif JP 번들 |
+| 폰트 | Noto Sans KR / Noto Sans JP / Noto Serif JP 번들 |
 
 ## 실행 방법
 
@@ -109,7 +109,6 @@ lib/
 │   └── idiom.dart              # 스페인어 어휘 모델, 호환성 때문에 이름은 Idiom 유지
 ├── data/
 │   ├── app_text.dart           # 선택 언어별 UI 문구
-│   ├── crossword.dart          # 스페인어 크로스워드 생성
 │   ├── daily.dart              # 오늘의 단어 문구
 │   ├── idiom_repository.dart   # 어휘 JSON 로더
 │   ├── kanken_tier.dart        # 어휘 마스터리 티어, 레거시 파일명
@@ -120,7 +119,6 @@ lib/
 │   └── stage_plan.dart         # 스테이지/라운드 구성
 ├── screens/
 │   ├── collection_screen.dart
-│   ├── crossword_screen.dart
 │   ├── home_screen.dart
 │   ├── quiz_screen.dart
 │   ├── result_screen.dart
@@ -142,11 +140,11 @@ lib/
 
 ## 남은 정리 작업
 
-- `Idiom`, `idiom_repository.dart`, `idioms.json`, `kanken_tier.dart` 등 레거시 이름 변경
+- `Idiom`, `idiom_repository.dart`, `kanken_tier.dart` 등 레거시 이름 변경
 - 스페인어 앱에 맞는 앱 아이콘/파비콘 교체
 - 스토어 문서, 개인정보처리방침, Play Console 문서 재작성
-- 500개 어휘 데이터를 실제 DELE 기준으로 검수
-- 크로스워드의 가변 길이 단어/가변 그리드 지원
+- 어휘 데이터의 템플릿 예문을 자연스러운 실제 예문으로 교체
+- 오답노트 통계와 복습 흐름 고도화
 
 ## 라이선스
 
