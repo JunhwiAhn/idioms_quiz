@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:1024px; height:500px; overflow:hidden;
+    font-family:'Segoe UI','Noto Sans JP','Yu Gothic',sans-serif;
+    background: linear-gradient(135deg,#FFB75E 0%,#E2711D 55%,#C0392B 100%);
+    display:flex; align-items:center; justify-content:center; position:relative; }
+  .deco { position:absolute; border-radius:50%; background:rgba(255,255,255,.08); }
+  .d1 { width:420px; height:420px; left:-120px; top:-160px; }
+  .d2 { width:300px; height:300px; right:-80px; bottom:-120px; }
+  .d3 { width:140px; height:140px; right:180px; top:-60px; background:rgba(255,255,255,.06); }
+  .wrap { display:flex; align-items:center; gap:56px; z-index:2; }
+  .icon { width:230px; height:230px; border-radius:52px;
+    box-shadow:0 18px 50px rgba(0,0,0,.35); }
+  .txt { color:#fff; }
+  h1 { font-size:64px; font-weight:800; letter-spacing:-1px;
+    text-shadow:0 4px 18px rgba(0,0,0,.30); line-height:1.05; }
+  .tag { margin-top:18px; font-size:30px; font-weight:600; opacity:.96; }
+  .sub { margin-top:10px; font-size:24px; font-weight:400; opacity:.85; }
+  .pills { margin-top:22px; display:flex; gap:12px; }
+  .pill { background:rgba(255,255,255,.18); border:1.5px solid rgba(255,255,255,.55);
+    border-radius:999px; padding:7px 20px; font-size:20px; font-weight:600; }
+</style>
+</head>
+<body>
+  <div class="deco d1"></div><div class="deco d2"></div><div class="deco d3"></div>
+  <div class="wrap">
+    <img class="icon" src="icon_512.png">
+    <div class="txt">
+      <h1>DELE Voca Dojo</h1>
+      <div class="tag">スペイン語単語、ゲーム感覚で攻略</div>
+      <div class="sub">DELE A1–B1 · 1,250+ palabras</div>
+      <div class="pills">
+        <span class="pill">ステージ</span>
+        <span class="pill">マラソン50問</span>
+        <span class="pill">間違いノート</span>
+        <span class="pill">単語帳</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,9 +1,25 @@
 # Google Play Console 제출용 팩 — DELE Voca Dojo
 
 Play Console 각 폼에 그대로 복사/붙여넣기 할 수 있게 정리한 문서입니다.
-전제: **만 18세 이상 대상 / 광고 있음(AdMob 배너·전면·보상형) / 앱 내 구매 없음**.
+전제: **만 18세 이상 대상 / 광고 있음(AdMob 배너·전면·보상형) / 앱 내 구매 없음 / 배포 국가: 대한민국·미국·일본**.
 
 앱 이름·설명문 전문은 [store_listing.md](store_listing.md) 참조.
+
+---
+
+## 0. 배포 국가 및 현지화 매트릭스
+
+Play Console → 「프로덕션」 → 「국가/지역」에서 **대한민국, 미국, 일본** 3개국 선택.
+
+| 언어 | 등록정보 텍스트 | 피처 그래픽 | 스크린샷 | 개인정보처리방침 |
+|---|---|---|---|---|
+| 한국어 ko-KR (기본) | store_listing.md §한국어 | `play_assets/feature_graphic.png` | `play_assets/screenshots/ko/` 5장 | 공개 페이지 한국어 섹션 |
+| 영어 en-US | store_listing.md §English | `play_assets/feature_graphic_en.png` | `play_assets/screenshots/en/` 5장 | 동일 페이지 English 섹션 |
+| 일본어 ja-JP | store_listing.md §日本語 | `play_assets/feature_graphic_ja.png` | `play_assets/screenshots/ja/` 5장 | 동일 페이지 日本語 섹션 |
+
+- 개인정보처리방침 URL은 하나(`https://junhwiahn.github.io/idioms_quiz/`)로 3개 언어를 모두 커버 (한/영/일 병기).
+- EEA(유럽)를 배포 국가에 넣지 않으므로 GDPR 동의 양식은 필수가 아니지만, 앱에 UMP 동의 코드가 이미 구현되어 있어 추후 유럽 확장 시 AdMob 콘솔에서 메시지만 게시하면 됨.
+- **미국 배포 시**: AdMob 콘솔 「개인 정보 보호 및 메시지」에서 **미국 주(州) 규정 메시지** 게시 권장 (캘리포니아 CPRA 등 대응, UMP가 자동 처리).
 
 ---
 
@@ -136,20 +152,13 @@ Play Console → 「앱 콘텐츠」 → 「데이터 보안」. **AdMob SDK가 
 
 | 자산 | 사이즈/형식 | 필수/수량 | 상태 |
 |---|---|---|---|
-| 고해상도 아이콘 | 512×512 PNG (알파 포함) | 필수 / 1장 | `assets/images/app_icon.png` 기반 재생성 필요 |
-| 피처 그래픽 | 1024×500 JPG/PNG (불투명) | 필수 / 1장 | **새로 제작 필요** (스페인어 앱 브랜딩) |
-| 폰 스크린샷 | 1080×1920 이상, 9:16 권장 | 2~8장 | **재촬영 필요** (기존 5장은 옛 앱) |
+| 고해상도 아이콘 | 512×512 PNG (알파 포함) | 필수 / 1장 | ✅ `play_assets/icon_512.png` |
+| 피처 그래픽 | 1024×500 PNG (불투명) | 언어별 1장 | ✅ ko/en/ja 3종 (`feature_graphic*.png`) |
+| 폰 스크린샷 | 1080×2400 (9:16 초과분 허용) | 언어별 2~8장 | ✅ ko/en/ja 각 5장 (`screenshots/<lang>/`) |
 | 태블릿 스크린샷 | 임의 | 0~8장 | 생략 가능 |
 | 프로모션 영상 | YouTube URL | 임의 | 생략 가능 |
 
-### 스크린샷 추천 구성 (6장)
-
-1. 홈 화면 (브랜드·메뉴)
-2. 스테이지 선택 (별점 보이게)
-3. 퀴즈 화면 (4지선다 + 예문)
-4. 정답 공개 화면 (예문 밑줄 + 번역 + DELE 레벨)
-5. 마라톤 결과 화면
-6. 단어장 (검색/필터)
+스크린샷 구성(언어별 동일): ① 홈 ② 스테이지 선택 ③ 퀴즈 ④ 정답 공개 ⑤ 단어장
 
 ---
 
@@ -173,13 +182,15 @@ Play Console → 「앱 콘텐츠」 → 「데이터 보안」. **AdMob SDK가 
 
 ## 11. 제출 직전 체크리스트
 
-- [ ] 개인정보처리방침 URL 공개·접속 확인 (한/영, 광고 수집 내용 포함)
-- [ ] AdMob 콘솔 GDPR 메시지 게시 완료 (UMP)
+- [ ] 개인정보처리방침 URL 공개·접속 확인 (한/영/일, 광고 수집 내용 포함)
+- [ ] 배포 국가: 대한민국·미국·일본 선택
+- [ ] 등록정보 언어 3종 입력 (ko-KR 기본 + en-US + ja-JP, store_listing.md 사용)
+- [ ] 언어별 피처 그래픽·스크린샷 업로드 (play_assets/)
+- [ ] AdMob 콘솔 미국 주(州) 규정 메시지 게시 (UMP) — EEA 확장 시 GDPR 메시지도
 - [ ] 데이터 세이프티: "수집 있음" + AdMob 항목 신고 완료
 - [ ] 대상 연령 `18세 이상` 단독 체크
 - [ ] IARC 설문 제출 (광고 있음 표기)
 - [ ] 서명된 AAB (`flutter build appbundle --release`) 생성 — `android/key.properties` + 업로드 키스토어 필요
 - [ ] 키스토어 백업 (분실 시 복구 불가)
-- [ ] 새 그래픽 자산 업로드 (아이콘 512 / 피처 그래픽 / 스크린샷 2장 이상)
 - [ ] 연락처 이메일 `ajk678678@gmail.com` 설정
 - [ ] 실기기에서 릴리스 빌드 스모크 테스트 (광고 로드 포함)
