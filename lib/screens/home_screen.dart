@@ -214,9 +214,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openFeedbackForm(BuildContext ctx) async {
-    final url = Uri.parse(
-      'https://docs.google.com/forms/d/e/1FAIpQLSdaNmb7JE8CWiS_4QUV0IawKI4-496jyDNBDXQa-ZDuoBX3Cw/viewform',
-    );
+    final feedbackFormUrl = switch (_language) {
+      StudyLanguage.ko =>
+        'https://docs.google.com/forms/d/e/1FAIpQLSehoUqeNblgLA3I1d_Plms7H8YBaL9HHaD7f9R1PofrdaNXnw/viewform?usp=header',
+      StudyLanguage.en =>
+        'https://docs.google.com/forms/d/e/1FAIpQLScgJzVmSDcO1WtiZOVQRkBlHccUBCkzQ5jXOgdFltfYxzZJoA/viewform?usp=header',
+      StudyLanguage.ja =>
+        'https://docs.google.com/forms/d/e/1FAIpQLSdaNmb7JE8CWiS_4QUV0IawKI4-496jyDNBDXQa-ZDuoBX3Cw/viewform',
+    };
+    final url = Uri.parse(feedbackFormUrl);
     final ok = await launchUrl(url, mode: LaunchMode.externalApplication);
     if (!ok && ctx.mounted) {
       ScaffoldMessenger.of(ctx).showSnackBar(
