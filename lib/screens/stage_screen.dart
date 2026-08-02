@@ -143,87 +143,92 @@ class _StageScreenState extends State<StageScreen> {
       },
       child: Scaffold(
         appBar: AppBar(title: Text(text.stageMode)),
-        body: snap == null
-            ? const Center(child: CircularProgressIndicator())
-            : AppContent(
-                maxWidth: AppUi.stageMaxWidth,
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                  itemCount: (end - start) + (_groupPickerExpanded ? 3 : 2),
-                  itemBuilder: (context, i) {
-                    if (i == 0) {
-                      return _StageRewardSummary(
-                        totalStars: snap.totalStars,
-                        scheme: scheme,
-                        text: text,
-                      );
-                    }
-                    if (i == 1) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 10),
-                        child: _StageGroupHeader(
-                          groupIndex: groupIndex,
-                          groupCount: groupCount,
-                          start: start,
-                          end: end,
-                          total: widget.plan.stageCount,
-                          expanded: _groupPickerExpanded,
+        // AppBar covers the top inset; guard the bottom so the last stage row
+        // is not hidden behind the gesture bar under edge-to-edge.
+        body: SafeArea(
+          top: false,
+          child: snap == null
+              ? const Center(child: CircularProgressIndicator())
+              : AppContent(
+                  maxWidth: AppUi.stageMaxWidth,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                    itemCount: (end - start) + (_groupPickerExpanded ? 3 : 2),
+                    itemBuilder: (context, i) {
+                      if (i == 0) {
+                        return _StageRewardSummary(
+                          totalStars: snap.totalStars,
+                          scheme: scheme,
                           text: text,
-                          onTap: () {
-                            setState(
-                              () =>
-                                  _groupPickerExpanded = !_groupPickerExpanded,
-                            );
-                          },
-                        ),
-                      );
-                    }
-                    if (_groupPickerExpanded && i == 2) {
+                        );
+                      }
+                      if (i == 1) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8, bottom: 10),
+                          child: _StageGroupHeader(
+                            groupIndex: groupIndex,
+                            groupCount: groupCount,
+                            start: start,
+                            end: end,
+                            total: widget.plan.stageCount,
+                            expanded: _groupPickerExpanded,
+                            text: text,
+                            onTap: () {
+                              setState(
+                                () => _groupPickerExpanded =
+                                    !_groupPickerExpanded,
+                              );
+                            },
+                          ),
+                        );
+                      }
+                      if (_groupPickerExpanded && i == 2) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _StageGroupPicker(
+                            groupIndex: groupIndex,
+                            groupCount: groupCount,
+                            total: widget.plan.stageCount,
+                            onSelected: (value) {
+                              setState(() {
+                                _groupIndex = value;
+                                _userSelectedGroup = true;
+                                _groupPickerExpanded = false;
+                              });
+                            },
+                          ),
+                        );
+                      }
+                      final stageIndex =
+                          start + i - (_groupPickerExpanded ? 3 : 2);
+                      final earned = snap.starsInStage(stageIndex);
+                      final max = _maxStarsFor(stageIndex);
+                      final unlocked = _isUnlocked(snap, stageIndex);
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: _StageGroupPicker(
-                          groupIndex: groupIndex,
-                          groupCount: groupCount,
-                          total: widget.plan.stageCount,
-                          onSelected: (value) {
-                            setState(() {
-                              _groupIndex = value;
-                              _userSelectedGroup = true;
-                              _groupPickerExpanded = false;
-                            });
-                          },
+                        child: _StageCard(
+                          index: stageIndex,
+                          title: widget.plan
+                              .topicFor(stageIndex)
+                              .title(widget.language),
+                          subtitle: widget.plan
+                              .topicFor(stageIndex)
+                              .subtitle(widget.language),
+                          earnedStars: earned,
+                          maxStars: max,
+                          rounds: widget.plan.roundsIn(stageIndex),
+                          questionCount: _questionCountFor(stageIndex),
+                          isCurrent: stageIndex == currentStage,
+                          unlocked: unlocked,
+                          onTap: unlocked ? () => _openStage(stageIndex) : null,
+                          scheme: scheme,
+                          text: text,
                         ),
                       );
-                    }
-                    final stageIndex =
-                        start + i - (_groupPickerExpanded ? 3 : 2);
-                    final earned = snap.starsInStage(stageIndex);
-                    final max = _maxStarsFor(stageIndex);
-                    final unlocked = _isUnlocked(snap, stageIndex);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _StageCard(
-                        index: stageIndex,
-                        title: widget.plan
-                            .topicFor(stageIndex)
-                            .title(widget.language),
-                        subtitle: widget.plan
-                            .topicFor(stageIndex)
-                            .subtitle(widget.language),
-                        earnedStars: earned,
-                        maxStars: max,
-                        rounds: widget.plan.roundsIn(stageIndex),
-                        questionCount: _questionCountFor(stageIndex),
-                        isCurrent: stageIndex == currentStage,
-                        unlocked: unlocked,
-                        onTap: unlocked ? () => _openStage(stageIndex) : null,
-                        scheme: scheme,
-                        text: text,
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }

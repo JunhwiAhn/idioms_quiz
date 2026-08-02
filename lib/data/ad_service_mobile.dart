@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import 'fullscreen_ad_gate.dart';
+
 const _androidReleaseBannerAdUnitId = 'ca-app-pub-1633662132825683/8303811636';
 const _androidReleaseInterstitialAdUnitId =
     'ca-app-pub-1633662132825683/7740292166';
@@ -16,6 +18,7 @@ const _androidTestInterstitialAdUnitId =
 const _iosTestInterstitialAdUnitId = 'ca-app-pub-3940256099942544/4411468910';
 const _androidTestRewardedAdUnitId = 'ca-app-pub-3940256099942544/5224354917';
 const _iosTestRewardedAdUnitId = 'ca-app-pub-3940256099942544/1712485313';
+const _useTestAds = bool.fromEnvironment('USE_TEST_ADS', defaultValue: false);
 
 class AdService {
   AdService._();
@@ -99,17 +102,31 @@ class AdService {
       return;
     }
     _interstitialAd = null;
+    final gate = FullscreenAdGate();
+
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
         preloadInterstitial();
+        gate.finish();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
         ad.dispose();
         preloadInterstitial();
+        gate.finish();
       },
     );
-    await ad.show();
+    try {
+      // show() completes once the native SDK accepts the show request, not
+      // when the user closes the ad. Keep callers paused until the fullscreen
+      // callback fires so a quiz timer cannot start behind the interstitial.
+      await gate.showAndWait(ad.show);
+    } catch (error) {
+      ad.dispose();
+      preloadInterstitial();
+      if (kDebugMode) debugPrint('Interstitial show failed: $error');
+      gate.finish();
+    }
   }
 
   Future<void> preloadRewarded() async {
@@ -171,27 +188,27 @@ class AdService {
   }
 
   String get _bannerAdUnitId {
-    if (Platform.isAndroid && kReleaseMode) {
+    if (!_useTestAds && Platform.isAndroid && kReleaseMode) {
       return _androidReleaseBannerAdUnitId;
     }
     return Platform.isIOS ? _iosTestBannerAdUnitId : _androidTestBannerAdUnitId;
   }
 
   String? get _interstitialAdUnitId {
-    if (Platform.isAndroid && kReleaseMode) {
+    if (!_useTestAds && Platform.isAndroid && kReleaseMode) {
       return _androidReleaseInterstitialAdUnitId;
     }
-    if (kReleaseMode) return null;
+    if (!_useTestAds && kReleaseMode) return null;
     return Platform.isIOS
         ? _iosTestInterstitialAdUnitId
         : _androidTestInterstitialAdUnitId;
   }
 
   String? get _rewardedAdUnitId {
-    if (Platform.isAndroid && kReleaseMode) {
+    if (!_useTestAds && Platform.isAndroid && kReleaseMode) {
       return _androidReleaseRewardedAdUnitId;
     }
-    if (kReleaseMode) return null;
+    if (!_useTestAds && kReleaseMode) return null;
     return Platform.isIOS
         ? _iosTestRewardedAdUnitId
         : _androidTestRewardedAdUnitId;

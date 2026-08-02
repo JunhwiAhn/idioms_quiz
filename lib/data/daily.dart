@@ -6,11 +6,7 @@ const _morning = <String>[
   'Start with one word.',
 ];
 
-const _noon = <String>[
-  'Buen día.',
-  'Keep practicing.',
-  'One word at a time.',
-];
+const _noon = <String>['Buen día.', 'Keep practicing.', 'One word at a time.'];
 
 const _afternoon = <String>[
   'Buena tarde.',
@@ -30,22 +26,21 @@ const _late = <String>[
   'One last word.',
 ];
 
-int _daySeed(DateTime now) =>
-    now.year * 10000 + now.month * 100 + now.day;
+int _daySeed(DateTime now) => now.year * 10000 + now.month * 100 + now.day;
 
 String greetingFor(DateTime now) {
   final h = now.hour;
   final pool = h < 5
       ? _late
       : h < 10
-          ? _morning
-          : h < 14
-              ? _noon
-              : h < 18
-                  ? _afternoon
-                  : h < 22
-                      ? _evening
-                      : _late;
+      ? _morning
+      : h < 14
+      ? _noon
+      : h < 18
+      ? _afternoon
+      : h < 22
+      ? _evening
+      : _late;
   return pool[_daySeed(now) % pool.length];
 }
 

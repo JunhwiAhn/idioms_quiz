@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/app_text.dart';
-import '../data/pronunciation_service.dart';
+import '../widgets/pronounce.dart';
 import '../data/score_service.dart'
     show MasteryStage, kMasteryThreshold, masteryStageForCount;
 import '../theme/app_theme.dart';
@@ -138,86 +138,91 @@ class _CollectionScreenState extends State<CollectionScreen> {
           ),
         ),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 760;
-          return Column(
-            children: [
-              _CollectionToolbar(
-                maxWidth: 1000,
-                isWide: isWide,
-                searchController: _searchCtrl,
-                query: _query,
-                text: text,
-                filter: _filter,
-                resultCount: visible.length,
-                stats: levelStats,
-                showOverview: _showOverview,
-                onOverviewTap: () =>
-                    setState(() => _showOverview = !_showOverview),
-                onQueryChanged: _setQuery,
-                onClearQuery: () {
-                  _searchCtrl.clear();
-                  _setQuery('');
-                },
-                onFilterChanged: _setFilter,
-              ),
-              Expanded(
-                child: visible.isEmpty
-                    ? _EmptyState(query: _query, text: text)
-                    : Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1000),
-                          child: isWide
-                              ? GridView.builder(
-                                  controller: _scrollCtrl,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    8,
-                                    16,
-                                    80,
+      // AppBar covers the top inset; guard the bottom so the last word card is
+      // not hidden behind the gesture bar under edge-to-edge.
+      body: SafeArea(
+        top: false,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 760;
+            return Column(
+              children: [
+                _CollectionToolbar(
+                  maxWidth: 1000,
+                  isWide: isWide,
+                  searchController: _searchCtrl,
+                  query: _query,
+                  text: text,
+                  filter: _filter,
+                  resultCount: visible.length,
+                  stats: levelStats,
+                  showOverview: _showOverview,
+                  onOverviewTap: () =>
+                      setState(() => _showOverview = !_showOverview),
+                  onQueryChanged: _setQuery,
+                  onClearQuery: () {
+                    _searchCtrl.clear();
+                    _setQuery('');
+                  },
+                  onFilterChanged: _setFilter,
+                ),
+                Expanded(
+                  child: visible.isEmpty
+                      ? _EmptyState(query: _query, text: text)
+                      : Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1000),
+                            child: isWide
+                                ? GridView.builder(
+                                    controller: _scrollCtrl,
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      8,
+                                      16,
+                                      80,
+                                    ),
+                                    cacheExtent: 700,
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          mainAxisExtent: 174,
+                                          crossAxisSpacing: 10,
+                                          mainAxisSpacing: 10,
+                                        ),
+                                    itemCount: visible.length,
+                                    itemBuilder: (context, i) =>
+                                        _buildCollectionCard(
+                                          context,
+                                          visible[i],
+                                          text,
+                                        ),
+                                  )
+                                : ListView.separated(
+                                    controller: _scrollCtrl,
+                                    padding: const EdgeInsets.fromLTRB(
+                                      12,
+                                      6,
+                                      12,
+                                      80,
+                                    ),
+                                    cacheExtent: 600,
+                                    itemCount: visible.length,
+                                    separatorBuilder: (_, _) =>
+                                        const SizedBox(height: 8),
+                                    itemBuilder: (context, i) =>
+                                        _buildCollectionCard(
+                                          context,
+                                          visible[i],
+                                          text,
+                                        ),
                                   ),
-                                  cacheExtent: 700,
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
-                                        mainAxisExtent: 174,
-                                        crossAxisSpacing: 10,
-                                        mainAxisSpacing: 10,
-                                      ),
-                                  itemCount: visible.length,
-                                  itemBuilder: (context, i) =>
-                                      _buildCollectionCard(
-                                        context,
-                                        visible[i],
-                                        text,
-                                      ),
-                                )
-                              : ListView.separated(
-                                  controller: _scrollCtrl,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    12,
-                                    6,
-                                    12,
-                                    80,
-                                  ),
-                                  cacheExtent: 600,
-                                  itemCount: visible.length,
-                                  separatorBuilder: (_, _) =>
-                                      const SizedBox(height: 8),
-                                  itemBuilder: (context, i) =>
-                                      _buildCollectionCard(
-                                        context,
-                                        visible[i],
-                                        text,
-                                      ),
-                                ),
+                          ),
                         ),
-                      ),
-              ),
-            ],
-          );
-        },
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -1057,11 +1062,21 @@ class _IdiomSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton.filledTonal(
-                tooltip: text.playPronunciation,
-                onPressed: () =>
-                    PronunciationService.instance.speakSpanish(idiom.idiom),
-                icon: const Icon(Icons.volume_up_rounded),
+              PronounceButton(
+                text: idiom.idiom,
+                appText: text,
+                builder: (context, available, onPressed) =>
+                    IconButton.filledTonal(
+                      tooltip: available
+                          ? text.playPronunciation
+                          : text.ttsDownloadVoice,
+                      onPressed: onPressed,
+                      icon: Icon(
+                        available
+                            ? Icons.volume_up_rounded
+                            : Icons.download_rounded,
+                      ),
+                    ),
               ),
             ],
           ),

@@ -8,6 +8,62 @@ class AppText {
       values[language] ?? values[StudyLanguage.ko] ?? '';
 
   String get appName => 'DELE Voca Dojo';
+  String get ttsMissingVoice => pick({
+    StudyLanguage.ko: '기기에 스페인어 음성이 설치되어 있지 않아 발음을 재생할 수 없습니다.',
+    StudyLanguage.en:
+        'No Spanish voice is installed on this device, so '
+        'pronunciation cannot play.',
+    StudyLanguage.ja: '端末にスペイン語の音声がインストールされていないため、発音を再生できません。',
+  });
+  String get ttsInstallVoice => pick({
+    StudyLanguage.ko: '설치',
+    StudyLanguage.en: 'Install',
+    StudyLanguage.ja: 'インストール',
+  });
+  String get ttsDownloadVoice => pick({
+    StudyLanguage.ko: '스페인어 음성 다운로드',
+    StudyLanguage.en: 'Download Spanish voice',
+    StudyLanguage.ja: 'スペイン語音声をダウンロード',
+  });
+  String get ttsInstallSteps => pick({
+    StudyLanguage.ko:
+        '발음을 들으려면 스페인어 음성 데이터가 필요합니다.\n\n'
+        '다음 화면에서 이렇게 해주세요.\n'
+        '1. 엔진을 "Google 음성 서비스"로 선택\n'
+        '2. 언어 설치 (또는 음성 데이터 설치)\n'
+        '3. "스페인어(스페인)" 다운로드\n\n'
+        '삼성 TTS 등 다른 엔진에는 스페인어가 없을 수 있으니 반드시 Google 음성 서비스를 선택하세요.',
+    StudyLanguage.en:
+        'Pronunciation needs Spanish voice data.\n\n'
+        'On the next screen:\n'
+        '1. Choose "Google Speech Services" as the engine\n'
+        '2. Open Install voice data\n'
+        '3. Download "Spanish (Spain)"\n\n'
+        'Other engines such as Samsung TTS may not offer Spanish, so pick '
+        'Google Speech Services.',
+    StudyLanguage.ja:
+        '発音の再生にはスペイン語の音声データが必要です。\n\n'
+        '次の画面で以下を行ってください。\n'
+        '1. エンジンを「Google 音声サービス」に設定\n'
+        '2. 音声データのインストールを開く\n'
+        '3. 「スペイン語(スペイン)」をダウンロード\n\n'
+        'Samsung TTS など他のエンジンにはスペイン語がない場合があるため、必ず Google 音声サービスを選んでください。',
+  });
+  String get ttsOpenInstaller => pick({
+    StudyLanguage.ko: '설치 화면 열기',
+    StudyLanguage.en: 'Open installer',
+    StudyLanguage.ja: 'インストール画面を開く',
+  });
+  String get cancel => pick({
+    StudyLanguage.ko: '취소',
+    StudyLanguage.en: 'Cancel',
+    StudyLanguage.ja: 'キャンセル',
+  });
+  String get ttsSettingsUnavailable => pick({
+    StudyLanguage.ko: '이 기기에서는 음성 설정 화면을 열 수 없습니다.',
+    StudyLanguage.en: 'Voice settings cannot be opened on this device.',
+    StudyLanguage.ja: 'この端末では音声設定を開けません。',
+  });
   String get chooseLanguageTitle => pick({
     StudyLanguage.ko: '학습 언어를 선택해 주세요',
     StudyLanguage.en: 'Choose your study language',

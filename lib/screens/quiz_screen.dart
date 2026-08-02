@@ -5,12 +5,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../data/ad_service.dart';
 import '../data/app_text.dart';
 import '../data/audio_service.dart';
-import '../data/pronunciation_service.dart';
 import '../data/quiz_session.dart';
 import '../data/score_service.dart';
 import '../data/stage_plan.dart' show starsForRound;
 import '../models/idiom.dart';
 import '../theme/app_theme.dart';
+import '../widgets/pronounce.dart';
 import 'result_screen.dart';
 
 const int kQuestionSeconds = 20;
@@ -37,7 +37,7 @@ class QuizScreen extends StatefulWidget {
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
+class _QuizScreenState extends State<QuizScreen> with WidgetsBindingObserver {
   final _scoreService = ScoreService();
   late Map<HintKind, int> _hints;
 
@@ -46,6 +46,7 @@ class _QuizScreenState extends State<QuizScreen> {
   HintKind? _lastDrop;
   bool _allowExit = false;
   bool _isConfirmingExit = false;
+  bool _isAdvancing = false;
 
   // Per-question hint state
   Set<int> _eliminated = {};
@@ -59,6 +60,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _hints = {...widget.initialHints};
     _syncHints();
     _startTimer();
@@ -68,10 +70,24 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
     _autoPronunciationTimer?.cancel();
     _secondsLeft.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Leaving the app must not burn the countdown — sending the user to the
+    // system voice installer mid-question would otherwise time out and score
+    // it wrong. Same for calls, the notification shade, and app switching.
+    if (state == AppLifecycleState.resumed) {
+      if (!_isConfirmingExit) _resumeTimer();
+    } else {
+      _ticker?.cancel();
+      _autoPronunciationTimer?.cancel();
+    }
   }
 
   void _startTimer() {
@@ -143,9 +159,16 @@ class _QuizScreenState extends State<QuizScreen> {
   int get _index => widget.session.currentIndex;
   int get _total => widget.session.questions.length;
 
-  Future<void> _speak(String text) {
+  /// [auto] marks playback the user did not ask for, so a device with no
+  /// Spanish voice is explained once instead of on every question.
+  Future<void> _speak(String text, {bool auto = false}) {
     _autoPronunciationTimer?.cancel();
-    return PronunciationService.instance.speakSpanish(text);
+    return pronounceWithFeedback(
+      context,
+      text,
+      AppText(_q.language),
+      oncePerRun: auto,
+    );
   }
 
   void _autoPlayWordForMeaningQuestion() {
@@ -158,7 +181,7 @@ class _QuizScreenState extends State<QuizScreen> {
       if (!mounted || widget.session.isFinished || _index != questionIndex) {
         return;
       }
-      _speak(question.idiom.idiom);
+      _speak(question.idiom.idiom, auto: true);
     });
   }
 
@@ -194,55 +217,61 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Future<void> _next() async {
-    final isLastQuestion = widget.session.currentIndex == _total - 1;
-    if (!isLastQuestion) {
-      await AdService.instance.maybeShowAfterRound(frequency: 4);
-      if (!mounted) return;
-    }
-    widget.session.advance();
-    if (widget.session.isFinished) {
-      int? stars;
-      if (widget.isStageRound) {
-        stars = starsForRound(
-          correct: widget.session.correctCount,
-          total: widget.session.questions.length,
-        );
+    if (_isAdvancing) return;
+    setState(() => _isAdvancing = true);
+    try {
+      final isLastQuestion = widget.session.currentIndex == _total - 1;
+      if (!isLastQuestion) {
+        await AdService.instance.maybeShowAfterRound(frequency: 4);
+        if (!mounted) return;
       }
-      final outcome = await _scoreService.commitRun(
-        correct: widget.session.correctCount,
-        total: widget.session.questions.length,
-        longestStreak: widget.session.longestStreak,
-        correctIdioms: widget.session.correctIdioms,
-        incorrectIdioms: widget.session.incorrectIdioms,
-        droppedHints: widget.session.droppedHints,
-        isMarathon: widget.isMarathon,
-        roundStageIndex: widget.roundStageIndex,
-        roundRoundIndex: widget.roundRoundIndex,
-        roundStars: stars,
-      );
-      if (!mounted) return;
-      await Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => ResultScreen(
+      widget.session.advance();
+      if (widget.session.isFinished) {
+        int? stars;
+        if (widget.isStageRound) {
+          stars = starsForRound(
             correct: widget.session.correctCount,
             total: widget.session.questions.length,
-            longestStreak: widget.session.longestStreak,
-            outcome: outcome,
-            language: widget.session.questions.first.language,
-            isMarathon: widget.isMarathon,
+          );
+        }
+        final outcome = await _scoreService.commitRun(
+          correct: widget.session.correctCount,
+          total: widget.session.questions.length,
+          longestStreak: widget.session.longestStreak,
+          correctIdioms: widget.session.correctIdioms,
+          incorrectIdioms: widget.session.incorrectIdioms,
+          droppedHints: widget.session.droppedHints,
+          isMarathon: widget.isMarathon,
+          roundStageIndex: widget.roundStageIndex,
+          roundRoundIndex: widget.roundRoundIndex,
+          roundStars: stars,
+        );
+        if (!mounted) return;
+        await Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => ResultScreen(
+              correct: widget.session.correctCount,
+              total: widget.session.questions.length,
+              longestStreak: widget.session.longestStreak,
+              outcome: outcome,
+              language: widget.session.questions.first.language,
+              isMarathon: widget.isMarathon,
+            ),
           ),
-        ),
-        result: true,
-      );
-    } else {
-      setState(() {
-        _picked = null;
-        _revealed = false;
-        _lastDrop = null;
-        _eliminated = {};
-      });
-      _startTimer();
-      _autoPlayWordForMeaningQuestion();
+          result: true,
+        );
+      } else {
+        setState(() {
+          _picked = null;
+          _revealed = false;
+          _lastDrop = null;
+          _eliminated = {};
+        });
+        _startTimer();
+        _autoPlayWordForMeaningQuestion();
+      }
+    } finally {
+      if (mounted) setState(() => _isAdvancing = false);
     }
   }
 
@@ -411,6 +440,15 @@ class _QuizScreenState extends State<QuizScreen> {
                               duration: const Duration(milliseconds: 260),
                               switchInCurve: Curves.easeOutBack,
                               switchOutCurve: Curves.easeIn,
+                              // AnimatedSwitcher's default layout stacks the
+                              // outgoing child underneath the incoming one.
+                              // When advancing, that briefly paints the
+                              // previous question's feedback over the next
+                              // question's hint bar. Keep only the current
+                              // child in the layout so stale question UI is
+                              // removed on the same frame.
+                              layoutBuilder: (currentChild, previousChildren) =>
+                                  currentChild ?? const SizedBox.shrink(),
                               child: _revealed
                                   ? _AnswerFeedbackBanner(
                                       key: ValueKey('feedback_$_index'),
@@ -441,7 +479,6 @@ class _QuizScreenState extends State<QuizScreen> {
                                   eliminated: _eliminated.contains(i),
                                   comboStreak: widget.session.currentStreak,
                                   language: _q.language,
-                                  speakTooltip: text.playPronunciation,
                                   onSpeak: _q.mode == QuizMode.wordLookup
                                       ? () => _speak(_q.choices[i])
                                       : null,
@@ -485,7 +522,7 @@ class _QuizScreenState extends State<QuizScreen> {
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 720),
                               child: FilledButton(
-                                onPressed: _next,
+                                onPressed: _isAdvancing ? null : _next,
                                 style: FilledButton.styleFrom(
                                   minimumSize: const Size.fromHeight(56),
                                   backgroundColor: _picked == _q.correctIndex
@@ -690,6 +727,9 @@ class _PromptDisplay extends StatelessWidget {
 
     if (question.mode == QuizMode.sentenceBlank) {
       final showAnswer = fullReveal;
+      final exampleTranslation = idiom.exampleMeaningFor(question.language);
+      final showTranslation =
+          idiom.hasUsableExample && exampleTranslation.isNotEmpty;
       return Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
@@ -711,6 +751,18 @@ class _PromptDisplay extends StatelessWidget {
                 color: scheme.onSurface,
               ),
             ),
+            if (showTranslation) ...[
+              const SizedBox(height: 10),
+              Text(
+                exampleTranslation,
+                textAlign: TextAlign.center,
+                style: notoSansJp(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
             const SizedBox(height: 10),
             AnimatedOpacity(
               duration: const Duration(milliseconds: 200),
@@ -748,7 +800,8 @@ class _PromptDisplay extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             _SpeakButton(
-              tooltip: AppText(question.language).playPronunciation,
+              text: idiom.idiom,
+              appText: AppText(question.language),
               onPressed: () => onSpeak(idiom.idiom),
             ),
           ],
@@ -1004,7 +1057,6 @@ class _ChoiceTile extends StatelessWidget {
   final bool eliminated;
   final int comboStreak;
   final StudyLanguage language;
-  final String speakTooltip;
   final VoidCallback? onSpeak;
   final VoidCallback onTap;
 
@@ -1018,7 +1070,6 @@ class _ChoiceTile extends StatelessWidget {
     required this.eliminated,
     required this.comboStreak,
     required this.language,
-    required this.speakTooltip,
     required this.onSpeak,
     required this.onTap,
   });
@@ -1223,7 +1274,8 @@ class _ChoiceTile extends StatelessWidget {
                   if (onSpeak != null) ...[
                     const SizedBox(width: 8),
                     _SpeakButton(
-                      tooltip: speakTooltip,
+                      text: text,
+                      appText: AppText(language),
                       onPressed: onSpeak!,
                       compact: true,
                     ),
@@ -1356,7 +1408,8 @@ class _MeaningRevealCard extends StatelessWidget {
                 ),
               ),
               _SpeakButton(
-                tooltip: AppText(question.language).playPronunciation,
+                text: idiom.idiom,
+                appText: AppText(question.language),
                 onPressed: () => onSpeak(idiom.idiom),
                 compact: true,
               ),
@@ -1412,12 +1465,14 @@ class _MeaningRevealCard extends StatelessWidget {
 }
 
 class _SpeakButton extends StatelessWidget {
-  final String tooltip;
+  final String text;
+  final AppText appText;
   final VoidCallback onPressed;
   final bool compact;
 
   const _SpeakButton({
-    required this.tooltip,
+    required this.text,
+    required this.appText,
     required this.onPressed,
     this.compact = false,
   });
@@ -1425,15 +1480,25 @@ class _SpeakButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return IconButton.filledTonal(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      icon: Icon(Icons.volume_up_rounded, size: compact ? 18 : 20),
-      style: IconButton.styleFrom(
-        minimumSize: Size.square(compact ? 34 : 40),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        backgroundColor: scheme.secondaryContainer,
-        foregroundColor: scheme.onSecondaryContainer,
+    return PronounceButton(
+      text: text,
+      appText: appText,
+      onSpeak: onPressed,
+      builder: (context, available, handler) => IconButton.filledTonal(
+        tooltip: available
+            ? appText.playPronunciation
+            : appText.ttsDownloadVoice,
+        onPressed: handler,
+        icon: Icon(
+          available ? Icons.volume_up_rounded : Icons.download_rounded,
+          size: compact ? 18 : 20,
+        ),
+        style: IconButton.styleFrom(
+          minimumSize: Size.square(compact ? 34 : 40),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          backgroundColor: scheme.secondaryContainer,
+          foregroundColor: scheme.onSecondaryContainer,
+        ),
       ),
     );
   }

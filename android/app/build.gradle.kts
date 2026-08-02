@@ -51,6 +51,14 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            // Play Console flags unoptimized release builds under "R8 최적화로
+            // 앱의 메모리 및 성능 개선"; code + resource shrinking addresses it.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

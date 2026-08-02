@@ -6,6 +6,6 @@ void main() {
   testWidgets('App builds and shows the home app bar', (tester) async {
     await tester.pumpWidget(const IdiomsQuizApp());
     await tester.pump(const Duration(seconds: 3));
-    expect(find.text('Español Dojo'), findsOneWidget);
+    expect(find.textContaining('DELE Voca'), findsWidgets);
   });
 }

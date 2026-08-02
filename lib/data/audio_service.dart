@@ -16,8 +16,10 @@ class AudioService {
   AudioService._();
   static final AudioService instance = AudioService._();
 
+  static const double _defaultVolume = 0.75;
+
   bool _muted = false;
-  double _volume = 0.4;
+  double _volume = _defaultVolume;
   bool _loaded = false;
 
   // Small reusable pool instead of spinning up a new native AudioPlayer per
@@ -37,7 +39,11 @@ class AudioService {
     _loaded = true;
     final prefs = await SharedPreferences.getInstance();
     _muted = prefs.getBool('audio_muted') ?? false;
-    _volume = prefs.getDouble('audio_volume') ?? 0.4;
+    // The OS media volume is the user's control, so play near full scale and
+    // leave headroom for the per-SFX multiplier. The old 0.4 default was
+    // unreachable to change — nothing calls setVolume — so it just made every
+    // effect quiet next to the 1.0 pronunciation.
+    _volume = prefs.getDouble('audio_volume') ?? _defaultVolume;
   }
 
   Future<void> setMuted(bool v) async {

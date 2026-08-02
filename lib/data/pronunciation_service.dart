@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,22 +42,46 @@ class PronunciationService {
   static const _kVoiceLocale = 'pronunciation_voice_locale';
   static const _kSpeechRate = 'pronunciation_speech_rate';
   static const _kPitch = 'pronunciation_pitch';
-  static const minSpeechRate = 0.55;
+  // Learners need the word slower than a native-speed 1.0, and 0.65 still ran
+  // ahead of what a beginner can follow.
+  static const minSpeechRate = 0.3;
   static const maxSpeechRate = 1.0;
-  static const defaultSpeechRate = 0.65;
+  static const defaultSpeechRate = 0.45;
 
   final FlutterTts _tts = FlutterTts();
-  bool _speechOptionsConfigured = false;
+  static const _setupChannel = MethodChannel(
+    'com.junhwiahn.spanishworddojo/tts_setup',
+  );
   Map<String, String>? _spanishVoice;
   double _speechRate = defaultSpeechRate;
   double _pitch = 1.0;
 
+  /// Whether this device can speak Spanish. Starts optimistic so buttons do
+  /// not flash a download icon before the first check resolves; playback and
+  /// [refreshAvailability] keep it honest afterwards.
+  final ValueNotifier<bool> spanishVoiceAvailable = ValueNotifier<bool>(true);
+
   double get speechRate => _speechRate;
   double get pitch => _pitch;
 
-  Future<void> speakSpanish(String text) async {
+  /// Re-runs voice discovery, e.g. after returning from the system installer.
+  Future<void> refreshAvailability() async {
+    if (kIsWeb) return;
+    _spanishVoice = null;
+    _triedGoogleEngine = false;
+    try {
+      spanishVoiceAvailable.value = await _configureForSpanish();
+    } catch (e) {
+      if (kDebugMode) debugPrint('TTS availability check failed: $e');
+    }
+  }
+
+  /// Returns false when the device has no Spanish voice, so callers that were
+  /// triggered by an explicit tap can explain the silence instead of looking
+  /// broken.
+  Future<bool> speakSpanish(String text) async {
     final phrase = text.trim();
-    if (phrase.isEmpty) return;
+    if (phrase.isEmpty) return true;
 
     try {
       if (kIsWeb) {
@@ -69,21 +94,39 @@ class PronunciationService {
           preferredVoiceName: prefs.getString(_kVoiceName),
           preferredVoiceLocale: prefs.getString(_kVoiceLocale),
         );
-        return;
+        return true;
       }
 
       final ready = await _configureForSpanish();
+      spanishVoiceAvailable.value = ready;
       if (!ready) {
         if (kDebugMode) {
           debugPrint('No Spanish TTS voice is available on this device.');
         }
-        return;
+        return false;
       }
       await _tts.stop();
       await _tts.speak(phrase);
+      return true;
     } catch (e) {
       if (kDebugMode) debugPrint('TTS playback failed: $e');
+      return false;
     }
+  }
+
+  /// Opens the system screen where the user can add the missing Spanish voice.
+  /// Returns false when no such screen exists on this device.
+  Future<bool> openVoiceInstall() async {
+    if (kIsWeb) return false;
+    for (final method in const ['installVoiceData', 'openTtsSettings']) {
+      try {
+        final ok = await _setupChannel.invokeMethod<bool>(method);
+        if (ok == true) return true;
+      } catch (e) {
+        if (kDebugMode) debugPrint('TTS setup intent "$method" failed: $e');
+      }
+    }
+    return false;
   }
 
   Future<void> loadSettings() async {
@@ -97,14 +140,12 @@ class PronunciationService {
 
   Future<void> setSpeechRate(double value) async {
     _speechRate = value.clamp(minSpeechRate, maxSpeechRate);
-    _speechOptionsConfigured = false;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_kSpeechRate, _speechRate);
   }
 
   Future<void> setPitch(double value) async {
     _pitch = value.clamp(0.7, 1.3);
-    _speechOptionsConfigured = false;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_kPitch, _pitch);
   }
@@ -152,15 +193,43 @@ class PronunciationService {
     }
   }
 
+  static const _googleTtsEngine = 'com.google.android.tts';
+  bool _triedGoogleEngine = false;
+
+  /// Samsung and other OEM engines are often the default but ship no Spanish
+  /// voice, while Google's engine does. Switch to Google's once if the current
+  /// engine turns out to have nothing Spanish to offer.
+  Future<bool> _switchToGoogleEngine() async {
+    if (_triedGoogleEngine || defaultTargetPlatform != TargetPlatform.android) {
+      return false;
+    }
+    _triedGoogleEngine = true;
+    try {
+      final engines = await _tts.getEngines;
+      if (engines is! List || !engines.contains(_googleTtsEngine)) return false;
+      await _tts.setEngine(_googleTtsEngine);
+      return true;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Switching to Google TTS engine failed: $e');
+      return false;
+    }
+  }
+
   Future<bool> _configureForSpanish() async {
     await loadSettings();
+    final ready = await _resolveSpanishVoice();
+    if (ready) return true;
 
-    if (!_speechOptionsConfigured) {
-      await _tts.setSpeechRate(_speechRate);
-      await _tts.setPitch(_pitch);
-      await _tts.setVolume(1.0);
-      _speechOptionsConfigured = true;
+    // Retry once on Google's engine before giving up.
+    if (await _switchToGoogleEngine()) {
+      _spanishVoice = null;
+      return _resolveSpanishVoice();
     }
+    return false;
+  }
+
+  Future<bool> _resolveSpanishVoice() async {
+    var ready = false;
 
     final voice =
         _spanishVoice ??
@@ -170,32 +239,42 @@ class PronunciationService {
       _spanishVoice = voice;
       final locale = voice['locale'];
       if (locale != null && locale.isNotEmpty) {
-        await _tts.setLanguage(locale);
+        // A successful setLanguage is enough to speak. Android engines often
+        // reject setVoice when the stored voice name no longer matches an
+        // installed voice, so failing that must not silence playback.
+        ready = _isSuccess(await _tts.setLanguage(locale));
       }
       final applied = await _tts.setVoice(voice);
-      return _isSuccess(applied) || applied == null;
+      ready = ready || _isSuccess(applied) || applied == null;
     }
 
-    if (defaultTargetPlatform == TargetPlatform.android) {
+    if (!ready && defaultTargetPlatform == TargetPlatform.android) {
       for (final locale in _spanishLocales) {
         final installed = await _tts.isLanguageInstalled(locale);
         if (installed == true || installed == 1) {
-          final applied = await _tts.setLanguage(locale);
-          return _isSuccess(applied);
+          ready = _isSuccess(await _tts.setLanguage(locale));
+          if (ready) break;
         }
       }
-      return false;
-    }
-
-    for (final locale in _spanishLocales) {
-      final available = await _tts.isLanguageAvailable(locale);
-      if (_isSuccess(available)) {
-        final applied = await _tts.setLanguage(locale);
-        return _isSuccess(applied);
+    } else if (!ready) {
+      for (final locale in _spanishLocales) {
+        final available = await _tts.isLanguageAvailable(locale);
+        if (_isSuccess(available)) {
+          ready = _isSuccess(await _tts.setLanguage(locale));
+          if (ready) break;
+        }
       }
     }
 
-    return false;
+    // Rate/pitch/volume are applied last: setLanguage and setVoice reset them
+    // on some Android engines, which would leave speech at the engine default.
+    if (ready) {
+      await _tts.setSpeechRate(_speechRate);
+      await _tts.setPitch(_pitch);
+      await _tts.setVolume(1.0);
+    }
+
+    return ready;
   }
 
   Future<Map<String, String>?> _findSpanishVoice() async {
