@@ -1,0 +1,11 @@
+STYLE: 1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.
+
+PALETTE (strict, use only these): warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.
+
+PADRE: Spanish man in his 40s from Madrid, long narrow face, warm olive skin, receding dark brown hair, light stubble, square dark-rimmed glasses, muted teal short-sleeve shirt tucked into warm grey-brown slacks, permanently deadpan half-lidded eyes.
+
+NPC: Spanish waiter in his 50s, thick grey moustache, balding, black apron over a white shirt, small notepad in his breast pocket, a folded towel over his forearm.
+
+SHOT 7: Medium two-shot. The table is a wreck of empty plates and crumpled napkins. PADRE raises one hand just above shoulder height without any expression at all. The waiter is already turning toward him from across the room, nodding. Absolutely no lettering, no labels, no captions, no signage text anywhere in the image.
+
+NEGATIVE: photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors

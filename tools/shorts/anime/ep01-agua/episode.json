@@ -1,0 +1,98 @@
+{
+  "id": "ep01-agua",
+  "sourceSet": "travel",
+  "sourceTerm": "Agua",
+  "sourceFile": "tools/shorts/travel_phrases.js",
+  "target": { "es": "Agua, por favor.", "ko": "물 주세요.", "pron": "아구아 뽀르 파보르" },
+  "situation": "마드리드 타파스 바 테라스. 목마른 막내가 오늘 처음으로 혼자 주문해 본다.",
+  "npc": "NPC: Spanish waiter in his 50s, thick grey moustache, balding, black apron over a white shirt, small notepad in his breast pocket.",
+  "punchline": "아빠는 한 박자 늦게 자기도 마시겠다고 한다",
+  "seed": 481207,
+  "langs": ["ko"],
+  "style": "1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.",
+  "palette": "warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.",
+  "negative": "photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors",
+  "shots": [
+    {
+      "n": 1, "start": 0.0, "dur": 5.0,
+      "cast": ["MADRE", "PADRE", "HIJA", "HIJO", "NPC"],
+      "shotDescription": "Wide establishing shot of a narrow Madrid street with a tapas bar terrace at midday, terracotta walls and a striped awning. The family of four sits around a small round metal table. The waiter arrives at the table with his notepad. HIJO fans himself, cheeks flushed, staring at his empty glass. Warm flat midday light.",
+      "motionPrompt": "Very slow push in toward the table. The waiter opens his notepad. The awning edge flutters. Background static.",
+      "lines": [{ "who": "NPC", "es": "¿Qué van a tomar?", "sub": { "ko": "뭐 드시겠어요?" } }],
+      "onScreen": null
+    },
+    {
+      "n": 2, "start": 5.0, "dur": 5.0,
+      "cast": ["MADRE", "HIJO"],
+      "shotDescription": "Medium two-shot at the table. HIJO tugs MADRE's sleeve with both hands, pointing at his empty glass, mouth in a small pleading frown. MADRE does not look at him; she tilts her chin toward the waiter, one eyebrow raised, faintly amused.",
+      "motionPrompt": "Static shot. HIJO tugs the sleeve twice, then MADRE tilts her chin once. Background static.",
+      "lines": [
+        { "who": "HIJO", "es": "Mamá, tengo sed.", "sub": { "ko": "엄마, 나 목말라" } },
+        { "who": "MADRE", "es": "Pídelo tú.", "sub": { "ko": "네가 말해 봐" } }
+      ],
+      "onScreen": null
+    },
+    {
+      "n": 3, "start": 10.0, "dur": 5.0,
+      "cast": ["MADRE"],
+      "shotDescription": "Close-up of MADRE leaning toward camera, speaking slowly and clearly with an open rounded mouth shape, eyebrows raised in encouragement. Blurred simple terrace behind her. Wide empty space in the lower third for a caption.",
+      "motionPrompt": "Static shot. MADRE leans in slightly and her mouth opens on the word. Background static.",
+      "lines": [{ "who": "MADRE", "es": "Agua, por favor.", "sub": { "ko": "물 주세요" } }],
+      "onScreen": "Agua, por favor."
+    },
+    {
+      "n": 4, "start": 15.0, "dur": 5.0,
+      "cast": ["MADRE"],
+      "shotDescription": "Same close-up of MADRE, now holding up two fingers beside her face, mouth slightly open mid-explanation, one eyebrow raised. Same blurred terrace. Wide empty space in the lower third for a caption.",
+      "motionPrompt": "Static shot. MADRE raises two fingers. Background static.",
+      "lines": [{ "who": "MADRE", "es": "Solo dos palabras.", "sub": { "ko": "두 단어면 끝이야" } }],
+      "note": { "ko": "agua는 물. 뒤에 por favor만 붙이면 주문 완료" },
+      "onScreen": "Agua, por favor."
+    },
+    {
+      "n": 5, "start": 20.0, "dur": 5.0,
+      "cast": ["HIJO"],
+      "shotDescription": "Close-up of HIJO standing up on his chair, chest puffed out, eyes squeezed shut, mouth wide open shouting toward the waiter, both fists clenched at his sides. Simple terrace wall behind him.",
+      "motionPrompt": "Slight push in. HIJO takes a breath, then his mouth opens wide. Background static.",
+      "lines": [{ "who": "HIJO", "es": "Agua, por favor.", "sub": { "ko": "물 주세요" } }],
+      "onScreen": "Agua, por favor."
+    },
+    {
+      "n": 6, "start": 25.0, "dur": 5.0,
+      "cast": ["NPC"],
+      "shotDescription": "Medium shot of the WAITER breaking into a broad delighted smile under his moustache, eyes crinkled, already lifting a glass water jug and a tumbler off his tray. Warm terrace behind him.",
+      "motionPrompt": "Slight push in. The waiter lifts the water jug and nods once. Background static.",
+      "lines": [{ "who": "NPC", "es": "¡Claro! Ahora mismo.", "sub": { "ko": "그럼요! 바로 드릴게요" } }],
+      "onScreen": null
+    },
+    {
+      "n": 7, "start": 30.0, "dur": 5.0,
+      "cast": ["MADRE", "PADRE", "HIJA", "HIJO"],
+      "shotDescription": "Wide shot of the whole table. HIJO stands on his chair beaming with both fists raised. MADRE applauds proudly. HIJA does not look up from her phone, already holding a full glass of water she got herself. PADRE raises one finger flatly, completely deadpan, a beat too late.",
+      "motionPrompt": "Static shot. HIJO raises his fists higher. PADRE slowly raises one finger. Background static.",
+      "lines": [{ "who": "PADRE", "es": "Yo también quiero.", "sub": { "ko": "나도 마실래" } }],
+      "onScreen": null
+    },
+    {
+      "n": 8, "start": 35.0, "dur": 5.0,
+      "cast": [],
+      "shotDescription": "Simple flat cream card background with a soft paper grain and a thin terracotta border, a small hand-drawn water glass illustration in the upper area, large empty centre area reserved for typography. No people.",
+      "motionPrompt": "Static shot. The water glass illustration bobs almost imperceptibly. Nothing else moves.",
+      "lines": [{ "who": "NARR", "es": "Agua, por favor.", "sub": { "ko": "물 주세요 / 아구아 뽀르 파보르" } }],
+      "onScreen": "Agua, por favor."
+    }
+  ],
+  "budget": {
+    "images": { "model": "gpt_image_2", "count": 9, "creditsEach": 0.5, "credits": 4.5 },
+    "videos": { "model": "kling3_0_turbo", "count": 8, "creditsEach": 7.5, "credits": 60 },
+    "total": 64.5
+  },
+  "metadata": {
+    "ko": {
+      "title": "물 한 잔 시키는 스페인 꼬마 | 스페인 회화 따라가기 #1",
+      "description": "스페인 식당에서 물 시킬 때 딱 한 마디. Agua, por favor. (아구아 뽀르 파보르)\n\nagua는 물, por favor는 부탁할 때 뒤에 붙이는 말이에요. 두 단어면 주문이 끝납니다. 수돗물을 시키려면 agua del grifo 라고 하면 돼요.\n\n스페인 가족의 실제 대화를 그대로 따라가면서 익히는 시리즈입니다. 단어·회화 연습은 앱에서 이어서 하실 수 있습니다.",
+      "tags": ["스페인어", "여행스페인어", "스페인여행", "스페인어회화", "왕초보스페인어", "스페인어독학", "DELE", "스페인어단어", "유럽여행", "쇼츠"],
+      "pinnedComment": "por favor 하나만 뒤에 붙여도 훨씬 정중하게 들려요. 다음 편은 시장에서 값 물어볼 때 쓰는 표현입니다 🙌"
+    }
+  }
+}

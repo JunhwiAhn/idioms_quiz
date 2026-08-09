@@ -181,6 +181,7 @@ class ScoreService {
   static const _kStudyStreakDays = 'study_streak_days';
   static const _kLastStudyDate = 'last_study_date';
   static const _kEquippedTitle = 'equipped_title';
+  static const _kSkipCognates = 'skip_cognates';
 
   Future<StudyLanguage> studyLanguage() async {
     final prefs = await SharedPreferences.getInstance();
@@ -199,6 +200,18 @@ class ScoreService {
   Future<bool> hasStudyLanguage() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey(_kStudyLanguage);
+  }
+
+  /// null until the learner has been asked whether to hide words spelled the
+  /// same in their language as in Spanish.
+  Future<bool?> skipCognates() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_kSkipCognates);
+  }
+
+  Future<void> setSkipCognates(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kSkipCognates, value);
   }
 
   Future<ScoreSnapshot> snapshot() async {

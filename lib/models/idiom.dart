@@ -1,7 +1,8 @@
 enum StudyLanguage {
   ko('ko', '한국어'),
   en('en', 'English'),
-  ja('ja', '日本語');
+  ja('ja', '日本語'),
+  pt('pt', 'Português (BR)');
 
   final String code;
   final String label;
@@ -18,6 +19,7 @@ enum StudyLanguage {
     final normalized = code?.toLowerCase();
     if (normalized == 'ko') return StudyLanguage.ko;
     if (normalized == 'ja') return StudyLanguage.ja;
+    if (normalized == 'pt') return StudyLanguage.pt;
     return StudyLanguage.en;
   }
 }
@@ -66,8 +68,10 @@ class Idiom {
   bool hasMeaningFor(StudyLanguage language) =>
       _firstNonEmpty([
         meanings[language],
-        meanings[StudyLanguage.ko],
+        // English before Korean: a learner whose language is missing a
+        // translation can far more likely read English than Korean.
         meanings[StudyLanguage.en],
+        meanings[StudyLanguage.ko],
         meanings[StudyLanguage.ja],
       ]) !=
       null;
@@ -88,8 +92,10 @@ class Idiom {
   String meaningFor(StudyLanguage language) =>
       _firstNonEmpty([
         meanings[language],
-        meanings[StudyLanguage.ko],
+        // English before Korean: a learner whose language is missing a
+        // translation can far more likely read English than Korean.
         meanings[StudyLanguage.en],
+        meanings[StudyLanguage.ko],
         meanings[StudyLanguage.ja],
       ]) ??
       '';
@@ -270,6 +276,39 @@ class Idiom {
 
   String exampleMeaningFor(StudyLanguage language) =>
       exampleMeanings[language] ?? exampleMeanings[StudyLanguage.ko] ?? '';
+
+  /// True when the translation is spelled the same as the Spanish word, so the
+  /// entry teaches a speaker of [language] nothing. Roughly a quarter of the
+  /// deck is like this for Portuguese ("animal", "hotel", "biblioteca"), which
+  /// is why those learners can opt out of them.
+  bool isCognateFor(StudyLanguage language) {
+    final term = _cognateKey(spanish);
+    if (term.isEmpty) return false;
+    final gloss = meanings[language];
+    if (gloss == null || gloss.trim().isEmpty) return false;
+    // Glosses list alternatives ("lá, ali"); a match on any of them counts.
+    return gloss
+        .split(RegExp(r'[,;/]'))
+        .map(_cognateKey)
+        .any((part) => part.isNotEmpty && part == term);
+  }
+
+  /// Casefold and strip the accents that differ between the two languages, so
+  /// "árbol"/"arvore" and "informacion"/"informação" compare equal.
+  static String _cognateKey(String value) {
+    var v = value.trim().toLowerCase();
+    // Drop parenthetical disambiguators: "peixe (como alimento)".
+    v = v.replaceAll(RegExp(r'\([^)]*\)'), '');
+    const from = 'áàâãäéèêëíìîïóòôõöúùûüñçý';
+    const to = 'aaaaaeeeeiiiiooooouuuuncy';
+    final buffer = StringBuffer();
+    for (final ch in v.runes) {
+      final c = String.fromCharCode(ch);
+      final i = from.indexOf(c);
+      buffer.write(i == -1 ? c : to[i]);
+    }
+    return buffer.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
 
   static List<String> _exampleIssues(String example, String blankedExample) {
     final joined = '$example $blankedExample';

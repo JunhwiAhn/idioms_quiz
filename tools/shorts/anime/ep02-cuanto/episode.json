@@ -1,0 +1,98 @@
+{
+  "id": "ep02-cuanto",
+  "sourceSet": "travel",
+  "sourceTerm": "¿Cuánto cuesta?",
+  "sourceFile": "tools/shorts/travel_phrases.js",
+  "target": { "es": "¿Cuánto cuesta?", "ko": "얼마예요?", "pron": "꾸안또 꾸에스따" },
+  "situation": "일요일 아침 엘 라스트로 벼룩시장. 막내가 부채를 집어 들고 값을 못 물어본다.",
+  "npc": "NPC: Spanish market vendor woman in her 60s, silver hair in a low bun, deep laugh lines, faded apron with big pockets, sitting behind a folding table of trinkets.",
+  "punchline": "아빠가 정색하고 비싸다고 해서 분위기가 식는다",
+  "seed": 481207,
+  "langs": ["ko"],
+  "style": "1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.",
+  "palette": "warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.",
+  "negative": "photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors",
+  "shots": [
+    {
+      "n": 1, "start": 0.0, "dur": 5.0,
+      "cast": ["MADRE", "HIJO", "NPC"],
+      "shotDescription": "Wide vertical shot of a crowded Sunday flea market street, folding tables of trinkets under canvas covers, warm morning light. HIJO has stopped dead in front of a table, both hands on a folding fan. MADRE stands behind him. The vendor woman watches from her stool, amused.",
+      "motionPrompt": "Slow push in toward the table. HIJO opens the fan. The canvas cover ripples. Background static.",
+      "lines": [{ "who": "HIJO", "es": "¡Mira, mamá!", "sub": { "ko": "엄마, 이것 봐!" } }],
+      "onScreen": null
+    },
+    {
+      "n": 2, "start": 5.0, "dur": 5.0,
+      "cast": ["MADRE", "HIJO"],
+      "shotDescription": "Medium two-shot. HIJO holds the open fan up with both hands, eyes shining, glancing back at MADRE. MADRE has her arms folded, smiling faintly, giving a small nod toward the vendor instead of reaching for her bag.",
+      "motionPrompt": "Static shot. HIJO lifts the fan higher. MADRE nods once toward the vendor. Background static.",
+      "lines": [
+        { "who": "MADRE", "es": "¿Te gusta?", "sub": { "ko": "마음에 들어?" } },
+        { "who": "MADRE", "es": "Pregunta tú.", "sub": { "ko": "네가 물어봐" } }
+      ],
+      "onScreen": null
+    },
+    {
+      "n": 3, "start": 10.0, "dur": 5.0,
+      "cast": ["MADRE"],
+      "shotDescription": "Close-up of MADRE leaning down toward camera, speaking slowly and clearly with raised eyebrows, one hand cupped near her mouth as if sharing a secret. Blurred market stalls behind her. Wide empty space in the lower third for a caption.",
+      "motionPrompt": "Static shot. MADRE leans down and her mouth opens on the words. Background static.",
+      "lines": [{ "who": "MADRE", "es": "¿Cuánto cuesta?", "sub": { "ko": "얼마예요?" } }],
+      "onScreen": "¿Cuánto cuesta?"
+    },
+    {
+      "n": 4, "start": 15.0, "dur": 5.0,
+      "cast": ["MADRE"],
+      "shotDescription": "Same close-up of MADRE, now pointing at an imaginary object off-frame with one finger, mouth slightly open mid-explanation. Same blurred market. Wide empty space in the lower third for a caption.",
+      "motionPrompt": "Static shot. MADRE points off-frame once. Background static.",
+      "lines": [{ "who": "MADRE", "es": "Señala y pregunta.", "sub": { "ko": "가리키면서 물어봐" } }],
+      "note": { "ko": "물건을 가리키며 이 한마디. 시장·상점 어디서나 통합니다" },
+      "onScreen": "¿Cuánto cuesta?"
+    },
+    {
+      "n": 5, "start": 20.0, "dur": 5.0,
+      "cast": ["HIJO"],
+      "shotDescription": "Close-up of HIJO holding the fan against his chest with one hand and pointing at it with the other, chin lifted, mouth wide open speaking toward the vendor, ears slightly red. Simple blurred stall behind him.",
+      "motionPrompt": "Slight push in. HIJO points at the fan and his mouth opens wide. Background static.",
+      "lines": [{ "who": "HIJO", "es": "¿Cuánto cuesta?", "sub": { "ko": "얼마예요?" } }],
+      "onScreen": "¿Cuánto cuesta?"
+    },
+    {
+      "n": 6, "start": 25.0, "dur": 5.0,
+      "cast": ["NPC"],
+      "shotDescription": "Medium shot of the vendor woman laughing warmly, deep laugh lines, holding up three fingers with one hand and waving the other in a generous 'take it' gesture. Trinket table in front of her.",
+      "motionPrompt": "Slight push in. The vendor holds up three fingers and waves once. Background static.",
+      "lines": [{ "who": "NPC", "es": "Tres euros, guapo.", "sub": { "ko": "3유로란다, 예쁜이" } }],
+      "onScreen": null
+    },
+    {
+      "n": 7, "start": 30.0, "dur": 5.0,
+      "cast": ["MADRE", "PADRE", "HIJA", "HIJO"],
+      "shotDescription": "Wide shot of the family at the stall. HIJO beams and hugs the fan. MADRE is already opening her purse. HIJA films the moment on her phone. PADRE stands slightly apart, arms crossed, staring flatly at the fan with total disapproval.",
+      "motionPrompt": "Static shot. MADRE opens her purse. PADRE does not move at all. Background static.",
+      "lines": [{ "who": "PADRE", "es": "Muy caro.", "sub": { "ko": "너무 비싼데" } }],
+      "onScreen": null
+    },
+    {
+      "n": 8, "start": 35.0, "dur": 5.0,
+      "cast": [],
+      "shotDescription": "Simple flat cream card background with a soft paper grain and a thin terracotta border, a small hand-drawn price tag illustration in the upper area, large empty centre area reserved for typography. No people.",
+      "motionPrompt": "Static shot. The price tag sways almost imperceptibly. Nothing else moves.",
+      "lines": [{ "who": "NARR", "es": "¿Cuánto cuesta?", "sub": { "ko": "얼마예요? / 꾸안또 꾸에스따" } }],
+      "onScreen": "¿Cuánto cuesta?"
+    }
+  ],
+  "budget": {
+    "images": { "model": "gpt_image_2", "count": 9, "creditsEach": 0.5, "credits": 4.5 },
+    "videos": { "model": "kling3_0_turbo", "count": 8, "creditsEach": 7.5, "credits": 60 },
+    "total": 64.5
+  },
+  "metadata": {
+    "ko": {
+      "title": "3유로짜리 부채 하나 사기 | 스페인 회화 따라가기 #2",
+      "description": "시장이나 상점에서 값을 물을 때. ¿Cuánto cuesta? (꾸안또 꾸에스따)\n\n물건을 가리키면서 이 한마디만 하면 됩니다. 여러 개일 때는 cuestan 이지만, 초보라면 cuesta 하나로 다 통해요.\n\n스페인 가족의 실제 대화를 그대로 따라가면서 익히는 시리즈입니다. 단어·회화 연습은 앱에서 이어서 하실 수 있습니다.",
+      "tags": ["스페인어", "여행스페인어", "스페인여행", "스페인어회화", "왕초보스페인어", "스페인어독학", "DELE", "스페인어단어", "마드리드여행", "쇼츠"],
+      "pinnedComment": "엘 라스트로는 일요일 오전에만 열려요. 다음 편은 화장실 찾을 때 쓰는 표현입니다 🙌"
+    }
+  }
+}

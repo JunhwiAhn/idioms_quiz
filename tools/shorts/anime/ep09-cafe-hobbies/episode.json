@@ -1,0 +1,14 @@
+{
+  "id": "ep09-cafe-hobbies",
+  "format": "dialogue",
+  "shots": [
+    { "n": 1, "lines": [{ "who": "NPC", "es": "¿Qué vais a tomar?" }] },
+    { "n": 2, "lines": [{ "who": "MADRE", "es": "Para mí, un café con leche." }] },
+    { "n": 3, "lines": [{ "who": "PADRE", "es": "Y para mí, un cortado, por favor." }] },
+    { "n": 4, "lines": [{ "who": "NPC", "es": "Muy bien. Ahora os lo traigo." }] },
+    { "n": 5, "lines": [{ "who": "MADRE", "es": "¿Qué te gusta hacer en tu tiempo libre?" }] },
+    { "n": 6, "lines": [{ "who": "PADRE", "es": "Me gusta cocinar y tocar la guitarra. ¿Y tú?" }] },
+    { "n": 7, "lines": [{ "who": "MADRE", "es": "A mí también. Tenemos algo en común." }] },
+    { "n": 8, "lines": [{ "who": "PADRE", "es": "Entonces... ¿la próxima vez traigo la guitarra?" }] }
+  ]
+}

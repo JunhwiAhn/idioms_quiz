@@ -8,6 +8,7 @@ import '../data/app_text.dart';
 import '../data/audio_service.dart';
 import '../data/kanken_tier.dart';
 import '../data/pronunciation_service.dart';
+import '../data/review_service.dart';
 import '../data/score_service.dart';
 import '../data/stage_plan.dart' show roundFailed;
 import '../models/idiom.dart';
@@ -61,6 +62,15 @@ class _ResultScreenState extends State<ResultScreen> {
     final snap = await ScoreService().snapshot();
     if (!mounted) return;
     setState(() => _masteredCount = snap.mastered.length);
+
+    // A 5-star round is the friendliest moment to ask for a store rating; the
+    // service decides whether this particular one qualifies.
+    if (widget.outcome.isRoundRun) {
+      await ReviewService.instance.maybeAskAfterRound(
+        stars: widget.outcome.roundStars,
+        clearedRounds: snap.roundStars.length,
+      );
+    }
   }
 
   @override
@@ -223,6 +233,7 @@ class _ResultCelebrationHero extends StatelessWidget {
     StudyLanguage.ko => isMarathon ? '마라톤 완료' : '퀴즈 완료',
     StudyLanguage.en => isMarathon ? 'MARATHON COMPLETE' : 'QUIZ COMPLETE',
     StudyLanguage.ja => isMarathon ? 'マラソン完走' : 'クイズ完了',
+    StudyLanguage.pt => isMarathon ? 'MARATONA CONCLUÍDA' : 'QUIZ CONCLUÍDO',
   };
 
   String get _title {
@@ -232,12 +243,14 @@ class _ResultCelebrationHero extends StatelessWidget {
         StudyLanguage.ko => '아깝다, 한 번 더!',
         StudyLanguage.en => 'So close—one more go!',
         StudyLanguage.ja => '惜しい、もう一度！',
+        StudyLanguage.pt => 'Quase lá — mais uma vez!',
       };
     }
     return switch (language) {
       StudyLanguage.ko => '멋지게 끝냈어요!',
       StudyLanguage.en => 'Great finish!',
       StudyLanguage.ja => 'ナイスフィニッシュ！',
+      StudyLanguage.pt => 'Belo resultado!',
     };
   }
 
@@ -247,12 +260,14 @@ class _ResultCelebrationHero extends StatelessWidget {
         StudyLanguage.ko => '한 문제도 놓치지 않은 완벽한 플레이예요',
         StudyLanguage.en => 'A flawless run without a single miss',
         StudyLanguage.ja => '一問も逃さないパーフェクトプレイ！',
+        StudyLanguage.pt => 'Uma rodada perfeita, sem nenhum erro',
       };
     }
     return switch (language) {
       StudyLanguage.ko => '오늘의 기록을 멋지게 쌓았어요',
       StudyLanguage.en => 'Another strong result in the books',
       StudyLanguage.ja => '今日も素敵な記録を残しました',
+      StudyLanguage.pt => 'Mais um bom resultado registrado',
     };
   }
 
@@ -389,6 +404,7 @@ class _ResultCelebrationHero extends StatelessWidget {
                     StudyLanguage.ko => '정답',
                     StudyLanguage.en => 'CORRECT',
                     StudyLanguage.ja => '正解',
+                    StudyLanguage.pt => 'ACERTOS',
                   },
                 ),
                 _ResultMetricDivider(),
@@ -399,6 +415,7 @@ class _ResultCelebrationHero extends StatelessWidget {
                     StudyLanguage.ko => '최고 콤보',
                     StudyLanguage.en => 'BEST COMBO',
                     StudyLanguage.ja => '最高コンボ',
+                    StudyLanguage.pt => 'MELHOR SEQUÊNCIA',
                   },
                 ),
                 _ResultMetricDivider(),
@@ -409,6 +426,7 @@ class _ResultCelebrationHero extends StatelessWidget {
                     StudyLanguage.ko => '획득 점수',
                     StudyLanguage.en => 'POINTS',
                     StudyLanguage.ja => '獲得点数',
+                    StudyLanguage.pt => 'PONTOS',
                   },
                 ),
               ],
@@ -564,12 +582,14 @@ String _primaryAction(StudyLanguage language, bool failed) {
       StudyLanguage.ko => '라운드로 돌아가기',
       StudyLanguage.en => 'Back to rounds',
       StudyLanguage.ja => 'ラウンドへ戻る',
+      StudyLanguage.pt => 'Voltar às rodadas',
     };
   }
   return switch (language) {
     StudyLanguage.ko => '계속하기',
     StudyLanguage.en => 'Continue',
     StudyLanguage.ja => '続ける',
+    StudyLanguage.pt => 'Continuar',
   };
 }
 

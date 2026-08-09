@@ -1,0 +1,322 @@
+{
+  "id": "ep06-restaurante",
+  "format": "dialogue",
+  "sourceSet": "restaurant",
+  "sourceFile": "tools/shorts/sets/restaurant.js",
+  "target": {
+    "es": null,
+    "ko": "식당 한 판 — 입장부터 계산까지",
+    "pron": null
+  },
+  "situation": "마드리드 동네 식당. 네 식구가 들어가서 앉고, 시키고, 먹고, 계산하고 나온다. 40초 안에 식사 한 판이 다 지나간다.",
+  "npc": "NPC: Spanish waiter in his 50s, thick grey moustache, balding, black apron over a white shirt, small notepad in his breast pocket, a folded towel over his forearm.",
+  "punchline": "막내가 디저트를 시도하다 아빠에게 한 방에 잘린다",
+  "seed": 481207,
+  "langs": [
+    "en",
+    "ko"
+  ],
+  "style": "1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.",
+  "palette": "warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.",
+  "negative": "photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors",
+  "shots": [
+    {
+      "n": 1,
+      "start": 0,
+      "dur": 5,
+      "cast": [
+        "MADRE",
+        "PADRE",
+        "HIJA",
+        "HIJO",
+        "NPC"
+      ],
+      "shotDescription": "Wide vertical shot of the doorway of a small Madrid neighbourhood restaurant, cream walls, dark wood trim, tiled floor, a chalkboard by the door. The family of four has just stepped inside in a loose cluster. The waiter turns from the bar toward them, towel over his forearm, raising one hand in greeting.",
+      "motionPrompt": "Slow push in toward the family. The waiter raises his hand once. The door swings shut behind them. Background static.",
+      "lines": [
+        {
+          "who": "NPC",
+          "es": "¡Hola! ¿Cuántos sois?",
+          "sub": {
+            "ko": "안녕하세요! 몇 분이세요?",
+            "en": "Hi there! How many of you?"
+          }
+        },
+        {
+          "who": "MADRE",
+          "es": "Una mesa para cuatro.",
+          "pron": "우나 메사 빠라 꽈뜨로",
+          "highlight": true,
+          "sub": {
+            "ko": "네 명 자리 주세요",
+            "en": "A table for four."
+          },
+          "pronEn": "OO-na MEH-sa PA-ra KWA-tro"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "start": 5,
+      "dur": 5,
+      "cast": [
+        "MADRE",
+        "PADRE",
+        "HIJA",
+        "HIJO",
+        "NPC"
+      ],
+      "shotDescription": "Medium wide shot of the family settling around a square table with a paper tablecloth. HIJO scrambles onto his chair on his knees. HIJA drops her phone on the table. The waiter is already handing menus across, one to MADRE.",
+      "motionPrompt": "Static shot. The waiter passes a menu across the table. HIJO settles onto his knees. Background static.",
+      "lines": [
+        {
+          "who": "MADRE",
+          "es": "La carta, por favor.",
+          "pron": "라 까르따, 뽀르 파보르",
+          "highlight": true,
+          "sub": {
+            "ko": "메뉴판 주세요",
+            "en": "The menu, please."
+          },
+          "pronEn": "la KAR-ta por fa-VOR"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "start": 10,
+      "dur": 5,
+      "cast": [
+        "HIJA",
+        "NPC"
+      ],
+      "shotDescription": "Medium two-shot. HIJA holds the open menu up with both hands, peering over the top of it at the waiter with a slightly lost expression. The waiter leans in, one hand on the back of a chair, pointing at a line on her menu.",
+      "motionPrompt": "Static shot. HIJA lowers the menu slightly. The waiter taps the menu once. Background static.",
+      "lines": [
+        {
+          "who": "HIJA",
+          "es": "¿Qué me recomienda?",
+          "pron": "께 메 레꼬미엔다",
+          "highlight": true,
+          "sub": {
+            "ko": "뭐가 맛있어요?",
+            "en": "What do you recommend?"
+          },
+          "pronEn": "keh meh reh-ko-MYEN-da"
+        },
+        {
+          "who": "NPC",
+          "es": "La paella está muy buena.",
+          "sub": {
+            "ko": "빠에야가 아주 좋아요",
+            "en": "The paella is very good."
+          }
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "start": 15,
+      "dur": 5,
+      "cast": [
+        "MADRE",
+        "PADRE",
+        "HIJO",
+        "NPC"
+      ],
+      "shotDescription": "Medium shot across the table. HIJO is up on his knees with one arm shot straight into the air, ordering before anyone else. MADRE holds up two fingers. PADRE does not look up from the menu, raising one lazy finger. The waiter writes on his notepad.",
+      "motionPrompt": "Static shot. HIJO's raised arm wobbles. PADRE lifts one finger without moving his head. Background static.",
+      "lines": [
+        {
+          "who": "HIJO",
+          "es": "¡Yo quiero patatas bravas!",
+          "sub": {
+            "ko": "저는 파타타스 브라바스요!",
+            "en": "I want patatas bravas!"
+          }
+        },
+        {
+          "who": "PADRE",
+          "es": "Y una caña.",
+          "sub": {
+            "ko": "그리고 생맥주 한 잔",
+            "en": "And a small draft beer."
+          }
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "start": 20,
+      "dur": 5,
+      "cast": [
+        "MADRE",
+        "PADRE",
+        "HIJA",
+        "HIJO",
+        "NPC"
+      ],
+      "shotDescription": "Medium wide shot of the waiter lowering a wide paella pan into the centre of the table with both hands, steam rising in simple flat curls. All four faces lean in over the table, eyes wide, lit warmly from below by the dish.",
+      "motionPrompt": "Slow push in toward the pan. Steam curls rise. All four lean in together once. Background static.",
+      "lines": [
+        {
+          "who": "NPC",
+          "es": "¡Que aproveche!",
+          "pron": "께 아프로베체",
+          "highlight": true,
+          "sub": {
+            "ko": "맛있게 드세요!",
+            "en": "Enjoy your meal!"
+          },
+          "pronEn": "keh a-pro-VEH-cheh"
+        },
+        {
+          "who": "HIJO",
+          "es": "¡Gracias!",
+          "sub": {
+            "ko": "감사합니다!",
+            "en": "Thank you!"
+          }
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "start": 25,
+      "dur": 5,
+      "cast": [
+        "MADRE",
+        "HIJO"
+      ],
+      "shotDescription": "Close two-shot. HIJO has both cheeks packed full, fork still in his mouth, eyes squeezed shut in bliss, a smear of sauce on his chin. MADRE watches him with a small satisfied smile, chin resting on her hand.",
+      "motionPrompt": "Static shot. HIJO chews twice. MADRE's smile widens slightly. Background static.",
+      "lines": [
+        {
+          "who": "HIJO",
+          "es": "Está muy rico.",
+          "pron": "에스따 무이 리꼬",
+          "highlight": true,
+          "sub": {
+            "ko": "정말 맛있어요",
+            "en": "It's really good."
+          },
+          "pronEn": "es-TA mwee REE-ko"
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "start": 30,
+      "dur": 5,
+      "cast": [
+        "PADRE",
+        "NPC"
+      ],
+      "shotDescription": "Medium two-shot. The table is a wreck of empty plates and crumpled napkins. PADRE raises one hand just above shoulder height without any expression at all. The waiter is already turning toward him from across the room, nodding.",
+      "motionPrompt": "Static shot. PADRE raises one hand. The waiter nods once and turns. Background static.",
+      "lines": [
+        {
+          "who": "PADRE",
+          "es": "La cuenta, por favor.",
+          "pron": "라 꾸엔따, 뽀르 파보르",
+          "highlight": true,
+          "sub": {
+            "ko": "계산서 주세요",
+            "en": "The bill, please."
+          },
+          "pronEn": "la KWEN-ta por fa-VOR"
+        },
+        {
+          "who": "NPC",
+          "es": "Ahora mismo.",
+          "sub": {
+            "ko": "바로 갖다 드릴게요",
+            "en": "Right away."
+          }
+        }
+      ]
+    },
+    {
+      "n": 8,
+      "start": 35,
+      "dur": 5,
+      "cast": [
+        "MADRE",
+        "PADRE",
+        "HIJA",
+        "HIJO"
+      ],
+      "shotDescription": "Wide shot of the table. HIJO has both palms pressed together in a pleading gesture, leaning across the empty plates with enormous hopeful eyes. HIJA films him on her phone. MADRE looks away, biting back a laugh. PADRE stares straight ahead, absolutely deadpan.",
+      "motionPrompt": "Static shot. HIJO leans further forward. PADRE does not move at all. Background static.",
+      "lines": [
+        {
+          "who": "HIJO",
+          "es": "¿Y el postre?",
+          "sub": {
+            "ko": "그럼 디저트는?",
+            "en": "What about dessert?"
+          }
+        },
+        {
+          "who": "PADRE",
+          "es": "No.",
+          "sub": {
+            "ko": "안 돼",
+            "en": "No."
+          }
+        }
+      ]
+    }
+  ],
+  "budget": {
+    "images": {
+      "model": "gpt_image_2",
+      "count": 9,
+      "creditsEach": 0.5,
+      "credits": 4.5
+    },
+    "videos": {
+      "model": "kling3_0_turbo",
+      "count": 8,
+      "creditsEach": 7.5,
+      "credits": 60
+    },
+    "total": 64.5
+  },
+  "metadata": {
+    "ko": {
+      "title": "스페인 식당 40초 한 판 | 들어가서 계산까지",
+      "description": "스페인 식당에서 실제로 오가는 말만 순서대로 담았습니다. 들어가서 자리 잡고, 메뉴 받고, 추천 받고, 시키고, 먹고, 계산하기까지 40초.\n\n· Una mesa para cuatro. (우나 메사 빠라 꽈뜨로) 네 명 자리 주세요\n· La carta, por favor. (라 까르따, 뽀르 파보르) 메뉴판 주세요\n· ¿Qué me recomienda? (께 메 레꼬미엔다) 뭐가 맛있어요?\n· ¡Que aproveche! (께 아프로베체) 맛있게 드세요\n· Está muy rico. (에스따 무이 리꼬) 정말 맛있어요\n· La cuenta, por favor. (라 꾸엔따, 뽀르 파보르) 계산서 주세요\n\n스페인 본토에서 쓰는 표현으로만 썼습니다. 자막의 스페인어를 소리 내어 따라 읽어 보세요.",
+      "tags": [
+        "스페인어",
+        "여행스페인어",
+        "스페인여행",
+        "스페인어회화",
+        "왕초보스페인어",
+        "스페인어독학",
+        "DELE",
+        "스페인맛집",
+        "마드리드여행",
+        "쇼츠"
+      ],
+      "pinnedComment": "스페인은 자리에서 계산하는 곳이 많아요. 손 들고 La cuenta, por favor 한마디면 끝납니다 🙌"
+    },
+    "en": {
+      "title": "A Whole Spanish Meal in 40 Seconds | Real Restaurant Spanish",
+      "description": "Everything a Spanish family actually says at a restaurant, in the order it happens. Walk in, sit down, get the menu, ask for a recommendation, order, eat, pay. 40 seconds.\n\n· Una mesa para cuatro. (OO-na MEH-sa PA-ra KWA-tro) A table for four.\n· La carta, por favor. (la KAR-ta por fa-VOR) The menu, please.\n· ¿Qué me recomienda? (keh meh reh-ko-MYEN-da) What do you recommend?\n· ¡Que aproveche! (keh a-pro-VEH-cheh) Enjoy your meal!\n· Está muy rico. (es-TA mwee REE-ko) It's really good.\n· La cuenta, por favor. (la KWEN-ta por fa-VOR) The bill, please.\n\nThis is Spain Spanish, not Latin American — vosotros, una caña, patatas bravas, la cuenta.\nTurn captions on for English. The Spanish on screen is what you say.\n\nAI-generated animation.",
+      "tags": [
+        "learn spanish",
+        "spanish for travel",
+        "spanish conversation",
+        "castilian spanish",
+        "spain travel",
+        "beginner spanish",
+        "travel phrases",
+        "spanish listening",
+        "DELE",
+        "shorts"
+      ],
+      "pinnedComment": "In Spain you usually pay at the table. Raise a hand and say La cuenta, por favor — that is the whole thing 🙌"
+    }
+  }
+}

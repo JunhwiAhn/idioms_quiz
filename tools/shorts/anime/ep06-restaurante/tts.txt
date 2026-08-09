@@ -1,0 +1,14 @@
+01	NPC	es-ES male	¡Hola! ¿Cuántos sois?
+01	MADRE	es-ES female	Una mesa para cuatro.
+02	MADRE	es-ES female	La carta, por favor.
+03	HIJA	es-ES female (younger, faster)	¿Qué me recomienda?
+03	NPC	es-ES male	La paella está muy buena.
+04	HIJO	es-ES female (slowest — child)	¡Yo quiero patatas bravas!
+04	PADRE	es-ES male (flat, low)	Y una caña.
+05	NPC	es-ES male	¡Que aproveche!
+05	HIJO	es-ES female (slowest — child)	¡Gracias!
+06	HIJO	es-ES female (slowest — child)	Está muy rico.
+07	PADRE	es-ES male (flat, low)	La cuenta, por favor.
+07	NPC	es-ES male	Ahora mismo.
+08	HIJO	es-ES female (slowest — child)	¿Y el postre?
+08	PADRE	es-ES male (flat, low)	No.

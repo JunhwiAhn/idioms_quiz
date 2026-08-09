@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../data/app_text.dart';
 import '../data/pronunciation_service.dart';
+import '../models/idiom.dart';
 
 /// Set once the "no Spanish voice" notice has been shown in this app run, so
 /// auto-play does not nag on every question.
 bool _notifiedMissingVoice = false;
+bool _notifiedMissingStudyVoice = false;
 
 @visibleForTesting
-void resetMissingVoiceNotice() => _notifiedMissingVoice = false;
+void resetMissingVoiceNotice() {
+  _notifiedMissingVoice = false;
+  _notifiedMissingStudyVoice = false;
+}
 
 /// Speaks [text] and, when the device has no Spanish voice, surfaces that
 /// instead of failing silently.
@@ -40,6 +45,89 @@ Future<void> pronounceWithFeedback(
         },
       ),
     ),
+  );
+}
+
+Future<void> pronounceShadowingWithFeedback(
+  BuildContext context, {
+  required String spanish,
+  required String meaning,
+  required StudyLanguage language,
+  required AppText appText,
+}) async {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final result = await PronunciationService.instance.speakShadowingPair(
+    spanish: spanish,
+    meaning: meaning,
+    language: language,
+  );
+  if (!context.mounted || messenger == null) return;
+  if (result.cancelled) return;
+
+  if (!result.spanishSpoken) {
+    if (_notifiedMissingVoice) return;
+    _notifiedMissingVoice = true;
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(appText.ttsMissingVoice),
+        duration: const Duration(seconds: 8),
+        action: SnackBarAction(
+          label: appText.ttsInstallVoice,
+          onPressed: () {
+            if (context.mounted) showVoiceInstallGuide(context, appText);
+          },
+        ),
+      ),
+    );
+    return;
+  }
+
+  if (result.studyLanguageSpoken || _notifiedMissingStudyVoice) return;
+  _notifiedMissingStudyVoice = true;
+  messenger.clearSnackBars();
+  messenger.showSnackBar(
+    SnackBar(
+      content: Text(appText.ttsStudyVoiceMissing),
+      duration: const Duration(seconds: 8),
+      action: SnackBarAction(
+        label: appText.ttsInstallVoice,
+        onPressed: () {
+          if (context.mounted) showStudyVoiceInstallGuide(context, appText);
+        },
+      ),
+    ),
+  );
+}
+
+Future<void> showStudyVoiceInstallGuide(
+  BuildContext context,
+  AppText appText,
+) async {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final proceed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(appText.ttsDownloadStudyVoice),
+      content: SingleChildScrollView(child: Text(appText.ttsStudyInstallSteps)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(false),
+          child: Text(appText.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(true),
+          child: Text(appText.ttsOpenInstaller),
+        ),
+      ],
+    ),
+  );
+  if (proceed != true) return;
+
+  final opened = await PronunciationService.instance.openVoiceInstall();
+  if (opened || messenger == null) return;
+  messenger.showSnackBar(
+    SnackBar(content: Text(appText.ttsSettingsUnavailable)),
   );
 }
 

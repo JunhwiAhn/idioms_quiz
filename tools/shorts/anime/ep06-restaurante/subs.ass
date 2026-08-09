@@ -1,0 +1,30 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: ES,Noto Sans KR,66,&H00F2FBFF,&H0018202E,&H0018202E,1,0,0,0,100,100,0,0,1,7,3,5,60,60,0,1
+Style: KEY,Noto Sans KR,80,&H002047C4,&H0018202E,&H0018202E,1,0,0,0,100,100,0,0,1,9,3,5,60,60,0,1
+Style: TR,Noto Sans KR,42,&H00F2FBFF,&H0018202E,&H0018202E,0,0,0,0,100,100,0,0,1,5,2,5,60,60,0,1
+Style: NOTE,Noto Sans KR,38,&H00F2FBFF,&H0018202E,&H0018202E,0,0,0,0,100,100,0,0,1,5,2,5,60,60,0,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.15,0:00:02.50,ES,,0,0,0,,{\pos(540,1300)}¡Hola! ¿Cuántos sois?
+Dialogue: 0,0:00:02.50,0:00:04.85,KEY,,0,0,0,,{\pos(540,1292)}Una mesa para cuatro.
+Dialogue: 0,0:00:05.15,0:00:09.85,KEY,,0,0,0,,{\pos(540,1292)}La carta, por favor.
+Dialogue: 0,0:00:10.15,0:00:12.50,KEY,,0,0,0,,{\pos(540,1292)}¿Qué me recomienda?
+Dialogue: 0,0:00:12.50,0:00:14.85,ES,,0,0,0,,{\pos(540,1300)}La paella está muy buena.
+Dialogue: 0,0:00:15.15,0:00:17.50,ES,,0,0,0,,{\pos(540,1300)}¡Yo quiero patatas bravas!
+Dialogue: 0,0:00:17.50,0:00:19.85,ES,,0,0,0,,{\pos(540,1300)}Y una caña.
+Dialogue: 0,0:00:20.15,0:00:22.50,KEY,,0,0,0,,{\pos(540,1292)}¡Que aproveche!
+Dialogue: 0,0:00:22.50,0:00:24.85,ES,,0,0,0,,{\pos(540,1300)}¡Gracias!
+Dialogue: 0,0:00:25.15,0:00:29.85,KEY,,0,0,0,,{\pos(540,1292)}Está muy rico.
+Dialogue: 0,0:00:30.15,0:00:32.50,KEY,,0,0,0,,{\pos(540,1292)}La cuenta, por favor.
+Dialogue: 0,0:00:32.50,0:00:34.85,ES,,0,0,0,,{\pos(540,1300)}Ahora mismo.
+Dialogue: 0,0:00:35.15,0:00:37.50,ES,,0,0,0,,{\pos(540,1300)}¿Y el postre?
+Dialogue: 0,0:00:37.50,0:00:39.85,ES,,0,0,0,,{\pos(540,1300)}No.

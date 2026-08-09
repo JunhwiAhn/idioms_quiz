@@ -1,0 +1,9 @@
+01	NPC	es-ES male	Aquí tienes.
+02	MADRE	es-ES female	Oye.
+02	MADRE	es-ES female	¿No dices nada?
+03	MADRE	es-ES female	Gracias.
+04	MADRE	es-ES female	Una palabra. Nada más.
+05	HIJO	es-ES female (slowest — child)	Gracias.
+06	NPC	es-ES male	De nada, campeón.
+07	PADRE	es-ES male (flat, low)	A mí nunca.
+08	NARR	es-ES female (slowest)	Gracias.

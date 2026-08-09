@@ -58,6 +58,41 @@ node build.js                   # 전체 60편
 결과물: `out/<lang>/ep01/video.mp4`, `metadata.json`, `metadata.txt`
 `metadata.txt`에 제목·설명·태그·고정 댓글이 그대로 붙여넣을 수 있게 들어 있습니다.
 
+## 인스타그램 카드뉴스
+
+영상과 같은 색·폰트로 1080x1350(4:5) 캐러셀을 만듭니다. TTS나 ffmpeg이 필요
+없어서 `npm install` + `node fetch_fonts.js` 만 되어 있으면 바로 돌아갑니다.
+
+```bash
+node build_sets.js              # 표현 세트 8종 전부 → out/sets/<id>/
+node build_sets.js restaurant   # 한 세트만
+node build_cards.js             # 영어인 줄 알았는데 (9장) → out/cards/
+node build_travel_cards.js      # 여행 표현 (10장, 발행 완료) → out/travel/
+```
+
+각 폴더에 `01.png…` 과 `caption.txt`(본문 + 해시태그)가 같이 나오고,
+`out/sets/SCHEDULE.md` 에 월·수·금 발행 캘린더가 생성됩니다.
+
+**인스타그램 캐러셀은 한 게시물에 10장까지입니다.** 그래서 세트마다
+표지 1 + 항목 9 로 맞춰 두었고, 항목이 9개가 아니면 `build_sets.js` 가
+빌드를 실패시킵니다. 초과분은 조용히 잘려서 나가기 때문에 일부러 막아 둡니다.
+
+| 파일 | 역할 |
+|---|---|
+| [card_base.js](card_base.js) | 세트 공통 부품 — 배경·푸터·스와이프 유도·알약 배지 |
+| [themes.js](themes.js) | 세트별 색. 채도·명도는 고정하고 색상만 돌린다 |
+| [themed_cards.js](themed_cards.js) | 표지 + 표현 카드 레이아웃 (모든 표현 세트 공용) |
+| [sets/](sets) | 세트 데이터 + 표지 문구 + 캡션 + 해시태그 |
+| [cards.js](cards.js) / [false_friends.js](false_friends.js) | 오해/실제 대비 레이아웃 (이 세트만 별도) |
+| [card_photo.js](card_photo.js) / [travel_cards_photo.js](travel_cards_photo.js) | 사진 배경 변형 (`--photo`) |
+
+세트를 추가하려면 `sets/` 에 파일 하나를 만들고 `sets/index.js` 에 등록하면
+됩니다. 레이아웃은 건드릴 필요가 없습니다.
+
+> `sets/known.js` 와 `sets/verbs.js` 는 단어·뜻·예문을 문제 은행에서 읽어옵니다.
+> 나머지 세트는 은행에 없는 표현이라 파일에 직접 적혀 있습니다(아래 "알려진 제약").
+> 은행에 인사말·관용 표현이 추가되면 은행 참조로 바꾸는 편이 좋습니다.
+
 ## 영상 구성 (약 70초)
 
 | 장면 | 길이 | 내용 |

@@ -1,0 +1,9 @@
+01	HIJA	es-ES female (younger, faster)	¿Estás bien?
+02	HIJO	es-ES female (slowest — child)	Necesito el baño.
+02	MADRE	es-ES female	Pregunta a ella.
+03	MADRE	es-ES female	¿Dónde está el baño?
+04	MADRE	es-ES female	Sirve para todo.
+05	HIJO	es-ES female (slowest — child)	¿Dónde está el baño?
+06	NPC	es-ES male	Al fondo, a la derecha.
+07	PADRE	es-ES male (flat, low)	Ya no está.
+08	NARR	es-ES female (slowest)	¿Dónde está el baño?

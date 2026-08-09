@@ -1,0 +1,98 @@
+{
+  "id": "ep05-perdon",
+  "sourceSet": "travel",
+  "sourceTerm": "Lo siento / Perdón",
+  "sourceFile": "tools/shorts/travel_phrases.js",
+  "target": { "es": "Perdón.", "ko": "실례합니다.", "pron": "뻬르돈" },
+  "situation": "만원 지하철. 내릴 역인데 사람에 막혀 못 나간다.",
+  "npc": "NPC: Spanish commuter man in his 30s, headphones around his neck, denim jacket, backpack held against his chest, packed in beside the doors.",
+  "punchline": "가족은 다 내렸는데 아빠만 문 안에 남는다",
+  "seed": 481207,
+  "langs": ["ko"],
+  "style": "1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.",
+  "palette": "warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.",
+  "negative": "photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors",
+  "shots": [
+    {
+      "n": 1, "start": 0.0, "dur": 5.0,
+      "cast": ["MADRE", "PADRE", "HIJA", "HIJO", "NPC"],
+      "shotDescription": "Wide vertical shot inside a packed metro car, warm cream interior panels, a wall of standing passengers between the family and the doors. HIJA looks up at the route strip above the doors, eyes widening. The family is wedged in the middle of the car.",
+      "motionPrompt": "Slow push in toward the doors. The car sways gently once. HIJA lifts her head. Background static.",
+      "lines": [{ "who": "HIJA", "es": "Es nuestra parada.", "sub": { "ko": "우리 내릴 역이야" } }],
+      "onScreen": null
+    },
+    {
+      "n": 2, "start": 5.0, "dur": 5.0,
+      "cast": ["MADRE", "HIJO"],
+      "shotDescription": "Medium two-shot squeezed between coats and backpacks. HIJO pushes weakly against a wall of passengers with both palms, going nowhere, face scrunched. MADRE looks down at him and taps her own throat with one finger.",
+      "motionPrompt": "Static shot. HIJO pushes twice and does not move. MADRE taps her throat once. Background static.",
+      "lines": [
+        { "who": "HIJO", "es": "No puedo salir.", "sub": { "ko": "못 나가겠어" } },
+        { "who": "MADRE", "es": "Habla alto.", "sub": { "ko": "크게 말해" } }
+      ],
+      "onScreen": null
+    },
+    {
+      "n": 3, "start": 10.0, "dur": 5.0,
+      "cast": ["MADRE"],
+      "shotDescription": "Close-up of MADRE in the crowd, speaking slowly and clearly with her chin lifted, one hand raised flat like a small blade to show the way through. Blurred passengers behind her. Wide empty space in the lower third for a caption.",
+      "motionPrompt": "Static shot. MADRE raises her flat hand and her mouth opens clearly. Background static.",
+      "lines": [{ "who": "MADRE", "es": "Perdón.", "sub": { "ko": "실례합니다" } }],
+      "onScreen": "Perdón."
+    },
+    {
+      "n": 4, "start": 15.0, "dur": 5.0,
+      "cast": ["MADRE"],
+      "shotDescription": "Same close-up of MADRE, now with one eyebrow raised and a small confident smile, mouth slightly open mid-explanation. Same blurred crowd. Wide empty space in the lower third for a caption.",
+      "motionPrompt": "Static shot. MADRE gives one small nod. Background static.",
+      "lines": [{ "who": "MADRE", "es": "Funciona siempre.", "sub": { "ko": "이건 항상 통해" } }],
+      "note": { "ko": "사과는 lo siento, 지나가거나 말 걸 때는 perdón" },
+      "onScreen": "Perdón."
+    },
+    {
+      "n": 5, "start": 20.0, "dur": 5.0,
+      "cast": ["HIJO"],
+      "shotDescription": "Close-up of HIJO in the crowd, both hands cupped around his mouth, head tilted back, shouting upward with his eyes shut. Blurred coats and backpacks around him.",
+      "motionPrompt": "Slight push in. HIJO cups his hands and his mouth opens wide. Background static.",
+      "lines": [{ "who": "HIJO", "es": "Perdón.", "sub": { "ko": "실례합니다" } }],
+      "onScreen": "Perdón."
+    },
+    {
+      "n": 6, "start": 25.0, "dur": 5.0,
+      "cast": ["NPC"],
+      "shotDescription": "Medium shot of the commuter man looking down with a friendly grin, already turning sideways and lifting his backpack overhead to open a gap. Other passengers shift aside behind him.",
+      "motionPrompt": "Slight push in. The commuter turns sideways and lifts his backpack. Background static.",
+      "lines": [{ "who": "NPC", "es": "Claro, pasa.", "sub": { "ko": "그럼, 지나가렴" } }],
+      "onScreen": null
+    },
+    {
+      "n": 7, "start": 30.0, "dur": 5.0,
+      "cast": ["MADRE", "PADRE", "HIJA", "HIJO"],
+      "shotDescription": "Wide shot on the platform. MADRE, HIJA and HIJO stand on the platform looking back. The metro doors have closed with PADRE still inside, his flat deadpan face pressed near the glass, one hand raised in a small motionless wave.",
+      "motionPrompt": "Static shot. The train begins to slide left. PADRE does not move at all. Background static.",
+      "lines": [{ "who": "PADRE", "es": "Perdón...", "sub": { "ko": "실례합니다..." } }],
+      "onScreen": null
+    },
+    {
+      "n": 8, "start": 35.0, "dur": 5.0,
+      "cast": [],
+      "shotDescription": "Simple flat cream card background with a soft paper grain and a thin terracotta border, a small hand-drawn metro door illustration in the upper area, large empty centre area reserved for typography. No people.",
+      "motionPrompt": "Static shot. The metro door illustration shifts almost imperceptibly. Nothing else moves.",
+      "lines": [{ "who": "NARR", "es": "Perdón.", "sub": { "ko": "실례합니다 / 뻬르돈" } }],
+      "onScreen": "Perdón."
+    }
+  ],
+  "budget": {
+    "images": { "model": "gpt_image_2", "count": 9, "creditsEach": 0.5, "credits": 4.5 },
+    "videos": { "model": "kling3_0_turbo", "count": 8, "creditsEach": 7.5, "credits": 60 },
+    "total": 64.5
+  },
+  "metadata": {
+    "ko": {
+      "title": "만원 지하철에서 내리는 법 | 스페인 회화 따라가기 #5",
+      "description": "사람 사이를 지나갈 때 한마디. Perdón. (뻬르돈)\n\n사과할 때는 lo siento, 지나가거나 말을 걸 때는 perdón 을 씁니다. 뒤에 ¿puedo pasar? 를 붙이면 더 확실해요.\n\n스페인 가족의 실제 대화를 그대로 따라가면서 익히는 시리즈입니다. 단어·회화 연습은 앱에서 이어서 하실 수 있습니다.",
+      "tags": ["스페인어", "여행스페인어", "스페인여행", "스페인어회화", "왕초보스페인어", "스페인어독학", "DELE", "스페인어단어", "마드리드여행", "쇼츠"],
+      "pinnedComment": "마드리드 지하철은 문이 금방 닫혀요. 미리 문 쪽으로 가시는 걸 추천합니다 🙌"
+    }
+  }
+}

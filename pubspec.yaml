@@ -1,7 +1,7 @@
 name: idioms_quiz
 description: "DELE Voca Dojo - Spanish vocabulary quiz app for DELE prep (A1-B1)."
 publish_to: 'none'
-version: 1.0.7+13
+version: 1.0.10+16
 
 environment:
   sdk: ^3.10.4
@@ -18,6 +18,7 @@ dependencies:
   url_launcher: ^6.3.1
   flutter_tts: ^4.2.5
   google_mobile_ads: ^9.0.0
+  in_app_review: ^2.0.10
 
 dev_dependencies:
   flutter_test:

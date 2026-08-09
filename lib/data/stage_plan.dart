@@ -11,11 +11,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: 'Hola, 첫 인사',
       StudyLanguage.en: 'Hola, First Greetings',
       StudyLanguage.ja: 'Hola、はじめての挨拶',
+      StudyLanguage.pt: 'Hola, primeiros cumprimentos',
     },
     subtitles: {
       StudyLanguage.ko: '처음 만나고 헤어질 때 바로 쓰는 말',
       StudyLanguage.en: 'Phrases for meeting and saying goodbye',
       StudyLanguage.ja: '出会いと別れですぐ使う言葉',
+      StudyLanguage.pt: 'Frases para conhecer alguém e se despedir',
     },
     levels: ['A1', 'A2'],
     keywords: {
@@ -43,11 +45,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '하루의 리듬',
       StudyLanguage.en: 'Rhythm of the Day',
       StudyLanguage.ja: '一日のリズム',
+      StudyLanguage.pt: 'O ritmo do dia',
     },
     subtitles: {
       StudyLanguage.ko: '아침, 밤, 오늘, 어제처럼 시간을 말해요',
       StudyLanguage.en: 'Talk about time: morning, night, today, yesterday',
       StudyLanguage.ja: '朝・夜・今日・昨日など時間を話します',
+      StudyLanguage.pt: 'Fale sobre o tempo: manhã, noite, hoje, ontem',
     },
     levels: ['A1', 'C1'],
     keywords: {
@@ -79,11 +83,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '식탁 위 스페인어',
       StudyLanguage.en: 'Spanish at the Table',
       StudyLanguage.ja: '食卓のスペイン語',
+      StudyLanguage.pt: 'Espanhol à mesa',
     },
     subtitles: {
       StudyLanguage.ko: '먹고 마시고 주문할 때 자주 만나는 말',
       StudyLanguage.en: 'Common words for eating, drinking, and ordering',
       StudyLanguage.ja: '食べる・飲む・注文でよく出会う言葉',
+      StudyLanguage.pt: 'Palavras comuns para comer, beber e pedir',
     },
     levels: ['A1', 'B1', 'B2'],
     keywords: {
@@ -123,11 +129,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '우리 집 한 바퀴',
       StudyLanguage.en: 'Around the House',
       StudyLanguage.ja: 'おうちをひとまわり',
+      StudyLanguage.pt: 'Pela casa',
     },
     subtitles: {
       StudyLanguage.ko: '방, 문, 창문, 가구처럼 생활 공간을 익혀요',
       StudyLanguage.en: 'Rooms, doors, windows, and furniture',
       StudyLanguage.ja: '部屋・ドア・窓・家具など生活空間の言葉',
+      StudyLanguage.pt: 'Cômodos, portas, janelas e móveis',
     },
     levels: ['A1', 'A2', 'B1', 'B2'],
     keywords: {
@@ -149,11 +157,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '동네 산책',
       StudyLanguage.en: 'A Walk in Town',
       StudyLanguage.ja: '街をおさんぽ',
+      StudyLanguage.pt: 'Passeio pela cidade',
     },
     subtitles: {
       StudyLanguage.ko: '거리, 광장, 가게, 병원까지 동네 단어',
       StudyLanguage.en: 'Streets, squares, shops, and the hospital',
       StudyLanguage.ja: '通り・広場・お店・病院など街の単語',
+      StudyLanguage.pt: 'Ruas, praças, lojas e o hospital',
     },
     levels: ['A1', 'A2', 'B1'],
     keywords: {
@@ -176,11 +186,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '여행 가방 챙기기',
       StudyLanguage.en: 'Packing for a Trip',
       StudyLanguage.ja: '旅行かばんの準備',
+      StudyLanguage.pt: 'Fazendo as malas',
     },
     subtitles: {
       StudyLanguage.ko: '교통, 호텔, 여권, 짐처럼 여행 필수어',
       StudyLanguage.en: 'Travel essentials: transport, hotels, passports',
       StudyLanguage.ja: '交通・ホテル・パスポートなど旅の必須語',
+      StudyLanguage.pt: 'Essenciais da viagem: transporte, hotéis, passaportes',
     },
     levels: ['A1', 'A2', 'B1'],
     keywords: {
@@ -207,11 +219,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '길 찾는 감각',
       StudyLanguage.en: 'Finding Your Way',
       StudyLanguage.ja: '道を探す感覚',
+      StudyLanguage.pt: 'Achando o caminho',
     },
     subtitles: {
       StudyLanguage.ko: '지도, 주소, 여기, 저기, 가깝고 먼 곳',
       StudyLanguage.en: 'Maps, addresses, here and there, near and far',
       StudyLanguage.ja: '地図・住所・ここ・あそこ、近くと遠く',
+      StudyLanguage.pt: 'Mapas, endereços, aqui e ali, perto e longe',
     },
     levels: ['A1', 'B1', 'B2', 'C1'],
     keywords: {
@@ -234,11 +248,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '교실에서 쓰는 말',
       StudyLanguage.en: 'Classroom Words',
       StudyLanguage.ja: '教室で使う言葉',
+      StudyLanguage.pt: 'Na sala de aula',
     },
     subtitles: {
       StudyLanguage.ko: '학교, 책, 질문, 시험, 공부에 필요한 단어',
       StudyLanguage.en: 'School, books, questions, exams, and studying',
       StudyLanguage.ja: '学校・本・質問・試験・勉強の単語',
+      StudyLanguage.pt: 'Escola, livros, perguntas, provas e estudo',
     },
     levels: ['A1', 'A2', 'B1', 'B2'],
     keywords: {
@@ -266,11 +282,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '사람과 몸',
       StudyLanguage.en: 'People and the Body',
       StudyLanguage.ja: '人とからだ',
+      StudyLanguage.pt: 'Pessoas e o corpo',
     },
     subtitles: {
       StudyLanguage.ko: '몸, 옷, 나이와 사람 묘사를 가볍게',
       StudyLanguage.en: 'Body, clothes, age, and describing people',
       StudyLanguage.ja: '体・服・年齢、人の描写を気軽に',
+      StudyLanguage.pt: 'Corpo, roupas, idade e descrição de pessoas',
     },
     levels: ['A1', 'A2', 'B1', 'C1'],
     keywords: {
@@ -295,11 +313,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '주말에 뭐 해?',
       StudyLanguage.en: 'What Do You Do on Weekends?',
       StudyLanguage.ja: '週末は何してる？',
+      StudyLanguage.pt: 'O que você faz no fim de semana?',
     },
     subtitles: {
       StudyLanguage.ko: '음악, 영화, 운동, 파티처럼 쉬는 날 단어',
       StudyLanguage.en: 'Music, movies, sports, and party words',
       StudyLanguage.ja: '音楽・映画・スポーツ・パーティーの単語',
+      StudyLanguage.pt: 'Música, filmes, esportes e festas',
     },
     levels: ['A2', 'B1', 'B2'],
     keywords: {
@@ -323,11 +343,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '날씨와 풍경',
       StudyLanguage.en: 'Weather and Scenery',
       StudyLanguage.ja: '天気と風景',
+      StudyLanguage.pt: 'Clima e paisagem',
     },
     subtitles: {
       StudyLanguage.ko: '해, 비, 바람, 산과 바다를 말해요',
       StudyLanguage.en: 'Sun, rain, wind, mountains, and the sea',
       StudyLanguage.ja: '太陽・雨・風、山と海を話します',
+      StudyLanguage.pt: 'Sol, chuva, vento, montanhas e o mar',
     },
     levels: ['A2', 'B1', 'C1'],
     keywords: {
@@ -351,11 +373,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '일하고 계산하기',
       StudyLanguage.en: 'Work and Money',
       StudyLanguage.ja: '働いてお会計',
+      StudyLanguage.pt: 'Trabalho e dinheiro',
     },
     subtitles: {
       StudyLanguage.ko: '회사, 돈, 가격, 사고파는 표현',
       StudyLanguage.en: 'Companies, money, prices, buying and selling',
       StudyLanguage.ja: '会社・お金・値段、売り買いの表現',
+      StudyLanguage.pt: 'Empresas, dinheiro, preços, compra e venda',
     },
     levels: ['A1', 'A2', 'B1', 'B2', 'C1'],
     keywords: {
@@ -383,11 +407,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '생각과 마음',
       StudyLanguage.en: 'Thoughts and Feelings',
       StudyLanguage.ja: '考えと気持ち',
+      StudyLanguage.pt: 'Pensamentos e sentimentos',
     },
     subtitles: {
       StudyLanguage.ko: '생각, 감정, 의견을 말할 때 쓰는 단어',
       StudyLanguage.en: 'Words for thoughts, emotions, and opinions',
       StudyLanguage.ja: '考え・感情・意見を伝える単語',
+      StudyLanguage.pt: 'Palavras para pensamentos, emoções e opiniões',
     },
     levels: ['A2', 'B1', 'B2', 'C1'],
     keywords: {
@@ -419,11 +445,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '움직이는 동사들',
       StudyLanguage.en: 'Verbs in Motion',
       StudyLanguage.ja: '動きの動詞たち',
+      StudyLanguage.pt: 'Verbos em movimento',
     },
     subtitles: {
       StudyLanguage.ko: '하다, 있다, 말하다처럼 문장을 만드는 힘',
       StudyLanguage.en: 'Core verbs that power your sentences',
       StudyLanguage.ja: 'する・いる・話すなど文を作る力',
+      StudyLanguage.pt: 'Verbos essenciais que sustentam suas frases',
     },
     levels: ['B1', 'B2'],
     keywords: {
@@ -452,11 +480,13 @@ const List<StageTopic> kStageTopics = [
       StudyLanguage.ko: '말을 이어주는 조각',
       StudyLanguage.en: 'Connecting Pieces',
       StudyLanguage.ja: '言葉をつなぐピース',
+      StudyLanguage.pt: 'Peças de ligação',
     },
     subtitles: {
       StudyLanguage.ko: '하지만, 그래서, 언제처럼 문장을 연결해요',
       StudyLanguage.en: 'Link sentences with but, so, and when',
       StudyLanguage.ja: 'でも・だから・いつ、で文をつなぎます',
+      StudyLanguage.pt: 'Conecte frases com mas, então e quando',
     },
     levels: ['A2', 'B1', 'C1'],
     keywords: {
@@ -509,10 +539,18 @@ class StageTopic {
     required this.keywords,
   });
 
+  // English before Korean: a language missing a string should degrade to
+  // something its speakers can read, not to Korean.
   String title(StudyLanguage language) =>
-      titles[language] ?? titles[StudyLanguage.ko] ?? '';
+      titles[language] ??
+      titles[StudyLanguage.en] ??
+      titles[StudyLanguage.ko] ??
+      '';
   String subtitle(StudyLanguage language) =>
-      subtitles[language] ?? subtitles[StudyLanguage.ko] ?? '';
+      subtitles[language] ??
+      subtitles[StudyLanguage.en] ??
+      subtitles[StudyLanguage.ko] ??
+      '';
 }
 
 class RoundRef {
@@ -540,236 +578,283 @@ const Map<String, Map<StudyLanguage, String>> _themeTitles = {
     StudyLanguage.ko: 'Hola, 첫 인사',
     StudyLanguage.en: 'Hola, First Greetings',
     StudyLanguage.ja: 'Hola、はじめての挨拶',
+    StudyLanguage.pt: 'Hola, primeiros cumprimentos',
   },
   'personal_information': {
     StudyLanguage.ko: '나를 소개하는 말',
     StudyLanguage.en: 'Introducing Yourself',
     StudyLanguage.ja: '自分を紹介する言葉',
+    StudyLanguage.pt: 'Se apresentando',
   },
   'family_people': {
     StudyLanguage.ko: '내 주변 사람들',
     StudyLanguage.en: 'People Around Me',
     StudyLanguage.ja: 'まわりの人たち',
+    StudyLanguage.pt: 'Pessoas ao meu redor',
   },
   'numbers_time': {
     StudyLanguage.ko: '시간 감각 익히기',
     StudyLanguage.en: 'Numbers and Time',
     StudyLanguage.ja: '時間の感覚をつかむ',
+    StudyLanguage.pt: 'Números e horas',
   },
   'home': {
     StudyLanguage.ko: '우리 집 한 바퀴',
     StudyLanguage.en: 'Around the House',
     StudyLanguage.ja: 'おうちをひとまわり',
+    StudyLanguage.pt: 'Pela casa',
   },
   'food_drink': {
     StudyLanguage.ko: '식탁 위 스페인어',
     StudyLanguage.en: 'Spanish at the Table',
     StudyLanguage.ja: '食卓のスペイン語',
+    StudyLanguage.pt: 'Espanhol à mesa',
   },
   'shopping': {
     StudyLanguage.ko: '시장과 가게',
     StudyLanguage.en: 'Markets and Shops',
     StudyLanguage.ja: '市場とお店',
+    StudyLanguage.pt: 'Mercados e lojas',
   },
   'education': {
     StudyLanguage.ko: '교실에서 쓰는 말',
     StudyLanguage.en: 'Classroom Words',
     StudyLanguage.ja: '教室で使う言葉',
+    StudyLanguage.pt: 'Na sala de aula',
   },
   'travel_transport': {
     StudyLanguage.ko: '여행 가방 챙기기',
     StudyLanguage.en: 'Packing for a Trip',
     StudyLanguage.ja: '旅行かばんの準備',
+    StudyLanguage.pt: 'Fazendo as malas',
   },
   'city_directions': {
     StudyLanguage.ko: '길 찾는 감각',
     StudyLanguage.en: 'Finding Your Way',
     StudyLanguage.ja: '道を探す感覚',
+    StudyLanguage.pt: 'Achando o caminho',
   },
   'weather_nature': {
     StudyLanguage.ko: '날씨와 풍경',
     StudyLanguage.en: 'Weather and Scenery',
     StudyLanguage.ja: '天気と風景',
+    StudyLanguage.pt: 'Clima e paisagem',
   },
   'basic_descriptions': {
     StudyLanguage.ko: '묘사 한 스푼',
     StudyLanguage.en: 'A Spoonful of Description',
     StudyLanguage.ja: '描写ひとさじ',
+    StudyLanguage.pt: 'Uma pitada de descrição',
   },
   'core_verbs': {
     StudyLanguage.ko: '문장을 여는 동사',
     StudyLanguage.en: 'Verbs That Open Sentences',
     StudyLanguage.ja: '文を開く動詞',
+    StudyLanguage.pt: 'Verbos que abrem frases',
   },
   'function_words': {
     StudyLanguage.ko: '말을 이어주는 조각',
     StudyLanguage.en: 'Connecting Pieces',
     StudyLanguage.ja: '言葉をつなぐピース',
+    StudyLanguage.pt: 'Peças de ligação',
   },
   'identity_documents': {
     StudyLanguage.ko: '서류 속 내 정보',
     StudyLanguage.en: 'My Info on Paper',
     StudyLanguage.ja: '書類の中の私',
+    StudyLanguage.pt: 'Meus dados no papel',
   },
   'health_body': {
     StudyLanguage.ko: '몸 상태 말하기',
     StudyLanguage.en: 'How Are You Feeling?',
     StudyLanguage.ja: '体調を伝える',
+    StudyLanguage.pt: 'Como você se sente?',
   },
   'daily_routine': {
     StudyLanguage.ko: '하루 루틴',
     StudyLanguage.en: 'Daily Routine',
     StudyLanguage.ja: '一日のルーティン',
+    StudyLanguage.pt: 'Rotina diária',
   },
   'home_tasks': {
     StudyLanguage.ko: '집안일 표현',
     StudyLanguage.en: 'Household Chores',
     StudyLanguage.ja: '家事の表現',
+    StudyLanguage.pt: 'Tarefas domésticas',
   },
   'restaurants': {
     StudyLanguage.ko: '카페와 식당',
     StudyLanguage.en: 'Cafés and Restaurants',
     StudyLanguage.ja: 'カフェとレストラン',
+    StudyLanguage.pt: 'Cafés e restaurantes',
   },
   'shopping_money': {
     StudyLanguage.ko: '계산하고 고르기',
     StudyLanguage.en: 'Paying and Choosing',
     StudyLanguage.ja: '選んでお会計',
+    StudyLanguage.pt: 'Pagar e escolher',
   },
   'clothing': {
     StudyLanguage.ko: '옷장 열어보기',
     StudyLanguage.en: 'Opening the Closet',
     StudyLanguage.ja: 'クローゼットを開けて',
+    StudyLanguage.pt: 'Abrindo o armário',
   },
   'work_professions': {
     StudyLanguage.ko: '일하는 하루',
     StudyLanguage.en: 'A Day at Work',
     StudyLanguage.ja: '働く一日',
+    StudyLanguage.pt: 'Um dia no trabalho',
   },
   'travel_hotels': {
     StudyLanguage.ko: '숙소와 여행',
     StudyLanguage.en: 'Hotels and Travel',
     StudyLanguage.ja: '宿と旅行',
+    StudyLanguage.pt: 'Hotéis e viagens',
   },
   'services': {
     StudyLanguage.ko: '생활 서비스',
     StudyLanguage.en: 'Everyday Services',
     StudyLanguage.ja: '生活サービス',
+    StudyLanguage.pt: 'Serviços do dia a dia',
   },
   'public_notices': {
     StudyLanguage.ko: '표지판 읽기',
     StudyLanguage.en: 'Reading Signs',
     StudyLanguage.ja: '標識を読む',
+    StudyLanguage.pt: 'Lendo placas',
   },
   'technology': {
     StudyLanguage.ko: '폰과 인터넷',
     StudyLanguage.en: 'Phones and the Internet',
     StudyLanguage.ja: 'スマホとネット',
+    StudyLanguage.pt: 'Celular e internet',
   },
   'opinions_preferences': {
     StudyLanguage.ko: '좋고 싫은 것',
     StudyLanguage.en: 'Likes and Dislikes',
     StudyLanguage.ja: '好きと嫌い',
+    StudyLanguage.pt: 'Gostar e não gostar',
   },
   'connectors': {
     StudyLanguage.ko: '문장 연결하기',
     StudyLanguage.en: 'Linking Sentences',
     StudyLanguage.ja: '文をつなげる',
+    StudyLanguage.pt: 'Ligando frases',
   },
   'health_services': {
     StudyLanguage.ko: '병원 가는 날',
     StudyLanguage.en: 'A Trip to the Doctor',
     StudyLanguage.ja: '病院に行く日',
+    StudyLanguage.pt: 'Indo ao médico',
   },
   'personality_feelings': {
     StudyLanguage.ko: '성격과 기분',
     StudyLanguage.en: 'Personality and Moods',
     StudyLanguage.ja: '性格と気分',
+    StudyLanguage.pt: 'Personalidade e humor',
   },
   'relationships_life_events': {
     StudyLanguage.ko: '관계와 인생 이벤트',
     StudyLanguage.en: 'Relationships and Life Events',
     StudyLanguage.ja: '人間関係と人生のイベント',
+    StudyLanguage.pt: 'Relações e momentos da vida',
   },
   'housing_neighborhood': {
     StudyLanguage.ko: '동네와 집 구하기',
     StudyLanguage.en: 'Housing and the Neighborhood',
     StudyLanguage.ja: '住まいと街さがし',
+    StudyLanguage.pt: 'Moradia e vizinhança',
   },
   'food_cooking': {
     StudyLanguage.ko: '요리하는 스페인어',
     StudyLanguage.en: 'Cooking in Spanish',
     StudyLanguage.ja: '料理のスペイン語',
+    StudyLanguage.pt: 'Cozinhando em espanhol',
   },
   'education_exams': {
     StudyLanguage.ko: '시험과 공부',
     StudyLanguage.en: 'Exams and Studying',
     StudyLanguage.ja: '試験と勉強',
+    StudyLanguage.pt: 'Provas e estudos',
   },
   'work_business': {
     StudyLanguage.ko: '회사와 일 이야기',
     StudyLanguage.en: 'Business Talk',
     StudyLanguage.ja: '会社と仕事の話',
+    StudyLanguage.pt: 'Papo de negócios',
   },
   'travel_accommodation': {
     StudyLanguage.ko: '이동과 숙박',
     StudyLanguage.en: 'Getting Around and Staying Over',
     StudyLanguage.ja: '移動と宿泊',
+    StudyLanguage.pt: 'Transporte e hospedagem',
   },
   'culture_media': {
     StudyLanguage.ko: '취미와 콘텐츠',
     StudyLanguage.en: 'Hobbies and Media',
     StudyLanguage.ja: '趣味とコンテンツ',
+    StudyLanguage.pt: 'Hobbies e mídia',
   },
   'technology_communication': {
     StudyLanguage.ko: '디지털 대화',
     StudyLanguage.en: 'Digital Conversations',
     StudyLanguage.ja: 'デジタル会話',
+    StudyLanguage.pt: 'Conversas digitais',
   },
   'money_administration': {
     StudyLanguage.ko: '돈과 행정',
     StudyLanguage.en: 'Money and Paperwork',
     StudyLanguage.ja: 'お金と行政',
+    StudyLanguage.pt: 'Dinheiro e papelada',
   },
   'city_safety': {
     StudyLanguage.ko: '도시와 안전',
     StudyLanguage.en: 'City and Safety',
     StudyLanguage.ja: '都市と安全',
+    StudyLanguage.pt: 'Cidade e segurança',
   },
   'environment': {
     StudyLanguage.ko: '자연과 환경',
     StudyLanguage.en: 'Nature and the Environment',
     StudyLanguage.ja: '自然と環境',
+    StudyLanguage.pt: 'Natureza e meio ambiente',
   },
   'society_civic_life': {
     StudyLanguage.ko: '사회 속 단어',
     StudyLanguage.en: 'Words for Society',
     StudyLanguage.ja: '社会の中の単語',
+    StudyLanguage.pt: 'Palavras da sociedade',
   },
   'opinions_arguments': {
     StudyLanguage.ko: '생각을 말하기',
     StudyLanguage.en: 'Making Your Point',
     StudyLanguage.ja: '考えを伝える',
+    StudyLanguage.pt: 'Dizer o que pensa',
   },
   'narration_verbs': {
     StudyLanguage.ko: '이야기를 움직이는 동사',
     StudyLanguage.en: 'Verbs That Drive a Story',
     StudyLanguage.ja: '物語を動かす動詞',
+    StudyLanguage.pt: 'Verbos que movem a história',
   },
   'pcic_general': {
     StudyLanguage.ko: '기본 핵심 어휘',
     StudyLanguage.en: 'Core Everyday Vocabulary',
     StudyLanguage.ja: '基本のコア語彙',
+    StudyLanguage.pt: 'Vocabulário essencial',
   },
   'pcic_specific': {
     StudyLanguage.ko: '세부 생활 어휘',
     StudyLanguage.en: 'Everyday Detail Vocabulary',
     StudyLanguage.ja: '生活の詳細語彙',
+    StudyLanguage.pt: 'Vocabulário detalhado',
   },
   'mixed_review': {
     StudyLanguage.ko: '추가 복습',
     StudyLanguage.en: 'Extra Review',
     StudyLanguage.ja: '追加復習',
+    StudyLanguage.pt: 'Revisão extra',
   },
 };
 
@@ -778,236 +863,283 @@ const Map<String, Map<StudyLanguage, String>> _themeSubtitles = {
     StudyLanguage.ko: '인사와 첫 대화에 필요한 표현',
     StudyLanguage.en: 'Greetings and first conversations',
     StudyLanguage.ja: '挨拶と初対面の会話の表現',
+    StudyLanguage.pt: 'Cumprimentos e primeiras conversas',
   },
   'personal_information': {
     StudyLanguage.ko: '이름, 주소, 국적처럼 나를 설명해요',
     StudyLanguage.en: 'Name, address, nationality — describe yourself',
     StudyLanguage.ja: '名前・住所・国籍など自分のこと',
+    StudyLanguage.pt: 'Nome, endereço, nacionalidade — fale sobre você',
   },
   'family_people': {
     StudyLanguage.ko: '가족, 친구, 주변 사람을 말해요',
     StudyLanguage.en: 'Family, friends, and people around you',
     StudyLanguage.ja: '家族・友達・身近な人を話します',
+    StudyLanguage.pt: 'Família, amigos e as pessoas ao seu redor',
   },
   'numbers_time': {
     StudyLanguage.ko: '숫자, 날짜, 시간 표현을 가볍게',
     StudyLanguage.en: 'Numbers, dates, and telling time',
     StudyLanguage.ja: '数字・日付・時間の表現を軽く',
+    StudyLanguage.pt: 'Números, datas e as horas',
   },
   'home': {
     StudyLanguage.ko: '방, 문, 가구처럼 생활 공간을 익혀요',
     StudyLanguage.en: 'Rooms, doors, and furniture',
     StudyLanguage.ja: '部屋・ドア・家具など生活空間の言葉',
+    StudyLanguage.pt: 'Cômodos, portas e móveis',
   },
   'food_drink': {
     StudyLanguage.ko: '먹고 마시는 순간에 바로 쓰는 말',
     StudyLanguage.en: 'Words for eating and drinking',
     StudyLanguage.ja: '食べる・飲む場面ですぐ使う言葉',
+    StudyLanguage.pt: 'Palavras para comer e beber',
   },
   'shopping': {
     StudyLanguage.ko: '가격, 가게, 물건을 고르는 표현',
     StudyLanguage.en: 'Prices, shops, and picking things out',
     StudyLanguage.ja: '値段・お店・品物を選ぶ表現',
+    StudyLanguage.pt: 'Preços, lojas e escolha de produtos',
   },
   'education': {
     StudyLanguage.ko: '수업, 질문, 공부에 필요한 단어',
     StudyLanguage.en: 'Lessons, questions, and studying',
     StudyLanguage.ja: '授業・質問・勉強に必要な単語',
+    StudyLanguage.pt: 'Aulas, perguntas e estudos',
   },
   'travel_transport': {
     StudyLanguage.ko: '교통수단과 여행 준비 단어',
     StudyLanguage.en: 'Transport and trip preparation',
     StudyLanguage.ja: '交通手段と旅の準備の単語',
+    StudyLanguage.pt: 'Transporte e preparação da viagem',
   },
   'city_directions': {
     StudyLanguage.ko: '길, 위치, 방향을 찾는 표현',
     StudyLanguage.en: 'Streets, locations, and directions',
     StudyLanguage.ja: '道・位置・方向を探す表現',
+    StudyLanguage.pt: 'Ruas, lugares e direções',
   },
   'weather_nature': {
     StudyLanguage.ko: '날씨와 자연 풍경을 말해요',
     StudyLanguage.en: 'Talk about weather and nature',
     StudyLanguage.ja: '天気と自然の風景を話します',
+    StudyLanguage.pt: 'Fale sobre o tempo e a natureza',
   },
   'basic_descriptions': {
     StudyLanguage.ko: '크기, 색, 상태를 짧게 묘사해요',
     StudyLanguage.en: 'Size, color, and simple descriptions',
     StudyLanguage.ja: '大きさ・色・状態を短く描写します',
+    StudyLanguage.pt: 'Tamanho, cor e descrições simples',
   },
   'core_verbs': {
     StudyLanguage.ko: '기본 동사로 문장을 만들어요',
     StudyLanguage.en: 'Build sentences with core verbs',
     StudyLanguage.ja: '基本動詞で文を作ります',
+    StudyLanguage.pt: 'Monte frases com os verbos essenciais',
   },
   'function_words': {
     StudyLanguage.ko: '짧지만 문장을 이어주는 표현',
     StudyLanguage.en: 'Small words that hold sentences together',
     StudyLanguage.ja: '短くても文をつなぐ表現',
+    StudyLanguage.pt: 'Palavrinhas que ligam as frases',
   },
   'identity_documents': {
     StudyLanguage.ko: '서류와 신분 확인에 나오는 말',
     StudyLanguage.en: 'Words for documents and ID checks',
     StudyLanguage.ja: '書類と身分確認に出る言葉',
+    StudyLanguage.pt: 'Palavras para documentos e identificação',
   },
   'health_body': {
     StudyLanguage.ko: '몸과 건강 상태를 설명해요',
     StudyLanguage.en: 'Describe your body and health',
     StudyLanguage.ja: '体と健康状態を説明します',
+    StudyLanguage.pt: 'Descreva seu corpo e sua saúde',
   },
   'daily_routine': {
     StudyLanguage.ko: '매일 반복되는 행동을 말해요',
     StudyLanguage.en: 'Talk about everyday actions',
     StudyLanguage.ja: '毎日繰り返す行動を話します',
+    StudyLanguage.pt: 'Fale sobre as ações do dia a dia',
   },
   'home_tasks': {
     StudyLanguage.ko: '청소, 세탁, 정리 같은 집안일',
     StudyLanguage.en: 'Cleaning, laundry, and tidying up',
     StudyLanguage.ja: '掃除・洗濯・片付けなどの家事',
+    StudyLanguage.pt: 'Limpeza, lavagem de roupa e arrumação',
   },
   'restaurants': {
     StudyLanguage.ko: '주문하고 계산하는 식당 표현',
     StudyLanguage.en: 'Ordering and paying at restaurants',
     StudyLanguage.ja: '注文と会計のレストラン表現',
+    StudyLanguage.pt: 'Pedir e pagar no restaurante',
   },
   'shopping_money': {
     StudyLanguage.ko: '돈, 할인, 결제 관련 표현',
     StudyLanguage.en: 'Money, discounts, and payment',
     StudyLanguage.ja: 'お金・割引・支払いの表現',
+    StudyLanguage.pt: 'Dinheiro, descontos e pagamento',
   },
   'clothing': {
     StudyLanguage.ko: '옷과 소지품을 고르는 말',
     StudyLanguage.en: 'Clothes and personal items',
     StudyLanguage.ja: '服と持ち物を選ぶ言葉',
+    StudyLanguage.pt: 'Roupas e objetos pessoais',
   },
   'work_professions': {
     StudyLanguage.ko: '직업과 일터에서 만나는 단어',
     StudyLanguage.en: 'Jobs and workplace words',
     StudyLanguage.ja: '職業と仕事場で出会う単語',
+    StudyLanguage.pt: 'Profissões e palavras do trabalho',
   },
   'travel_hotels': {
     StudyLanguage.ko: '예약, 숙소, 여행 상황 표현',
     StudyLanguage.en: 'Bookings, lodging, and travel situations',
     StudyLanguage.ja: '予約・宿泊・旅行の場面の表現',
+    StudyLanguage.pt: 'Reservas, hospedagem e situações de viagem',
   },
   'services': {
     StudyLanguage.ko: '은행, 우체국, 공공서비스 단어',
     StudyLanguage.en: 'Banks, post offices, and public services',
     StudyLanguage.ja: '銀行・郵便局・公共サービスの単語',
+    StudyLanguage.pt: 'Bancos, correios e serviços públicos',
   },
   'public_notices': {
     StudyLanguage.ko: '표지판과 안내문을 읽어요',
     StudyLanguage.en: 'Signs and public notices',
     StudyLanguage.ja: '標識と案内文を読みます',
+    StudyLanguage.pt: 'Placas e avisos públicos',
   },
   'technology': {
     StudyLanguage.ko: '기기와 인터넷 기본 표현',
     StudyLanguage.en: 'Devices and internet basics',
     StudyLanguage.ja: '機器とインターネットの基本表現',
+    StudyLanguage.pt: 'O básico de aparelhos e internet',
   },
   'opinions_preferences': {
     StudyLanguage.ko: '좋아함, 선호, 생각을 말해요',
     StudyLanguage.en: 'Talk about likes, preferences, and thoughts',
     StudyLanguage.ja: '好み・意見を話します',
+    StudyLanguage.pt: 'Fale sobre gostos, preferências e opiniões',
   },
   'connectors': {
     StudyLanguage.ko: '문장과 문장을 자연스럽게 이어요',
     StudyLanguage.en: 'Join sentences naturally',
     StudyLanguage.ja: '文と文を自然につなぎます',
+    StudyLanguage.pt: 'Conecte frases com naturalidade',
   },
   'health_services': {
     StudyLanguage.ko: '진료, 증상, 병원 상황 표현',
     StudyLanguage.en: 'Appointments, symptoms, and hospital visits',
     StudyLanguage.ja: '診察・症状・病院の場面の表現',
+    StudyLanguage.pt: 'Consultas, sintomas e visitas ao hospital',
   },
   'personality_feelings': {
     StudyLanguage.ko: '성격과 감정을 더 섬세하게',
     StudyLanguage.en: 'Describe personality and emotions in detail',
     StudyLanguage.ja: '性格と感情をより細やかに',
+    StudyLanguage.pt: 'Descreva personalidade e emoções em detalhe',
   },
   'relationships_life_events': {
     StudyLanguage.ko: '관계, 만남, 인생 이벤트',
     StudyLanguage.en: 'Relationships, meetings, and milestones',
     StudyLanguage.ja: '関係・出会い・人生の節目',
+    StudyLanguage.pt: 'Relacionamentos, encontros e marcos da vida',
   },
   'housing_neighborhood': {
     StudyLanguage.ko: '집과 동네를 설명하는 말',
     StudyLanguage.en: 'Describe homes and neighborhoods',
     StudyLanguage.ja: '家と街を説明する言葉',
+    StudyLanguage.pt: 'Descreva casas e bairros',
   },
   'food_cooking': {
     StudyLanguage.ko: '재료, 맛, 조리 표현',
     StudyLanguage.en: 'Ingredients, flavors, and cooking',
     StudyLanguage.ja: '材料・味・調理の表現',
+    StudyLanguage.pt: 'Ingredientes, sabores e preparo',
   },
   'education_exams': {
     StudyLanguage.ko: '시험, 과제, 학습 표현',
     StudyLanguage.en: 'Exams, assignments, and learning',
     StudyLanguage.ja: '試験・課題・学習の表現',
+    StudyLanguage.pt: 'Provas, trabalhos e aprendizado',
   },
   'work_business': {
     StudyLanguage.ko: '회사, 업무, 거래 표현',
     StudyLanguage.en: 'Companies, tasks, and deals',
     StudyLanguage.ja: '会社・業務・取引の表現',
+    StudyLanguage.pt: 'Empresas, tarefas e negócios',
   },
   'travel_accommodation': {
     StudyLanguage.ko: '이동과 숙박 상황을 다뤄요',
     StudyLanguage.en: 'Transport and accommodation situations',
     StudyLanguage.ja: '移動と宿泊の場面を扱います',
+    StudyLanguage.pt: 'Situações de transporte e hospedagem',
   },
   'culture_media': {
     StudyLanguage.ko: '영화, 음악, 문화생활 단어',
     StudyLanguage.en: 'Movies, music, and cultural life',
     StudyLanguage.ja: '映画・音楽・文化生活の単語',
+    StudyLanguage.pt: 'Filmes, música e vida cultural',
   },
   'technology_communication': {
     StudyLanguage.ko: '메시지, 앱, 온라인 표현',
     StudyLanguage.en: 'Messages, apps, and life online',
     StudyLanguage.ja: 'メッセージ・アプリ・オンラインの表現',
+    StudyLanguage.pt: 'Mensagens, aplicativos e vida online',
   },
   'money_administration': {
     StudyLanguage.ko: '계좌, 서류, 행정 처리 표현',
     StudyLanguage.en: 'Accounts, documents, and admin tasks',
     StudyLanguage.ja: '口座・書類・行政手続きの表現',
+    StudyLanguage.pt: 'Contas, documentos e burocracia',
   },
   'city_safety': {
     StudyLanguage.ko: '도시 시설과 안전 관련 단어',
     StudyLanguage.en: 'City facilities and safety words',
     StudyLanguage.ja: '都市の施設と安全の単語',
+    StudyLanguage.pt: 'Serviços da cidade e segurança',
   },
   'environment': {
     StudyLanguage.ko: '환경과 자연을 이야기해요',
     StudyLanguage.en: 'Talk about nature and the environment',
     StudyLanguage.ja: '環境と自然を語ります',
+    StudyLanguage.pt: 'Fale sobre a natureza e o meio ambiente',
   },
   'society_civic_life': {
     StudyLanguage.ko: '사회 이슈와 시민 생활 단어',
     StudyLanguage.en: 'Social issues and civic life',
     StudyLanguage.ja: '社会問題と市民生活の単語',
+    StudyLanguage.pt: 'Questões sociais e vida cidadã',
   },
   'opinions_arguments': {
     StudyLanguage.ko: '이유와 의견을 정리해 말해요',
     StudyLanguage.en: 'Organize reasons and opinions',
     StudyLanguage.ja: '理由と意見を整理して話します',
+    StudyLanguage.pt: 'Organize razões e opiniões',
   },
   'narration_verbs': {
     StudyLanguage.ko: '사건과 경험을 풀어내는 동사',
     StudyLanguage.en: 'Verbs for telling events and experiences',
     StudyLanguage.ja: '出来事と経験を語る動詞',
+    StudyLanguage.pt: 'Verbos para contar fatos e experiências',
   },
   'pcic_general': {
     StudyLanguage.ko: '자주 쓰는 기본 단어를 차근차근 익혀요',
     StudyLanguage.en: 'Learn frequent basic words step by step',
     StudyLanguage.ja: 'よく使う基本単語をこつこつ学びます',
+    StudyLanguage.pt: 'Aprenda palavras básicas frequentes passo a passo',
   },
   'pcic_specific': {
     StudyLanguage.ko: '상황별로 쓰이는 세부 단어를 익혀요',
     StudyLanguage.en: 'Learn words for specific situations',
     StudyLanguage.ja: '場面ごとの細かい単語を学びます',
+    StudyLanguage.pt: 'Aprenda palavras para situações específicas',
   },
   'mixed_review': {
     StudyLanguage.ko: '작은 테마의 남은 단어를 함께 복습해요',
     StudyLanguage.en: 'Review leftover words from smaller themes',
     StudyLanguage.ja: '小さなテーマの残りの単語を復習します',
+    StudyLanguage.pt: 'Revise as palavras restantes de temas menores',
   },
 };
 
@@ -1015,12 +1147,14 @@ const Map<StudyLanguage, String> _extraWordsTitles = {
   StudyLanguage.ko: '추가 단어',
   StudyLanguage.en: 'Extra Words',
   StudyLanguage.ja: '追加単語',
+  StudyLanguage.pt: 'Palavras extras',
 };
 
 const Map<StudyLanguage, String> _fallbackThemeSubtitles = {
   StudyLanguage.ko: '짧게 풀고 바로 다음 테마로 넘어가요',
   StudyLanguage.en: 'A quick set before the next theme',
   StudyLanguage.ja: '短く解いて次のテーマへ進みましょう',
+  StudyLanguage.pt: 'Um conjunto rápido antes do próximo tema',
 };
 
 class StagePlan {

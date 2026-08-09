@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -20,6 +21,8 @@ const _androidTestRewardedAdUnitId = 'ca-app-pub-3940256099942544/5224354917';
 const _iosTestRewardedAdUnitId = 'ca-app-pub-3940256099942544/1712485313';
 const _useTestAds = bool.fromEnvironment('USE_TEST_ADS', defaultValue: false);
 
+enum RewardedAdOutcome { earned, dismissedWithoutReward, unavailable, failed }
+
 class AdService {
   AdService._();
   static final AdService instance = AdService._();
@@ -28,6 +31,7 @@ class AdService {
   InterstitialAd? _interstitialAd;
   RewardedAd? _rewardedAd;
   final ValueNotifier<bool> _rewardedReady = ValueNotifier(false);
+  final Random _random = Random();
   int _roundCounter = 0;
   bool _canRequestAds = false;
 
@@ -96,9 +100,26 @@ class AdService {
     if (!isSupported || !_canRequestAds || frequency <= 0) return;
     _roundCounter++;
     if (_roundCounter % frequency != 0) return;
+    await _showInterstitialIfReady();
+  }
+
+  /// Shows an interstitial at a user-driven shadowing boundary with the given
+  /// probability. If no ad is ready, learning continues without waiting.
+  Future<void> maybeShowShadowingInterstitial({
+    double probability = 0.2,
+  }) async {
+    if (!isSupported ||
+        probability <= 0 ||
+        _random.nextDouble() >= probability) {
+      return;
+    }
+    await _showInterstitialIfReady();
+  }
+
+  Future<void> _showInterstitialIfReady() async {
     final ad = _interstitialAd;
     if (ad == null) {
-      preloadInterstitial();
+      unawaited(preloadInterstitial());
       return;
     }
     _interstitialAd = null;
@@ -156,14 +177,18 @@ class AdService {
   }
 
   Future<bool> showRewarded() async {
-    if (!isSupported) return false;
+    return await showRewardedWithOutcome() == RewardedAdOutcome.earned;
+  }
+
+  Future<RewardedAdOutcome> showRewardedWithOutcome() async {
+    if (!isSupported) return RewardedAdOutcome.unavailable;
     if (_rewardedAd == null) {
       await preloadRewarded();
     }
     final ad = _rewardedAd;
-    if (ad == null) return false;
+    if (ad == null) return RewardedAdOutcome.unavailable;
 
-    final completer = Completer<bool>();
+    final completer = Completer<RewardedAdOutcome>();
     var earned = false;
     _rewardedAd = null;
     _rewardedReady.value = false;
@@ -171,19 +196,36 @@ class AdService {
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
         preloadRewarded();
-        if (!completer.isCompleted) completer.complete(earned);
+        if (!completer.isCompleted) {
+          completer.complete(
+            earned
+                ? RewardedAdOutcome.earned
+                : RewardedAdOutcome.dismissedWithoutReward,
+          );
+        }
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
         ad.dispose();
         preloadRewarded();
-        if (!completer.isCompleted) completer.complete(false);
+        if (!completer.isCompleted) {
+          completer.complete(RewardedAdOutcome.failed);
+        }
       },
     );
-    await ad.show(
-      onUserEarnedReward: (_, _) {
-        earned = true;
-      },
-    );
+    try {
+      await ad.show(
+        onUserEarnedReward: (_, _) {
+          earned = true;
+        },
+      );
+    } catch (error) {
+      ad.dispose();
+      preloadRewarded();
+      if (kDebugMode) debugPrint('Rewarded show failed: $error');
+      if (!completer.isCompleted) {
+        completer.complete(RewardedAdOutcome.failed);
+      }
+    }
     return completer.future;
   }
 

@@ -1,0 +1,74 @@
+1
+00:00:00,200 --> 00:00:02,500
+¿Te ayudo en algo?
+Can I help you with anything?
+
+2
+00:00:02,500 --> 00:00:04,800
+Solo estoy mirando.
+I'm just looking.
+
+3
+00:00:05,200 --> 00:00:07,500
+¿Puedo probármelo?
+Can I try it on?
+
+4
+00:00:07,500 --> 00:00:09,800
+Claro, al fondo.
+Sure, at the back.
+
+5
+00:00:10,200 --> 00:00:12,500
+¿Tiene otra talla?
+Do you have another size?
+
+6
+00:00:12,500 --> 00:00:14,800
+Te traigo la mediana.
+I'll get you the medium.
+
+7
+00:00:15,200 --> 00:00:17,500
+Es un poco caro.
+It's a bit expensive.
+
+8
+00:00:17,500 --> 00:00:19,800
+Mamá...
+Mum...
+
+9
+00:00:20,200 --> 00:00:22,500
+¿Está en rebajas?
+Is it on sale?
+
+10
+00:00:22,500 --> 00:00:24,800
+Sí, treinta por ciento.
+Yes, thirty percent off.
+
+11
+00:00:25,200 --> 00:00:29,800
+Me lo llevo.
+I'll take it.
+
+12
+00:00:30,200 --> 00:00:32,500
+¿Puedo pagar con tarjeta?
+Can I pay by card?
+
+13
+00:00:32,500 --> 00:00:34,800
+Por supuesto.
+Of course.
+
+14
+00:00:35,200 --> 00:00:37,500
+¿Me da una bolsa?
+Could I have a bag?
+
+15
+00:00:37,500 --> 00:00:39,800
+Ya llevo cinco.
+I'm already carrying five.

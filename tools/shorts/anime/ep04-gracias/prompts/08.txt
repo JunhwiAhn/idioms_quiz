@@ -1,0 +1,7 @@
+STYLE: 1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.
+
+PALETTE (strict, use only these): warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.
+
+SHOT 8: Simple flat cream card background with a soft paper grain and a thin terracotta border, a small hand-drawn bread loaf illustration in the upper area, large empty centre area reserved for typography. No people. Absolutely no lettering, no labels, no captions, no signage text anywhere in the image.
+
+NEGATIVE: photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors

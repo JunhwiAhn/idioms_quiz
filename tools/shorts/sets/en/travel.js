@@ -1,0 +1,130 @@
+// EN — Travel Spanish, 9 phrases.
+//
+// 영어권 학습자용 세트. 이 세트의 영어 문구는 문제 은행에 없는 회화 표현이라
+// 직접 작성한 것이다 (은행 기반 세트는 cognates.js / verbs.js / false_friends.js).
+//
+// pron 은 영어 화자용 음차(respelling)다. 한국어 세트의 한글 음차와 목적은
+// 같지만 표기 체계가 다르므로 그대로 옮기면 안 된다.
+
+export default {
+  id: 'travel',
+  title: 'Travel Spanish Basics',
+  theme: 'travel',
+  thumbnailHint: 'A sunlit Spanish plaza with terracotta rooftops, shot low. Keep the middle of the frame visually quiet.',
+  cover: {
+    eyebrow: 'TRAVEL SPANISH',
+    line1: '9 phrases you will',
+    line2: 'actually use',
+    accentLine: 'in Spain',
+    pill: 'No grammar needed — just these nine',
+  },
+  caption: {
+    headline: '🇪🇸 9 Spanish phrases you will actually use in Spain ✈️',
+    intro: [
+      'You need far less Spanish than you think for a trip 🤭',
+      'These nine cover greetings, ordering, directions and paying 👏',
+    ],
+    highlight: [
+      'The most useful one is ¿Dónde está...? 🫶',
+      'Swap in any place and you can ask for anything: el baño, la estación, el hotel.',
+    ],
+    hashtags: [
+      'learnspanish', 'spanishforbeginners', 'travelspanish', 'spanishvocabulary',
+      'spanishphrases', 'spainTravel', 'spain', 'languagelearning', 'studyspanish',
+      'spanish', 'basicspanish', 'traveltips', 'europetravel', 'barcelona',
+      'madrid', 'dele', 'polyglot', 'languagestudy',
+    ],
+  },
+  items: [
+    {
+      term: 'Hola',
+      pron: 'OH-lah',
+      meaning: 'Hello',
+      tag: 'greeting',
+      emoji: '👋',
+      example: '¡Hola! Buenos días.',
+      exampleTrans: 'Hello! Good morning.',
+      tip: 'Say it first when you walk into a shop. In Spain it is expected.',
+    },
+    {
+      term: 'Gracias',
+      pron: 'GRAH-syahs',
+      meaning: 'Thank you',
+      tag: 'greeting',
+      emoji: '🙏',
+      example: 'Muchas gracias.',
+      exampleTrans: 'Thank you very much.',
+      tip: 'The word you will use most. Add muchas to make it warmer.',
+    },
+    {
+      term: 'Por favor',
+      pron: 'por fah-BOR',
+      meaning: 'Please',
+      tag: 'request',
+      emoji: '🥺',
+      example: 'Un café, por favor.',
+      exampleTrans: 'A coffee, please.',
+      tip: 'Stick it on the end of anything and you instantly sound polite.',
+    },
+    {
+      term: '¿Cuánto cuesta?',
+      pron: 'KWAN-toh KWES-tah',
+      meaning: 'How much is it?',
+      tag: 'shopping',
+      emoji: '💰',
+      example: '¿Cuánto cuesta esto?',
+      exampleTrans: 'How much is this?',
+      tip: 'Point at the thing while you say it. Works in every market.',
+    },
+    {
+      term: '¿Dónde está...?',
+      pron: 'DON-deh es-TAH',
+      meaning: 'Where is...?',
+      tag: 'directions',
+      emoji: '🗺️',
+      example: '¿Dónde está el baño?',
+      exampleTrans: 'Where is the bathroom?',
+      tip: 'The highest-value sentence frame here. Just swap the place.',
+    },
+    {
+      term: 'Baño',
+      pron: 'BAH-nyoh',
+      meaning: 'Bathroom',
+      tag: 'places',
+      emoji: '🚻',
+      example: '¿Hay baño aquí?',
+      exampleTrans: 'Is there a bathroom here?',
+      tip: 'In Spain you will also see servicios on the door.',
+    },
+    {
+      term: 'Agua',
+      pron: 'AH-gwah',
+      meaning: 'Water',
+      tag: 'ordering',
+      emoji: '💧',
+      example: 'Agua, por favor.',
+      exampleTrans: 'Water, please.',
+      tip: 'Tap water is agua del grifo, and it is free if you ask for it.',
+    },
+    {
+      term: 'Ayuda',
+      pron: 'ah-YOO-dah',
+      meaning: 'Help',
+      tag: 'emergency',
+      emoji: '🆘',
+      example: '¡Ayuda, por favor!',
+      exampleTrans: 'Help, please!',
+      tip: 'One word is enough. People will understand the situation.',
+    },
+    {
+      term: 'Perdón',
+      pron: 'per-DOHN',
+      meaning: 'Excuse me / Sorry',
+      tag: 'manners',
+      emoji: '😅',
+      example: 'Perdón, ¿puedo pasar?',
+      exampleTrans: 'Excuse me, may I get past?',
+      tip: 'Use perdón to squeeze by, lo siento when you are truly apologising.',
+    },
+  ],
+};

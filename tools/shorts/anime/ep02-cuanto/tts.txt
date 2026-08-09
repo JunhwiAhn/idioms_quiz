@@ -1,0 +1,9 @@
+01	HIJO	es-ES female (slowest — child)	¡Mira, mamá!
+02	MADRE	es-ES female	¿Te gusta?
+02	MADRE	es-ES female	Pregunta tú.
+03	MADRE	es-ES female	¿Cuánto cuesta?
+04	MADRE	es-ES female	Señala y pregunta.
+05	HIJO	es-ES female (slowest — child)	¿Cuánto cuesta?
+06	NPC	es-ES male	Tres euros, guapo.
+07	PADRE	es-ES male (flat, low)	Muy caro.
+08	NARR	es-ES female (slowest)	¿Cuánto cuesta?

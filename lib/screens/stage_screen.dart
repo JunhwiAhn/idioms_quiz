@@ -735,11 +735,19 @@ String _currentLabel(StudyLanguage language) => switch (language) {
   StudyLanguage.ko => '이어하기',
   StudyLanguage.en => 'Continue',
   StudyLanguage.ja => '続きから',
+  StudyLanguage.pt => 'Continuar',
 };
 
 String _roundMeta(StudyLanguage language, int rounds, int questions) =>
     switch (language) {
       StudyLanguage.ko => '$rounds라운드 · $questions문제',
-      StudyLanguage.en => '$rounds rounds · $questions questions',
+      // English and Portuguese inflect for number; Korean and Japanese do not,
+      // which is why "1 rounds" went unnoticed until pt-BR was added.
+      StudyLanguage.en =>
+        '$rounds ${rounds == 1 ? 'round' : 'rounds'} · '
+            '$questions ${questions == 1 ? 'question' : 'questions'}',
       StudyLanguage.ja => '$roundsラウンド · $questions問',
+      StudyLanguage.pt =>
+        '$rounds ${rounds == 1 ? 'rodada' : 'rodadas'} · '
+            '$questions ${questions == 1 ? 'questão' : 'questões'}',
     };

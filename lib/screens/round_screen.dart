@@ -293,6 +293,7 @@ class _RoundPreviewScreenState extends State<RoundPreviewScreen> {
     StudyLanguage.ko => '출제 단어 미리보기',
     StudyLanguage.en => 'Round Preview',
     StudyLanguage.ja => '出題語プレビュー',
+    StudyLanguage.pt => 'Prévia da rodada',
   };
 
   String get _body => switch (widget.language) {
@@ -300,12 +301,15 @@ class _RoundPreviewScreenState extends State<RoundPreviewScreen> {
     StudyLanguage.en =>
       'Review this round for one minute before the quiz starts.',
     StudyLanguage.ja => '1分間、このラウンドの単語を確認できます。',
+    StudyLanguage.pt =>
+      'Revise as palavras desta rodada por um minuto antes do quiz.',
   };
 
   String get _autoStart => switch (widget.language) {
     StudyLanguage.ko => '타이머가 끝나면 자동 시작',
     StudyLanguage.en => 'Auto-starts when the timer ends',
     StudyLanguage.ja => 'タイマー終了で自動開始',
+    StudyLanguage.pt => 'Começa sozinho quando o tempo acabar',
   };
 
   @override

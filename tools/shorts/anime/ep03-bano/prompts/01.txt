@@ -1,0 +1,15 @@
+STYLE: 1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.
+
+PALETTE (strict, use only these): warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.
+
+MADRE: Spanish woman in her 40s from Madrid, round face, warm olive skin, wavy shoulder-length dark brown hair, thick eyebrows, small round eyes, small gold hoop earrings, terracotta short-sleeve blouse, warm sand wide pants, terracotta crossbody bag, brown leather sandals.
+
+PADRE: Spanish man in his 40s from Madrid, long narrow face, warm olive skin, receding dark brown hair, light stubble, square dark-rimmed glasses, muted teal short-sleeve shirt tucked into warm grey-brown slacks, permanently deadpan half-lidded eyes.
+
+HIJA: Spanish girl, 17, long wavy dark brown hair, oval face, warm olive skin, cream t-shirt, muted teal denim shorts, cream sneakers, phone in hand.
+
+HIJO: Spanish boy, 10, messy curly dark brown hair, round cheeks, freckles across the nose, mustard striped t-shirt, muted teal shorts, brown leather sandals.
+
+SHOT 1: Wide vertical shot of a calm museum lobby with high cream walls, a stone floor and a long bench. The family walks in a loose line. HIJO lags behind with his knees pressed together, shifting his weight from foot to foot, face tense. HIJA glances back at him. Absolutely no lettering, no labels, no captions, no signage text anywhere in the image.
+
+NEGATIVE: photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors

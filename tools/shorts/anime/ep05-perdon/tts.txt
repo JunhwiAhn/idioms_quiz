@@ -1,0 +1,9 @@
+01	HIJA	es-ES female (younger, faster)	Es nuestra parada.
+02	HIJO	es-ES female (slowest — child)	No puedo salir.
+02	MADRE	es-ES female	Habla alto.
+03	MADRE	es-ES female	Perdón.
+04	MADRE	es-ES female	Funciona siempre.
+05	HIJO	es-ES female (slowest — child)	Perdón.
+06	NPC	es-ES male	Claro, pasa.
+07	PADRE	es-ES male (flat, low)	Perdón...
+08	NARR	es-ES female (slowest)	Perdón.

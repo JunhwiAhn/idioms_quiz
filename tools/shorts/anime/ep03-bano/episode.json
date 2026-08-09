@@ -1,0 +1,98 @@
+{
+  "id": "ep03-bano",
+  "sourceSet": "travel",
+  "sourceTerm": "¿Dónde está...? / Baño",
+  "sourceFile": "tools/shorts/travel_phrases.js",
+  "target": { "es": "¿Dónde está el baño?", "ko": "화장실이 어디예요?", "pron": "돈데 에스따 엘 바뇨" },
+  "situation": "미술관 로비. 급해진 막내가 직원에게 직접 물어봐야 한다.",
+  "npc": "NPC: Spanish museum attendant woman in her 30s, short dark hair tucked behind one ear, navy vest over a cream shirt, lanyard badge, standing beside an information desk.",
+  "punchline": "막내는 벌써 뛰어가고 없다",
+  "seed": 481207,
+  "langs": ["ko"],
+  "style": "1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.",
+  "palette": "warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.",
+  "negative": "photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors",
+  "shots": [
+    {
+      "n": 1, "start": 0.0, "dur": 5.0,
+      "cast": ["MADRE", "PADRE", "HIJA", "HIJO"],
+      "shotDescription": "Wide vertical shot of a calm museum lobby with high cream walls, a stone floor and a long bench. The family walks in a loose line. HIJO lags behind with his knees pressed together, shifting his weight from foot to foot, face tense. HIJA glances back at him.",
+      "motionPrompt": "Slow push in toward HIJO. He shifts his weight twice. HIJA turns her head once. Background static.",
+      "lines": [{ "who": "HIJA", "es": "¿Estás bien?", "sub": { "ko": "너 괜찮아?" } }],
+      "onScreen": null
+    },
+    {
+      "n": 2, "start": 5.0, "dur": 5.0,
+      "cast": ["MADRE", "HIJO"],
+      "shotDescription": "Medium two-shot. HIJO grabs MADRE's arm with both hands, eyes wide and desperate, whispering urgently. MADRE keeps her face calm and points with an open hand toward the information desk off-frame.",
+      "motionPrompt": "Static shot. HIJO tugs the arm once. MADRE raises her open hand and points. Background static.",
+      "lines": [
+        { "who": "HIJO", "es": "Necesito el baño.", "sub": { "ko": "나 화장실 가야 해" } },
+        { "who": "MADRE", "es": "Pregunta a ella.", "sub": { "ko": "저분한테 물어봐" } }
+      ],
+      "onScreen": null
+    },
+    {
+      "n": 3, "start": 10.0, "dur": 5.0,
+      "cast": ["MADRE"],
+      "shotDescription": "Close-up of MADRE crouching to camera height, speaking slowly and clearly, both hands on her knees, eyebrows raised patiently. Blurred museum lobby behind her. Wide empty space in the lower third for a caption.",
+      "motionPrompt": "Static shot. MADRE's mouth opens clearly on each word. Background static.",
+      "lines": [{ "who": "MADRE", "es": "¿Dónde está el baño?", "sub": { "ko": "화장실이 어디예요?" } }],
+      "onScreen": "¿Dónde está el baño?"
+    },
+    {
+      "n": 4, "start": 15.0, "dur": 5.0,
+      "cast": ["MADRE"],
+      "shotDescription": "Same close-up of MADRE, now drawing a small circle in the air with one finger, mouth slightly open mid-explanation, one eyebrow raised. Same blurred lobby. Wide empty space in the lower third for a caption.",
+      "motionPrompt": "Static shot. MADRE draws one small circle in the air. Background static.",
+      "lines": [{ "who": "MADRE", "es": "Sirve para todo.", "sub": { "ko": "어디에나 써먹을 수 있어" } }],
+      "note": { "ko": "¿Dónde está … ? 뒤에 장소만 갈아 끼우면 됩니다" },
+      "onScreen": "¿Dónde está el baño?"
+    },
+    {
+      "n": 5, "start": 20.0, "dur": 5.0,
+      "cast": ["HIJO"],
+      "shotDescription": "Close-up of HIJO standing very straight in front of the desk, fists clenched at his sides, chin up, mouth wide open speaking quickly, eyes shut tight with effort. Simple blurred lobby wall behind him.",
+      "motionPrompt": "Slight push in. HIJO straightens up and his mouth opens wide. Background static.",
+      "lines": [{ "who": "HIJO", "es": "¿Dónde está el baño?", "sub": { "ko": "화장실이 어디예요?" } }],
+      "onScreen": "¿Dónde está el baño?"
+    },
+    {
+      "n": 6, "start": 25.0, "dur": 5.0,
+      "cast": ["NPC"],
+      "shotDescription": "Medium shot of the museum attendant smiling kindly and pointing down a corridor with a flat open hand, the other hand resting on the desk. Calm cream lobby behind her.",
+      "motionPrompt": "Slight push in. The attendant extends her arm to point down the corridor. Background static.",
+      "lines": [{ "who": "NPC", "es": "Al fondo, a la derecha.", "sub": { "ko": "끝까지 가서 오른쪽이요" } }],
+      "onScreen": null
+    },
+    {
+      "n": 7, "start": 30.0, "dur": 5.0,
+      "cast": ["MADRE", "PADRE", "HIJA"],
+      "shotDescription": "Wide shot of the lobby. MADRE, PADRE and HIJA stand in a row looking down the empty corridor. A single sandal lies on the stone floor where HIJO was standing. PADRE stares at the sandal, completely deadpan.",
+      "motionPrompt": "Static shot. Nobody moves except HIJA slowly turning her head toward the sandal. Background static.",
+      "lines": [{ "who": "PADRE", "es": "Ya no está.", "sub": { "ko": "벌써 없네" } }],
+      "onScreen": null
+    },
+    {
+      "n": 8, "start": 35.0, "dur": 5.0,
+      "cast": [],
+      "shotDescription": "Simple flat cream card background with a soft paper grain and a thin terracotta border, a small hand-drawn arrow sign illustration in the upper area, large empty centre area reserved for typography. No people.",
+      "motionPrompt": "Static shot. The arrow sign sways almost imperceptibly. Nothing else moves.",
+      "lines": [{ "who": "NARR", "es": "¿Dónde está el baño?", "sub": { "ko": "화장실이 어디예요? / 돈데 에스따 엘 바뇨" } }],
+      "onScreen": "¿Dónde está el baño?"
+    }
+  ],
+  "budget": {
+    "images": { "model": "gpt_image_2", "count": 9, "creditsEach": 0.5, "credits": 4.5 },
+    "videos": { "model": "kling3_0_turbo", "count": 8, "creditsEach": 7.5, "credits": 60 },
+    "total": 64.5
+  },
+  "metadata": {
+    "ko": {
+      "title": "급할 때 이 한마디 | 스페인 회화 따라가기 #3",
+      "description": "여행 중 가장 급하게 필요한 문장. ¿Dónde está el baño? (돈데 에스따 엘 바뇨)\n\n¿Dónde está … ? 뒤에 장소만 갈아 끼우면 됩니다. 스페인에서는 baño 대신 servicio 라고도 해요.\n\n스페인 가족의 실제 대화를 그대로 따라가면서 익히는 시리즈입니다. 단어·회화 연습은 앱에서 이어서 하실 수 있습니다.",
+      "tags": ["스페인어", "여행스페인어", "스페인여행", "스페인어회화", "왕초보스페인어", "스페인어독학", "DELE", "스페인어단어", "유럽여행준비", "쇼츠"],
+      "pinnedComment": "¿Dónde está la estación? / la salida? 처럼 장소만 바꿔 쓰시면 됩니다. 다음 편은 빵집이에요 🙌"
+    }
+  }
+}

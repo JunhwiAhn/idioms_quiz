@@ -54,3 +54,7 @@ android/build/
 /tmp/
 emulator_screen.png
 codex_web_test.*
+
+# Agent skills installed via `npx skills add` (.claude/skills symlinks into .agents)
+/.agents/
+/.claude/skills/

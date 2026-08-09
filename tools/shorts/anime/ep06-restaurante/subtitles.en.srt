@@ -1,0 +1,69 @@
+1
+00:00:00,200 --> 00:00:02,500
+¡Hola! ¿Cuántos sois?
+Hi there! How many of you?
+
+2
+00:00:02,500 --> 00:00:04,800
+Una mesa para cuatro.
+A table for four.
+
+3
+00:00:05,200 --> 00:00:09,800
+La carta, por favor.
+The menu, please.
+
+4
+00:00:10,200 --> 00:00:12,500
+¿Qué me recomienda?
+What do you recommend?
+
+5
+00:00:12,500 --> 00:00:14,800
+La paella está muy buena.
+The paella is very good.
+
+6
+00:00:15,200 --> 00:00:17,500
+¡Yo quiero patatas bravas!
+I want patatas bravas!
+
+7
+00:00:17,500 --> 00:00:19,800
+Y una caña.
+And a small draft beer.
+
+8
+00:00:20,200 --> 00:00:22,500
+¡Que aproveche!
+Enjoy your meal!
+
+9
+00:00:22,500 --> 00:00:24,800
+¡Gracias!
+Thank you!
+
+10
+00:00:25,200 --> 00:00:29,800
+Está muy rico.
+It's really good.
+
+11
+00:00:30,200 --> 00:00:32,500
+La cuenta, por favor.
+The bill, please.
+
+12
+00:00:32,500 --> 00:00:34,800
+Ahora mismo.
+Right away.
+
+13
+00:00:35,200 --> 00:00:37,500
+¿Y el postre?
+What about dessert?
+
+14
+00:00:37,500 --> 00:00:39,800
+No.
+No.

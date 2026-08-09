@@ -1,0 +1,35 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Title,Arial Black,88,&H00FFFFFF,&H0000FFFF,&H00110022,&H00000000,-1,0,0,0,100,100,1,0,1,6,3,8,45,45,105,1
+Style: Question,Arial Black,60,&H003CFFFF,&H0000FFFF,&H00110022,&H00000000,-1,0,0,0,100,100,0,0,1,4,2,8,40,40,260,1
+Style: Spanish,Arial Black,82,&H00FFFFFF,&H0000FFFF,&H00110022,&H88000000,-1,0,0,0,100,100,1,0,1,6,2,8,55,55,455,1
+Style: Prompt,Arial Black,60,&H00FFFFFF,&H0000FFFF,&H00110022,&H88000000,-1,0,0,0,100,100,0,0,1,5,2,5,60,60,0,1
+Style: Choice,Arial Black,62,&H00FFFFFF,&H0000FFFF,&H00110022,&H00000000,-1,0,0,0,100,100,0,0,1,4,1,5,75,75,0,1
+Style: Countdown,Arial Black,190,&H003CFFFF,&H0000FFFF,&H00110022,&H00000000,-1,0,0,0,100,100,3,0,1,8,4,5,40,40,0,1
+Style: Answer,Arial Black,76,&H003CFFFF,&H0000FFFF,&H00110022,&HAA000000,-1,0,0,0,100,100,1,0,3,3,0,5,65,65,0,1
+Style: Explain,Arial Black,70,&H00FFFFFF,&H0000FFFF,&H00110022,&HAA000000,-1,0,0,0,100,100,0,0,3,3,0,5,70,70,0,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 2,0:00:00.00,0:00:30.00,Title,,0,0,0,,WHAT DID THEY SAY?
+Dialogue: 2,0:00:00.00,0:00:30.00,Question,,0,0,0,,¿QUÉ ESCUCHASTE?
+Dialogue: 2,0:00:01.20,0:00:07.00,Spanish,,0,0,0,,ES HORA DE UNA\N{\c&H00FFFF&}NUEVA {\c&H3CFFFF&}ESTRATEGIA
+Dialogue: 2,0:00:01.20,0:00:07.00,Prompt,,0,0,0,,{\pos(540,905)}LISTEN ONCE
+Dialogue: 2,0:00:07.00,0:00:14.20,Choice,,0,0,0,,{\pos(540,1165)}A.  IT'S TIME FOR A\N{\c&H00FFFF&}NEW STRATEGY.
+Dialogue: 2,0:00:07.00,0:00:14.20,Choice,,0,0,0,,{\pos(540,1375)}B.  IT'S TIME TO\NCHANGE THE STORY.
+Dialogue: 2,0:00:07.00,0:00:14.20,Choice,,0,0,0,,{\pos(540,1585)}C.  IT'S TIME FOR\NOUR VICTORY.
+Dialogue: 3,0:00:11.20,0:00:12.20,Countdown,,0,0,0,,{\pos(540,750)}3
+Dialogue: 3,0:00:12.20,0:00:13.20,Countdown,,0,0,0,,{\pos(540,750)}2
+Dialogue: 3,0:00:13.20,0:00:14.20,Countdown,,0,0,0,,{\pos(540,750)}1
+Dialogue: 2,0:00:14.20,0:00:18.20,Answer,,0,0,0,,{\pos(540,1250)}ANSWER: A\N{\c&HFFFFFF&}IT'S TIME FOR A\N{\c&H3CFFFF&}NEW STRATEGY.
+Dialogue: 2,0:00:18.20,0:00:22.00,Explain,,0,0,0,,{\pos(540,1220)}{\c&H00FFFF&}ES HORA DE…{\c&HFFFFFF&}\NIT'S TIME TO…
+Dialogue: 2,0:00:22.00,0:00:25.20,Explain,,0,0,0,,{\pos(540,1320)}{\c&H00FFFF&}NUEVA{\c&HFFFFFF&} = NEW
+Dialogue: 2,0:00:25.20,0:00:27.50,Explain,,0,0,0,,{\pos(540,1320)}{\c&H3CFFFF&}ESTRATEGIA{\c&HFFFFFF&} = STRATEGY
+Dialogue: 2,0:00:27.50,0:00:30.00,Explain,,0,0,0,,{\pos(540,1280)}SAY IT WITH ME!\N{\c&H00FFFF&}ES HORA DE UNA\N{\c&H3CFFFF&}NUEVA ESTRATEGIA

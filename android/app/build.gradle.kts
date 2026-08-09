@@ -49,6 +49,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Keep local debug builds beside the Play Store app. Their signing
+            // keys differ, so reusing the release package ID would require
+            // uninstalling the user's app and deleting its learning data.
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             signingConfig = signingConfigs.getByName("release")
             // Play Console flags unoptimized release builds under "R8 최적화로

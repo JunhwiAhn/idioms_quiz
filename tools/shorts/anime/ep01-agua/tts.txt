@@ -1,0 +1,9 @@
+01	NPC	es-ES male	¿Qué van a tomar?
+02	HIJO	es-ES female (slowest — child)	Mamá, tengo sed.
+02	MADRE	es-ES female	Pídelo tú.
+03	MADRE	es-ES female	Agua, por favor.
+04	MADRE	es-ES female	Solo dos palabras.
+05	HIJO	es-ES female (slowest — child)	Agua, por favor.
+06	NPC	es-ES male	¡Claro! Ahora mismo.
+07	PADRE	es-ES male (flat, low)	Yo también quiero.
+08	NARR	es-ES female (slowest)	Agua, por favor.

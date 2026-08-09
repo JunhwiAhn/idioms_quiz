@@ -53,6 +53,26 @@ Future<void> speakSpanishInBrowser(
   _speechSynthesis.speak(utterance);
 }
 
+Future<bool> speakLocalizedInBrowser(
+  String text, {
+  required List<String> locales,
+  required double rate,
+  required double pitch,
+}) async {
+  final voices = await _waitForVoices();
+  final voice = _pickVoiceForLocales(voices, locales);
+  if (voice == null) return false;
+  final utterance = _SpeechSynthesisUtterance(text)
+    ..lang = voice.lang
+    ..rate = rate
+    ..pitch = pitch
+    ..voice = voice;
+  _speechSynthesis.cancel();
+  await Future<void>.delayed(const Duration(milliseconds: 50));
+  _speechSynthesis.speak(utterance);
+  return true;
+}
+
 Future<void> stopBrowserSpeech() async {
   _speechSynthesis.cancel();
 }
@@ -89,6 +109,27 @@ _SpeechSynthesisVoice? _pickSpanishVoice(
   for (final voice in voices) {
     final locale = voice.lang.toLowerCase();
     if (locale == 'es' || locale.startsWith('es-')) return voice;
+  }
+  return null;
+}
+
+_SpeechSynthesisVoice? _pickVoiceForLocales(
+  List<_SpeechSynthesisVoice> voices,
+  List<String> locales,
+) {
+  for (final locale in locales) {
+    for (final voice in voices) {
+      if (voice.lang.toLowerCase() == locale.toLowerCase()) return voice;
+    }
+  }
+  for (final locale in locales) {
+    final language = locale.split('-').first.toLowerCase();
+    for (final voice in voices) {
+      final voiceLocale = voice.lang.toLowerCase();
+      if (voiceLocale == language || voiceLocale.startsWith('$language-')) {
+        return voice;
+      }
+    }
   }
   return null;
 }

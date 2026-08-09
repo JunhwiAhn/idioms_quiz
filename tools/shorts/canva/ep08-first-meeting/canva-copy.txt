@@ -1,0 +1,34 @@
+TITLE
+FIRST MEETING IN SPANISH
+
+00:00-00:05
+ES: ¡Hola! Soy Lucía. ¿Cómo te llamas?
+EN: Hi! I'm Lucía. What's your name?
+
+00:05-00:10
+ES: Me llamo Jake. Encantado.
+EN: I'm Jake. Nice to meet you.
+
+00:10-00:15
+ES: Encantada. ¿De dónde eres?
+EN: Nice to meet you. Where are you from?
+
+00:15-00:20
+ES: Soy de Estados Unidos. ¿Y tú?
+EN: I'm from the U.S. What about you?
+
+00:20-00:25
+ES: Soy de Madrid. ¿Cómo estás?
+EN: I'm from Madrid. How are you?
+
+00:25-00:30
+ES: Bien, pero mi español está de vacaciones.
+EN: Good, but my Spanish is on vacation.
+
+00:30-00:35
+ES: Tranquilo. Tiene jet lag.
+EN: Don't worry. It has jet lag.
+
+00:35-00:40
+ES: ¡Eso lo explica! ¿Tomamos un café?
+EN: That explains it! Want to grab coffee?

@@ -1,0 +1,14 @@
+{
+  "id": "ep08-first-meeting",
+  "format": "dialogue",
+  "shots": [
+    { "n": 1, "lines": [{ "who": "MADRE", "es": "¡Hola! Soy Lucía. ¿Cómo te llamas?" }] },
+    { "n": 2, "lines": [{ "who": "PADRE", "es": "Me llamo Jake. Encantado." }] },
+    { "n": 3, "lines": [{ "who": "MADRE", "es": "Encantada. ¿De dónde eres?" }] },
+    { "n": 4, "lines": [{ "who": "PADRE", "es": "Soy de Estados Unidos. ¿Y tú?" }] },
+    { "n": 5, "lines": [{ "who": "MADRE", "es": "Soy de Madrid. ¿Cómo estás?" }] },
+    { "n": 6, "lines": [{ "who": "PADRE", "es": "Bien, pero mi español está de vacaciones." }] },
+    { "n": 7, "lines": [{ "who": "MADRE", "es": "Tranquilo. Tiene jet lag." }] },
+    { "n": 8, "lines": [{ "who": "PADRE", "es": "¡Eso lo explica! ¿Tomamos un café?" }] }
+  ]
+}

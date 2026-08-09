@@ -5,6 +5,7 @@ import '../data/score_service.dart'
     show MasteryStage, kMasteryThreshold, masteryStageForCount;
 import '../theme/app_theme.dart';
 import '../models/idiom.dart';
+import 'word_slide_screen.dart';
 
 enum _Filter { all, mastered, locked }
 
@@ -123,6 +124,28 @@ class _CollectionScreenState extends State<CollectionScreen> {
         title: Text(
           text.wordbookTitle(widget.mastered.length, widget.idioms.length),
         ),
+        actions: [
+          IconButton(
+            tooltip: switch (widget.language) {
+              StudyLanguage.ko => '쉐도잉',
+              StudyLanguage.en => 'Shadowing',
+              StudyLanguage.ja => 'シャドーイング',
+              StudyLanguage.pt => 'Shadowing',
+            },
+            onPressed: visible.isEmpty
+                ? null
+                : () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => WordSlideScreen(
+                        idioms: visible,
+                        language: widget.language,
+                      ),
+                    ),
+                  ),
+            icon: const Icon(Icons.slideshow_rounded),
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       floatingActionButton: AnimatedSlide(
         duration: const Duration(milliseconds: 200),
@@ -868,6 +891,12 @@ String _masteryLabel(MasteryStage stage, StudyLanguage language) {
       MasteryStage.familiar => '学習中',
       MasteryStage.learned => '習得',
       MasteryStage.mastered => '収集済み',
+    },
+    StudyLanguage.pt => switch (stage) {
+      MasteryStage.locked => 'Não estudada',
+      MasteryStage.familiar => 'Aprendendo',
+      MasteryStage.learned => 'Aprendida',
+      MasteryStage.mastered => 'Coletada',
     },
   };
 }

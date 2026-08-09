@@ -1,0 +1,115 @@
+{
+  "id": "ep07-tienda",
+  "format": "dialogue",
+  "sourceSet": "shopping",
+  "sourceFile": "tools/shorts/sets/shopping.js",
+  "target": { "es": null, "ko": "옷 가게 한 판 — 구경부터 봉투까지", "pron": null },
+  "situation": "마드리드 동네 옷 가게. 딸이 옷을 하나 고르는 동안 구경·피팅·사이즈·세일·결제가 순서대로 지나간다.",
+  "npc": "NPC: Spanish shop assistant woman in her 30s, dark hair in a high ponytail, thin gold necklace, cream knit top and dark jeans, measuring tape draped over one shoulder.",
+  "punchline": "아빠는 이미 봉투 다섯 개를 들고 있다",
+  "seed": 481207,
+  "langs": ["en", "ko"],
+  "style": "1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.",
+  "palette": "warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.",
+  "negative": "photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors",
+  "shots": [
+    {
+      "n": 1, "start": 0.0, "dur": 5.0,
+      "cast": ["MADRE", "PADRE", "HIJA", "HIJO", "NPC"],
+      "shotDescription": "Wide vertical shot inside a small Madrid clothing shop, cream walls, wooden rails of folded clothes, a mirror at the back. The family has just come in. HIJA is already running her hand along a rail. The shop assistant steps forward with a friendly open gesture. PADRE stops just inside the door holding shopping bags.",
+      "motionPrompt": "Slow push in toward HIJA at the rail. The assistant steps forward once. Clothes on the rail sway slightly.",
+      "lines": [
+        { "who": "NPC", "es": "¿Te ayudo en algo?", "sub": { "en": "Can I help you with anything?", "ko": "뭐 도와드릴까요?" } },
+        { "who": "HIJA", "es": "Solo estoy mirando.", "highlight": true, "pronEn": "SO-lo es-TOY mee-RAN-do", "pron": "솔로 에스또이 미란도", "sub": { "en": "I'm just looking.", "ko": "그냥 구경 중이에요" } }
+      ]
+    },
+    {
+      "n": 2, "start": 5.0, "dur": 5.0,
+      "cast": ["HIJA", "NPC"],
+      "shotDescription": "Medium two-shot. HIJA holds a terracotta jacket up against her shoulders, chin tilted, asking. The shop assistant points off-frame toward the fitting rooms with an open palm, smiling.",
+      "motionPrompt": "Static shot. HIJA lifts the jacket against her shoulders. The assistant extends her arm to point.",
+      "lines": [
+        { "who": "HIJA", "es": "¿Puedo probármelo?", "highlight": true, "pronEn": "PWEH-do pro-BAR-meh-lo", "pron": "뿌에도 쁘로바르멜로", "sub": { "en": "Can I try it on?", "ko": "입어봐도 돼요?" } },
+        { "who": "NPC", "es": "Claro, al fondo.", "sub": { "en": "Sure, at the back.", "ko": "그럼요, 안쪽이에요" } }
+      ]
+    },
+    {
+      "n": 3, "start": 10.0, "dur": 5.0,
+      "cast": ["HIJA", "NPC"],
+      "shotDescription": "Medium shot at the fitting room curtain. HIJA leans out wearing the jacket, which is visibly too big, sleeves swallowing her hands. The shop assistant looks her up and down with a knowing expression, already turning away.",
+      "motionPrompt": "Static shot. HIJA raises one arm and the oversized sleeve flops. The assistant turns her head.",
+      "lines": [
+        { "who": "HIJA", "es": "¿Tiene otra talla?", "highlight": true, "pronEn": "TYEH-neh OH-tra TA-ya", "pron": "띠에네 오뜨라 따야", "sub": { "en": "Do you have another size?", "ko": "다른 사이즈 있어요?" } },
+        { "who": "NPC", "es": "Te traigo la mediana.", "sub": { "en": "I'll get you the medium.", "ko": "미디엄으로 갖다드릴게요" } }
+      ]
+    },
+    {
+      "n": 4, "start": 15.0, "dur": 5.0,
+      "cast": ["MADRE", "HIJA"],
+      "shotDescription": "Close two-shot. MADRE has turned the price tag over between two fingers and is staring at it with her eyebrows climbing. HIJA, now in the correct size, watches her mother's face with dread.",
+      "motionPrompt": "Static shot. MADRE turns the price tag once. HIJA's shoulders drop slightly.",
+      "lines": [
+        { "who": "MADRE", "es": "Es un poco caro.", "sub": { "en": "It's a bit expensive.", "ko": "좀 비싸네" } },
+        { "who": "HIJA", "es": "Mamá...", "sub": { "en": "Mum...", "ko": "엄마아..." } }
+      ]
+    },
+    {
+      "n": 5, "start": 20.0, "dur": 5.0,
+      "cast": ["MADRE", "NPC"],
+      "shotDescription": "Medium two-shot at the counter. MADRE turns to the shop assistant with a bright hopeful face, still holding the price tag. The assistant brightens and holds up three fingers and a zero shape.",
+      "motionPrompt": "Static shot. MADRE turns her head to the assistant. The assistant raises three fingers.",
+      "lines": [
+        { "who": "MADRE", "es": "¿Está en rebajas?", "highlight": true, "pronEn": "es-TA en reh-BA-hass", "pron": "에스따 엔 레바하스", "sub": { "en": "Is it on sale?", "ko": "세일 중이에요?" } },
+        { "who": "NPC", "es": "Sí, treinta por ciento.", "sub": { "en": "Yes, thirty percent off.", "ko": "네, 30% 할인이에요" } }
+      ]
+    },
+    {
+      "n": 6, "start": 25.0, "dur": 5.0,
+      "cast": ["HIJA"],
+      "shotDescription": "Close-up of HIJA hugging the folded jacket to her chest with both arms, eyes shining, decision made. Blurred shop rails behind her.",
+      "motionPrompt": "Slight push in. HIJA hugs the jacket tighter and nods once.",
+      "lines": [
+        { "who": "HIJA", "es": "Me lo llevo.", "highlight": true, "pronEn": "meh lo YEH-vo", "pron": "메 로 예보", "sub": { "en": "I'll take it.", "ko": "이걸로 할게요" } }
+      ]
+    },
+    {
+      "n": 7, "start": 30.0, "dur": 5.0,
+      "cast": ["MADRE", "NPC"],
+      "shotDescription": "Medium two-shot at the counter. MADRE holds a card out between two fingers. The shop assistant is already reaching for the card terminal with a nod.",
+      "motionPrompt": "Static shot. MADRE extends the card. The assistant reaches for the terminal.",
+      "lines": [
+        { "who": "MADRE", "es": "¿Puedo pagar con tarjeta?", "highlight": true, "pronEn": "PWEH-do pa-GAR kon tar-HEH-ta", "pron": "뿌에도 빠가르 꼰 따르헤따", "sub": { "en": "Can I pay by card?", "ko": "카드로 계산돼요?" } },
+        { "who": "NPC", "es": "Por supuesto.", "sub": { "en": "Of course.", "ko": "물론이죠" } }
+      ]
+    },
+    {
+      "n": 8, "start": 35.0, "dur": 5.0,
+      "cast": ["MADRE", "PADRE", "HIJA", "HIJO"],
+      "shotDescription": "Wide shot by the shop door. MADRE turns back toward the counter asking for one more bag. HIJA hugs her new jacket. HIJO is spinning a hanger. PADRE stands motionless with five shopping bags hanging off both arms, staring flatly straight ahead.",
+      "motionPrompt": "Static shot. MADRE turns her head back. PADRE does not move at all. The hanger spins.",
+      "lines": [
+        { "who": "MADRE", "es": "¿Me da una bolsa?", "sub": { "en": "Could I have a bag?", "ko": "봉투 하나 주시겠어요?" } },
+        { "who": "PADRE", "es": "Ya llevo cinco.", "sub": { "en": "I'm already carrying five.", "ko": "나 벌써 다섯 개 들었어" } }
+      ]
+    }
+  ],
+  "budget": {
+    "images": { "model": "gpt_image_2", "count": 0, "creditsEach": 0.5, "credits": 0 },
+    "videos": { "model": "lumina seedance_2_5", "count": 8, "creditsEach": 84, "credits": 672 },
+    "total": 672
+  },
+  "metadata": {
+    "en": {
+      "title": "Shopping in Spain in 40 Seconds | Real Store Spanish",
+      "description": "Everything you actually say in a Spanish clothing shop, in the order it happens. Browse, try it on, ask for another size, check the sale, decide, pay. 40 seconds.\n\n· Solo estoy mirando. (SO-lo es-TOY mee-RAN-do) I'm just looking.\n· ¿Puedo probármelo? (PWEH-do pro-BAR-meh-lo) Can I try it on?\n· ¿Tiene otra talla? (TYEH-neh OH-tra TA-ya) Do you have another size?\n· ¿Está en rebajas? (es-TA en reh-BA-hass) Is it on sale?\n· Me lo llevo. (meh lo YEH-vo) I'll take it.\n· ¿Puedo pagar con tarjeta? (PWEH-do pa-GAR kon tar-HEH-ta) Can I pay by card?\n\nThis is Spain Spanish, not Latin American.\n\nSay them out loud with the video.\n\nAI-generated animation.\n\n#learnspanish #spanishfortravel #spain #Shorts",
+      "tags": ["learn spanish", "spanish for travel", "spanish conversation", "castilian spanish", "spain travel", "beginner spanish", "shopping in spanish", "spanish phrases", "DELE", "shorts"],
+      "pinnedComment": "Solo estoy mirando is the one that saves you every time — it politely means \"just browsing, thanks\" 🙌"
+    },
+    "ko": {
+      "title": "스페인 옷 가게 40초 한 판 | 구경부터 계산까지",
+      "description": "스페인 옷 가게에서 실제로 오가는 말만 순서대로. 구경하고, 입어보고, 사이즈 바꾸고, 세일 확인하고, 결제까지 40초.\n\n· Solo estoy mirando. (솔로 에스또이 미란도) 그냥 구경 중이에요\n· ¿Puedo probármelo? (뿌에도 쁘로바르멜로) 입어봐도 돼요?\n· ¿Tiene otra talla? (띠에네 오뜨라 따야) 다른 사이즈 있어요?\n· ¿Está en rebajas? (에스따 엔 레바하스) 세일 중이에요?\n· Me lo llevo. (메 로 예보) 이걸로 할게요\n· ¿Puedo pagar con tarjeta? (뿌에도 빠가르 꼰 따르헤따) 카드로 계산돼요?\n\nAI로 만든 애니메이션입니다.",
+      "tags": ["스페인어", "여행스페인어", "스페인여행", "스페인어회화", "왕초보스페인어", "스페인어독학", "DELE", "쇼핑스페인어", "마드리드여행", "쇼츠"],
+      "pinnedComment": "가게 들어가면 점원이 꼭 물어봐요. Solo estoy mirando 한마디면 편하게 구경할 수 있습니다 🙌"
+    }
+  }
+}

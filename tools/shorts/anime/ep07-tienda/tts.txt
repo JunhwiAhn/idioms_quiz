@@ -1,0 +1,15 @@
+01	NPC	es-ES male	¿Te ayudo en algo?
+01	HIJA	es-ES female (younger, faster)	Solo estoy mirando.
+02	HIJA	es-ES female (younger, faster)	¿Puedo probármelo?
+02	NPC	es-ES male	Claro, al fondo.
+03	HIJA	es-ES female (younger, faster)	¿Tiene otra talla?
+03	NPC	es-ES male	Te traigo la mediana.
+04	MADRE	es-ES female	Es un poco caro.
+04	HIJA	es-ES female (younger, faster)	Mamá...
+05	MADRE	es-ES female	¿Está en rebajas?
+05	NPC	es-ES male	Sí, treinta por ciento.
+06	HIJA	es-ES female (younger, faster)	Me lo llevo.
+07	MADRE	es-ES female	¿Puedo pagar con tarjeta?
+07	NPC	es-ES male	Por supuesto.
+08	MADRE	es-ES female	¿Me da una bolsa?
+08	PADRE	es-ES male (flat, low)	Ya llevo cinco.

@@ -1,0 +1,9 @@
+STYLE: 1990s Japanese TV anime cel look, hand-painted flat matte color fills, no gradients, no rim light, no glossy highlights. Uniform dark warm-brown ink outlines of even thin weight, never pure black. Rounded simplified shapes, small simple facial features, gentle exaggerated expressions. Shadows are single flat tones only. Simple background art with few details. Static TV-anime framing. Slight paper grain. 9:16 vertical, 1080x1920.
+
+PALETTE (strict, use only these): warm cream #FFFBF2, terracotta #C44720, soft peach #F6E2D6, warm sand #EADCCB, muted teal #007C99, mustard #8B6500, warm brown ink #2E2018.
+
+NPC: Spanish market vendor woman in her 60s, silver hair in a low bun, deep laugh lines, faded apron with big pockets, sitting behind a folding table of trinkets.
+
+SHOT 6: Medium shot of the vendor woman laughing warmly, deep laugh lines, holding up three fingers with one hand and waving the other in a generous 'take it' gesture. Trinket table in front of her. Absolutely no lettering, no labels, no captions, no signage text anywhere in the image.
+
+NEGATIVE: photorealistic, 3D render, CGI, glossy skin, cinematic lighting, depth of field, lens flare, hyperdetailed, extra fingers, deformed hands, watermark, logo, western cartoon style, moe anime style, sexualized, heavy shadows, saturated primary colors

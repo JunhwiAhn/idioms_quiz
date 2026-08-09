@@ -582,6 +582,7 @@ class _AnswerFeedbackBanner extends StatelessWidget {
         StudyLanguage.ko => '멋져요! 정답 감각이 살아있어요.  +10점',
         StudyLanguage.en => 'Brilliant! Your instincts are on point.  +10 pts',
         StudyLanguage.ja => 'すごい！見事に正解です。  +10点',
+        StudyLanguage.pt => 'Muito bem! Seu instinto está afiado.  +10 pts',
       };
     }
     return switch (language) {
@@ -589,6 +590,7 @@ class _AnswerFeedbackBanner extends StatelessWidget {
       StudyLanguage.en =>
         'So close! Lock in the answer and bounce back next round.',
       StudyLanguage.ja => '惜しい！正解を覚えて、次の問題で取り返そう。',
+      StudyLanguage.pt => 'Quase! Fixe a resposta e recupere na próxima.',
     };
   }
 

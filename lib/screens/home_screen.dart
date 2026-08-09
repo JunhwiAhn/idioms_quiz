@@ -9,12 +9,14 @@ import '../data/daily.dart';
 import '../data/idiom_repository.dart';
 import '../data/level_tier.dart';
 import '../data/quiz_session.dart';
+import '../data/review_service.dart';
 import '../data/score_service.dart';
 import '../data/stage_plan.dart';
 import '../models/idiom.dart';
 import 'collection_screen.dart';
 import 'quiz_screen.dart';
 import 'stage_screen.dart';
+import 'word_slide_screen.dart';
 import 'wrong_note_screen.dart';
 
 String _homeAppName(AppText text, StudyLanguage language) => text.appName;
@@ -30,6 +32,13 @@ String _stageSubtitle(AppText text, StudyLanguage language) =>
     ? '테마별 10문제로 DELE 어휘를 차근차근 익혀요.'
     : text.stageSubtitle;
 
+String _randomShadowingTitle(StudyLanguage language) => switch (language) {
+  StudyLanguage.ko => '랜덤 쉐도잉',
+  StudyLanguage.en => 'Random shadowing',
+  StudyLanguage.ja => 'ランダムシャドーイング',
+  StudyLanguage.pt => 'Shadowing aleatório',
+};
+
 // ignore: unused_element
 String _randomChallengeTitle(AppText text, StudyLanguage language) =>
     language == StudyLanguage.ko ? '랜덤 챌린지 모드' : 'Random Challenge Mode';
@@ -40,7 +49,7 @@ String _randomChallengeSubtitle(AppText text, StudyLanguage language) =>
     ? '무작위 50문제로 스페인어 어휘를 집중 점검해요.'
     : text.marathonFocusedSubtitle;
 
-enum _HomeMenuAction { toggleMute, appInfo }
+enum _HomeMenuAction { toggleMute, rateApp, appInfo }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -59,7 +68,19 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _muted = AudioService.instance.muted;
   StudyLanguage _language = StudyLanguage.ko;
   bool _languageDialogShown = false;
+  bool _cognateDialogShown = false;
+  bool _skipCognates = false;
   bool _startingRandomChallenge = false;
+
+  /// All words minus the ones the learner opted out of. The stage plan is
+  /// built from this too, so the round sizes shown always match what is asked.
+  List<Idiom> get _activeIdioms {
+    final all = _idioms ?? const <Idiom>[];
+    if (!_skipCognates) return all;
+    return all
+        .where((idiom) => !idiom.isCognateFor(_language))
+        .toList(growable: false);
+  }
 
   @override
   void initState() {
@@ -75,17 +96,85 @@ class _HomeScreenState extends State<HomeScreen> {
     final snap = await _scoreService.snapshot();
     final language = await _scoreService.studyLanguage();
     final hasLanguage = await _scoreService.hasStudyLanguage();
+    final skip = await _scoreService.skipCognates();
     if (!mounted) return;
     setState(() {
       _idioms = idioms;
       _snap = snap;
       _language = language;
-      _plan = StagePlan.build(idioms);
+      _skipCognates = skip ?? false;
+      _plan = StagePlan.build(_activeIdioms);
     });
     if (!hasLanguage) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_languageDialogShown) _showLanguageDialog();
       });
+    } else {
+      // Covers the locale-detected case: the learner never opened the picker,
+      // so the offer has to come from here.
+      _maybeOfferCognateSkip();
+    }
+  }
+
+  /// Offered once, to learners whose language shares spelling with Spanish.
+  Future<void> _maybeOfferCognateSkip() async {
+    if (_cognateDialogShown) return;
+    final idioms = _idioms;
+    if (idioms == null) return;
+    if (await _scoreService.skipCognates() != null) return;
+    final cognates = idioms
+        .where((idiom) => idiom.isCognateFor(_language))
+        .toList(growable: false);
+    // Not worth interrupting anyone for a handful of words.
+    if (cognates.length < 50) return;
+    if (!mounted) return;
+    _cognateDialogShown = true;
+
+    final text = AppText(_language);
+    final samples = cognates.take(6).map((i) => i.spanish).join(' · ');
+    final choice = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(text.cognateTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(text.cognateBody(cognates.length)),
+              const SizedBox(height: 14),
+              Text(
+                text.cognateExamplesLabel,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 4),
+              Text(samples),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(text.cognateKeep),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(text.cognateSkip),
+          ),
+        ],
+      ),
+    );
+    if (choice == null || !mounted) return;
+    await _scoreService.setSkipCognates(choice);
+    if (!mounted) return;
+    setState(() {
+      _skipCognates = choice;
+      _plan = StagePlan.build(_activeIdioms);
+    });
+    if (choice) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(text.cognateHiddenNotice)));
     }
   }
 
@@ -102,7 +191,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _setLanguage(StudyLanguage language) async {
     await _scoreService.setStudyLanguage(language);
     if (!mounted) return;
-    setState(() => _language = language);
+    setState(() {
+      _language = language;
+      // Which words count as cognates depends on the language, so the plan has
+      // to be rebuilt whenever it changes.
+      _plan = StagePlan.build(_activeIdioms);
+    });
+    await _maybeOfferCognateSkip();
   }
 
   Future<void> _showLanguageDialog() async {
@@ -140,9 +235,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               actions: [
                 FilledButton(
-                  onPressed: () async {
-                    await _setLanguage(selected);
-                    if (ctx.mounted) Navigator.of(ctx).pop();
+                  // Close this dialog before _setLanguage runs: it may open the
+                  // cognate offer, which must not stack on top of the picker.
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    _setLanguage(selected);
                   },
                   child: Text(text.start),
                 ),
@@ -154,6 +251,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Sends the learner straight to the listing to rate. The automatic prompt
+  /// is throttled by Play and capped by us, so this is the only path someone
+  /// who *wants* to leave a rating can rely on.
+  Future<void> _openStoreListing() async {
+    final text = AppText(_language);
+    final opened = await ReviewService.instance.openStoreListing();
+    if (!mounted || opened) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(text.rateAppUnavailable)));
+  }
+
   Future<void> _toggleMute() async {
     final next = !_muted;
     await AudioService.instance.setMuted(next);
@@ -161,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _startQuiz(int questionCount, {bool isMarathon = false}) async {
-    final idioms = _idioms;
+    final idioms = _idioms == null ? null : _activeIdioms;
     final snap = _snap;
     if (idioms == null || snap == null || _startingRandomChallenge) return;
 
@@ -221,6 +330,9 @@ class _HomeScreenState extends State<HomeScreen> {
         'https://docs.google.com/forms/d/e/1FAIpQLScgJzVmSDcO1WtiZOVQRkBlHccUBCkzQ5jXOgdFltfYxzZJoA/viewform?usp=header',
       StudyLanguage.ja =>
         'https://docs.google.com/forms/d/e/1FAIpQLSdaNmb7JE8CWiS_4QUV0IawKI4-496jyDNBDXQa-ZDuoBX3Cw/viewform',
+      // No Portuguese form exists yet; the English one is the closest fit.
+      StudyLanguage.pt =>
+        'https://docs.google.com/forms/d/e/1FAIpQLScgJzVmSDcO1WtiZOVQRkBlHccUBCkzQ5jXOgdFltfYxzZJoA/viewform?usp=header',
     };
     final url = Uri.parse(feedbackFormUrl);
     final ok = await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -386,7 +498,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // snapshot was taken, whatever navigation path led back here.
     await _refreshSnapshot();
     if (!mounted) return;
-    final idioms = _idioms;
+    final idioms = _idioms == null ? null : _activeIdioms;
     final snap = _snap;
     if (idioms == null || snap == null) return;
     await Navigator.of(context).push(
@@ -401,10 +513,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _openRandomShadowing() async {
+    await _refreshSnapshot();
+    if (!mounted || _idioms == null) return;
+    final idioms = List<Idiom>.of(_activeIdioms)..shuffle();
+    if (idioms.isEmpty) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => WordSlideScreen(idioms: idioms, language: _language),
+      ),
+    );
+  }
+
   Future<void> _openWrongNote() async {
     await _refreshSnapshot();
     if (!mounted) return;
-    final idioms = _idioms;
+    final idioms = _idioms == null ? null : _activeIdioms;
     final snap = _snap;
     if (idioms == null || snap == null) return;
     await Navigator.of(context).push(
@@ -498,7 +622,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final idioms = _idioms;
+    final idioms = _idioms == null ? null : _activeIdioms;
     final snap = _snap;
     final text = AppText(_language);
     final scheme = Theme.of(context).colorScheme;
@@ -547,6 +671,8 @@ class _HomeScreenState extends State<HomeScreen> {
               switch (action) {
                 case _HomeMenuAction.toggleMute:
                   _toggleMute();
+                case _HomeMenuAction.rateApp:
+                  _openStoreListing();
                 case _HomeMenuAction.appInfo:
                   _openAppInfoSheet();
               }
@@ -560,6 +686,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
                   ),
                   title: Text(_muted ? text.unmute : text.mute),
+                ),
+              ),
+              PopupMenuItem(
+                value: _HomeMenuAction.rateApp,
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.star_rate_rounded),
+                  title: Text(text.rateApp),
                 ),
               ),
               PopupMenuItem(
@@ -608,6 +742,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: _modeSectionTitle(text, _language),
                           actionLabel: text.wordbook,
                           onAction: _openCollection,
+                          secondaryActionLabel: _randomShadowingTitle(
+                            _language,
+                          ),
+                          onSecondaryAction: _openRandomShadowing,
                         ),
                         const SizedBox(height: 10),
                         _PlayModeTile(
@@ -1390,35 +1528,69 @@ class _ModeSectionHeader extends StatelessWidget {
   final String title;
   final String actionLabel;
   final VoidCallback onAction;
+  final String secondaryActionLabel;
+  final VoidCallback onSecondaryAction;
   const _ModeSectionHeader({
     required this.title,
     required this.actionLabel,
     required this.onAction,
+    required this.secondaryActionLabel,
+    required this.onSecondaryAction,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Text(
-            title,
-            style: notoSerifJp(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: scheme.onSurface,
-            ),
+        Text(
+          title,
+          style: notoSerifJp(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: scheme.onSurface,
           ),
         ),
-        TextButton.icon(
-          onPressed: onAction,
-          icon: const Icon(Icons.collections_bookmark_rounded, size: 17),
-          label: Text(actionLabel),
-          style: TextButton.styleFrom(
-            foregroundColor: scheme.primary,
-            textStyle: notoSansJp(fontSize: 12, fontWeight: FontWeight.w800),
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: onAction,
+                icon: const Icon(Icons.collections_bookmark_rounded, size: 18),
+                label: Text(actionLabel, maxLines: 1),
+                style: OutlinedButton.styleFrom(
+                  textStyle: notoSansJp(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton.tonalIcon(
+                onPressed: onSecondaryAction,
+                icon: const Icon(Icons.shuffle_rounded, size: 18),
+                label: Text(
+                  secondaryActionLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 12,
+                  ),
+                  textStyle: notoSansJp(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -1866,9 +2038,12 @@ class _PlayModeTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 6),
+                      // Two lines each: Portuguese runs 15-25% longer than the
+                      // English these sizes were tuned for, and a single line
+                      // clipped titles like "Modo desafio aleatório".
                       Text(
                         title,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: notoSerifJp(
                           fontSize: 19,
@@ -1879,7 +2054,7 @@ class _PlayModeTile extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        maxLines: 2,
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: notoSansJp(
                           fontSize: 12,
