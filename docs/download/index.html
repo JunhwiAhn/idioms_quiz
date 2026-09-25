@@ -154,10 +154,20 @@
       z-index: 2;
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(300px, 0.68fr);
-      gap: clamp(44px, 6vw, 84px);
+      grid-template-areas:
+        "copy demo"
+        "actions demo";
+      column-gap: clamp(44px, 6vw, 84px);
+      row-gap: 24px;
       align-items: center;
+      align-content: center;
       min-height: 685px;
       padding: 58px 0 88px;
+    }
+
+    .hero-copy-block {
+      grid-area: copy;
+      align-self: end;
     }
 
     .eyebrow {
@@ -261,9 +271,12 @@
     .play-button strong { font-size: 19px; line-height: 1.15; }
 
     .hero-actions {
+      grid-area: actions;
       display: flex;
       flex-direction: column;
       align-items: center;
+      align-self: start;
+      justify-self: center;
       width: fit-content;
       max-width: 100%;
     }
@@ -279,6 +292,7 @@
 
     .video-showcase {
       position: relative;
+      grid-area: demo;
       justify-self: center;
       width: min(100%, 325px);
       aspect-ratio: 9 / 16;
@@ -642,7 +656,14 @@
     .footer-link { font-weight: 750; text-underline-offset: 3px; }
 
     @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; padding-top: 90px; }
+      .hero-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "copy"
+          "actions"
+          "demo";
+        padding-top: 90px;
+      }
       .hero-copy-block { text-align: center; }
       .hero-copy { margin-inline: auto; }
       .hero-pills { justify-content: center; }
@@ -666,12 +687,20 @@
       .brand { font-size: 18px; }
       .brand img { width: 42px; height: 42px; }
       .nav-link { display: none; }
-      .hero-grid { min-height: 0; gap: 28px; padding: 28px 0 48px; }
+      .hero-grid {
+        grid-template-areas:
+          "demo"
+          "actions"
+          "copy";
+        min-height: 0;
+        gap: 18px;
+        padding: 18px 0 40px;
+      }
       .video-showcase {
-        order: -1;
-        width: min(58vw, 240px);
+        width: min(48vw, 200px);
         margin-top: 0;
       }
+      .video-toggle { right: 12px; bottom: 12px; padding: 6px 9px; font-size: 10px; }
       h1 { font-size: clamp(31px, 8.2vw, 37px); }
       .hero-copy { font-size: 15px; }
       .play-button { justify-content: center; }
@@ -735,18 +764,6 @@
           <li>Shadowing</li>
           <li>Wordbook</li>
         </ul>
-        <div class="hero-actions">
-          <a class="play-button" data-play-store-link data-placement="hero" href="https://play.google.com/store/apps/details?id=com.junhwiahn.spanishworddojo" aria-label="Get DELE Voca Dojo on Google Play">
-            <svg viewBox="0 0 32 34" aria-hidden="true">
-              <path fill="#00d6ff" d="M1.2 1.7a3.1 3.1 0 0 0-.7 2v26.6c0 .8.3 1.5.8 2L17.6 17 1.2 1.7Z"/>
-              <path fill="#ffcc00" d="m22.9 12-5.3 5 5.4 5.1 6.5-3.7c1.3-.8 1.3-2 0-2.8L22.9 12Z"/>
-              <path fill="#ff4b55" d="M1.3 32.3c.9.9 2.2 1 3.3.4L23 22.1 17.6 17 1.3 32.3Z"/>
-              <path fill="#00ef75" d="M1.2 1.7 17.6 17l5.3-5L4.6 1.4a3 3 0 0 0-3.4.3Z"/>
-            </svg>
-            <span><small>Get it on</small><strong>Google Play</strong></span>
-          </a>
-          <span class="hero-note">Free to download · No account required · Works offline</span>
-        </div>
       </div>
 
       <div class="video-showcase" aria-label="DELE Voca Dojo app demo">
@@ -755,6 +772,19 @@
           Your browser does not support the app demo video.
         </video>
         <button class="video-toggle" id="video-toggle" type="button" aria-controls="app-demo">Pause demo</button>
+      </div>
+
+      <div class="hero-actions">
+        <a class="play-button" data-play-store-link data-placement="hero" href="https://play.google.com/store/apps/details?id=com.junhwiahn.spanishworddojo" aria-label="Get DELE Voca Dojo on Google Play">
+          <svg viewBox="0 0 32 34" aria-hidden="true">
+            <path fill="#00d6ff" d="M1.2 1.7a3.1 3.1 0 0 0-.7 2v26.6c0 .8.3 1.5.8 2L17.6 17 1.2 1.7Z"/>
+            <path fill="#ffcc00" d="m22.9 12-5.3 5 5.4 5.1 6.5-3.7c1.3-.8 1.3-2 0-2.8L22.9 12Z"/>
+            <path fill="#ff4b55" d="M1.3 32.3c.9.9 2.2 1 3.3.4L23 22.1 17.6 17 1.3 32.3Z"/>
+            <path fill="#00ef75" d="M1.2 1.7 17.6 17l5.3-5L4.6 1.4a3 3 0 0 0-3.4.3Z"/>
+          </svg>
+          <span><small>Get it on</small><strong>Google Play</strong></span>
+        </a>
+        <span class="hero-note">Free to download · No account required · Works offline</span>
       </div>
     </div>
   </header>
